@@ -10,11 +10,11 @@ export default function HomePage(): ReactNode {
     <div className="home-page">
       <div className="hero-section">
         <div className="hero-content">
-          <h1>Welcome to NanumAuth</h1>
-          <p className="subtitle">Enterprise-grade Identity as a Service</p>
+          <h1>Welcome to NanumProject</h1>
+          <p className="subtitle">Gantt-based Project Management</p>
           <p className="description">
-            Secure authentication and authorization for your applications.
-            Multi-tenant, RBAC, MFA, and comprehensive audit logging built-in.
+            Plan, track, and manage projects with a Gantt timeline.
+            TeamGantt 데이터를 마이그레이션하여 프로젝트/태스크/멤버를 한 곳에서 운영합니다.
           </p>
           
           <div className="cta-buttons">

@@ -29,3 +29,9 @@ dist-ssr
 # Migration output
 migration/output/
 migration/dist/
+
+# Supabase CLI temp
+supabase/.temp/
+
+# Claude Code local settings
+.claude/settings.local.json

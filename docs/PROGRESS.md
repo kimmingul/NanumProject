@@ -1,5 +1,9 @@
 # Project Progress
 
+> Note (2026-02): ì´ˆê¸°ì—ëŠ” Auth0-like IDaaS(NanumAuth/CoreAuth)ë¥¼ ë§Œë“¤ë ¤ë‹¤ê°€,
+> ì´í›„ TeamGantt ë°ì´í„°ë¥¼ Supabaseë¡œ ë§ˆì´ê·¸ë ˆì´ì…˜í•˜ë©´ì„œ **NanumProject(í”„ë¡œì íŠ¸/ê°„íŠ¸ ê´€ë¦¬)** ê¸°ëŠ¥ì´ ë©”ì¸ìœ¼ë¡œ í™•ì¥ë˜ì—ˆìŠµë‹ˆë‹¤.
+> ì¸ì¦ ê¸°ëŠ¥ì€ NanumProjectì˜ í•„ìˆ˜ ëª¨ë“ˆë¡œ ìœ ì§€í•˜ë˜, ì œí’ˆ/ë¬¸ì„œì˜ 1ìˆœìœ„ëŠ” NanumProjectì— ë§ì¶¥ë‹ˆë‹¤.
+
 ## 2024-12-20 - Session 1: Initial Project Setup ?
 
 ### Completed Tasks
@@ -20,51 +24,51 @@
 #### 3. Project Structure ?
 ```
 NanumAuth/
-¦§¦¡¦¡ src/
-¦¢   ¦§¦¡¦¡ components/      # Shared UI components
-¦¢   ¦¢   ¦§¦¡¦¡ MainLayout.tsx
-¦¢   ¦¢   ¦§¦¡¦¡ ProtectedRoute.tsx
-¦¢   ¦¢   ¦¦¦¡¦¡ index.ts
-¦¢   ¦§¦¡¦¡ config/          # Configuration files
-¦¢   ¦¢   ¦¦¦¡¦¡ index.ts
-¦¢   ¦§¦¡¦¡ features/        # Feature modules (future)
-¦¢   ¦§¦¡¦¡ hooks/           # React hooks
-¦¢   ¦¢   ¦§¦¡¦¡ useAuth.ts
-¦¢   ¦¢   ¦¦¦¡¦¡ index.ts
-¦¢   ¦§¦¡¦¡ lib/             # Utility libraries
-¦¢   ¦¢   ¦§¦¡¦¡ supabase.ts
-¦¢   ¦¢   ¦§¦¡¦¡ auth-store.ts
-¦¢   ¦¢   ¦¦¦¡¦¡ index.ts
-¦¢   ¦§¦¡¦¡ pages/           # Page components
-¦¢   ¦¢   ¦§¦¡¦¡ HomePage.tsx
-¦¢   ¦¢   ¦§¦¡¦¡ LoginPage.tsx
-¦¢   ¦¢   ¦¦¦¡¦¡ DashboardPage.tsx
-¦¢   ¦§¦¡¦¡ routes/          # Routing configuration
-¦¢   ¦¢   ¦¦¦¡¦¡ index.tsx
-¦¢   ¦¦¦¡¦¡ types/           # TypeScript type definitions
-¦¢       ¦§¦¡¦¡ database.ts
-¦¢       ¦§¦¡¦¡ auth.ts
-¦¢       ¦§¦¡¦¡ supabase.ts
-¦¢       ¦¦¦¡¦¡ index.ts
-¦§¦¡¦¡ supabase/            # Database schema and migrations
-¦¢   ¦§¦¡¦¡ migrations/
-¦¢   ¦¢   ¦§¦¡¦¡ 001_initial_schema.sql
-¦¢   ¦¢   ¦§¦¡¦¡ 002_rls_policies.sql
-¦¢   ¦¢   ¦§¦¡¦¡ 003_triggers.sql
-¦¢   ¦¢   ¦§¦¡¦¡ 004_functions.sql
-¦¢   ¦¢   ¦¦¦¡¦¡ 005_seed_data.sql
-¦¢   ¦§¦¡¦¡ COMPLETE_MIGRATION.sql  # ?? All-in-one migration
-¦¢   ¦¦¦¡¦¡ README.md
-¦§¦¡¦¡ scripts/             # ?? Helper scripts
-¦¢   ¦¦¦¡¦¡ migrate.mjs
-¦§¦¡¦¡ docs/
-¦¢   ¦§¦¡¦¡ PRD.md
-¦¢   ¦§¦¡¦¡ ARCHITECTURE.md
-¦¢   ¦¦¦¡¦¡ PROGRESS.md
-¦§¦¡¦¡ MIGRATION_GUIDE.md   # ?? Quick start guide
-¦§¦¡¦¡ DEV_SERVER_GUIDE.md  # ?? Dev server guide
-¦§¦¡¦¡ .env                 # Environment variables (configured)
-¦¦¦¡¦¡ .env.example
+ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ src/
+ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ components/      # Shared UI components
+ï¿½ï¿½   ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ MainLayout.tsx
+ï¿½ï¿½   ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ProtectedRoute.tsx
+ï¿½ï¿½   ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ index.ts
+ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ config/          # Configuration files
+ï¿½ï¿½   ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ index.ts
+ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ features/        # Feature modules (future)
+ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ hooks/           # React hooks
+ï¿½ï¿½   ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ useAuth.ts
+ï¿½ï¿½   ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ index.ts
+ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ lib/             # Utility libraries
+ï¿½ï¿½   ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ supabase.ts
+ï¿½ï¿½   ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ auth-store.ts
+ï¿½ï¿½   ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ index.ts
+ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ pages/           # Page components
+ï¿½ï¿½   ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ HomePage.tsx
+ï¿½ï¿½   ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ LoginPage.tsx
+ï¿½ï¿½   ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ DashboardPage.tsx
+ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ routes/          # Routing configuration
+ï¿½ï¿½   ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ index.tsx
+ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ types/           # TypeScript type definitions
+ï¿½ï¿½       ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ database.ts
+ï¿½ï¿½       ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ auth.ts
+ï¿½ï¿½       ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ supabase.ts
+ï¿½ï¿½       ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ index.ts
+ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ supabase/            # Database schema and migrations
+ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ migrations/
+ï¿½ï¿½   ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 001_initial_schema.sql
+ï¿½ï¿½   ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 002_rls_policies.sql
+ï¿½ï¿½   ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 003_triggers.sql
+ï¿½ï¿½   ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 004_functions.sql
+ï¿½ï¿½   ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 005_seed_data.sql
+ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ COMPLETE_MIGRATION.sql  # ?? All-in-one migration
+ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ README.md
+ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ scripts/             # ?? Helper scripts
+ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ migrate.mjs
+ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ docs/
+ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ PRD.md
+ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ARCHITECTURE.md
+ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ PROGRESS.md
+ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ MIGRATION_GUIDE.md   # ?? Quick start guide
+ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ DEV_SERVER_GUIDE.md  # ?? Dev server guide
+ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ .env                 # Environment variables (configured)
+ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ .env.example
 ```
 
 #### 4. Type Definitions ?
@@ -442,32 +446,32 @@ The following environment variables are configured in `.env`:
 
 ```
 NanumAuth/
-¦§¦¡¦¡ src/
-¦¢   ¦§¦¡¦¡ components/
-¦¢   ¦¢   ¦§¦¡¦¡ MainLayout.tsx
-¦¢   ¦¢   ¦§¦¡¦¡ ProtectedRoute.tsx
-¦¢   ¦¢   ¦¦¦¡¦¡ index.ts (with DevExtreme exports)
-¦¢   ¦§¦¡¦¡ config/
-¦¢   ¦¢   ¦§¦¡¦¡ index.ts
-¦¢   ¦¢   ¦¦¦¡¦¡ devextreme.ts ??
-¦¢   ¦§¦¡¦¡ pages/
-¦¢   ¦¢   ¦§¦¡¦¡ HomePage.tsx ? (Enhanced)
-¦¢   ¦¢   ¦§¦¡¦¡ HomePage.css ??
-¦¢   ¦¢   ¦§¦¡¦¡ LoginPage.tsx ? (Complete)
-¦¢   ¦¢   ¦§¦¡¦¡ LoginPage.css ??
-¦¢   ¦¢   ¦§¦¡¦¡ SignUpPage.tsx ??
-¦¢   ¦¢   ¦§¦¡¦¡ SignUpPage.css ??
-¦¢   ¦¢   ¦§¦¡¦¡ ResetPasswordPage.tsx ??
-¦¢   ¦¢   ¦§¦¡¦¡ ResetPasswordPage.css ??
-¦¢   ¦¢   ¦§¦¡¦¡ DashboardPage.tsx ? (Complete)
-¦¢   ¦¢   ¦§¦¡¦¡ DashboardPage.css ??
-¦¢   ¦¢   ¦§¦¡¦¡ UsersPage.tsx ??
-¦¢   ¦¢   ¦§¦¡¦¡ UsersPage.css ??
-¦¢   ¦¢   ¦¦¦¡¦¡ index.ts (with all exports)
-¦¢   ¦§¦¡¦¡ routes/
-¦¢   ¦¢   ¦¦¦¡¦¡ index.tsx ? (Complete routing)
-¦¢   ¦¦¦¡¦¡ [other folders...]
-¦¦¦¡¦¡ [rest of structure...]
+ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ src/
+ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ components/
+ï¿½ï¿½   ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ MainLayout.tsx
+ï¿½ï¿½   ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ProtectedRoute.tsx
+ï¿½ï¿½   ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ index.ts (with DevExtreme exports)
+ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ config/
+ï¿½ï¿½   ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ index.ts
+ï¿½ï¿½   ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ devextreme.ts ??
+ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ pages/
+ï¿½ï¿½   ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ HomePage.tsx ? (Enhanced)
+ï¿½ï¿½   ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ HomePage.css ??
+ï¿½ï¿½   ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ LoginPage.tsx ? (Complete)
+ï¿½ï¿½   ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ LoginPage.css ??
+ï¿½ï¿½   ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ SignUpPage.tsx ??
+ï¿½ï¿½   ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ SignUpPage.css ??
+ï¿½ï¿½   ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ResetPasswordPage.tsx ??
+ï¿½ï¿½   ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ResetPasswordPage.css ??
+ï¿½ï¿½   ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ DashboardPage.tsx ? (Complete)
+ï¿½ï¿½   ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ DashboardPage.css ??
+ï¿½ï¿½   ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ UsersPage.tsx ??
+ï¿½ï¿½   ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ UsersPage.css ??
+ï¿½ï¿½   ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ index.ts (with all exports)
+ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ routes/
+ï¿½ï¿½   ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ index.tsx ? (Complete routing)
+ï¿½ï¿½   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ [other folders...]
+ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ [rest of structure...]
 ```
 
 ### Next Steps

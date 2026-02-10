@@ -52,7 +52,7 @@ export default function SignUpPage(): ReactNode {
         <div className="signup-card">
           <div className="signup-header">
             <h1>Create Account</h1>
-            <p>Join NanumAuth today</p>
+            <p>Join NanumProject today</p>
           </div>
 
           {success ? (
