@@ -85,6 +85,11 @@
   min-height: 400px;
 }
 
+.project-tab-content:has(.gantt-chart-container) {
+  padding: 0;
+  overflow: hidden;
+}
+
 /* Placeholder styles */
 .tab-placeholder {
   display: flex;

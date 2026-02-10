@@ -1,0 +1,71 @@
+.gantt-chart-container {
+  height: calc(100vh - 320px);
+  min-height: 400px;
+}
+
+.gantt-chart-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+}
+
+.gantt-chart-loading .loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e2e8f0;
+  border-top-color: #667eea;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 1rem;
+}
+
+.gantt-chart-loading p {
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.gantt-chart-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  text-align: center;
+}
+
+.gantt-chart-error i {
+  font-size: 2.5rem;
+  color: #ef4444;
+  margin-bottom: 1rem;
+}
+
+.gantt-chart-error p {
+  color: #64748b;
+  margin: 0 0 1rem;
+}
+
+.gantt-chart-error button {
+  padding: 0.5rem 1.25rem;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.gantt-chart-error button:hover {
+  background: #5a6fd6;
+}
+
+/* Override DevExtreme Gantt for project theme consistency */
+.gantt-chart-container .dx-gantt .dx-gantt-taskWrapper .dx-gantt-task {
+  border-radius: 4px;
+}
+
+.gantt-chart-container .dx-gantt .dx-gantt-taskWrapper .dx-gantt-milestone {
+  border-radius: 2px;
+}

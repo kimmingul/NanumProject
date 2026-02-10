@@ -2,7 +2,8 @@ import { type ReactNode, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Tabs } from 'devextreme-react';
 import { PMLayout } from '@/components/PMLayout';
-import { useProject } from '@/hooks';
+import { GanttChart } from '@/components/GanttChart';
+import { useProject, useGanttData } from '@/hooks';
 import type { Project } from '@/types';
 import './ProjectDetailPage.css';
 
@@ -25,6 +26,7 @@ export default function ProjectDetailPage(): ReactNode {
   const { projectId, tab } = useParams<{ projectId: string; tab?: string }>();
   const navigate = useNavigate();
   const { project, loading } = useProject(projectId);
+  const gantt = useGanttData(projectId);
 
   const activeTab = tab || 'gantt';
   const selectedIndex = useMemo(
@@ -101,7 +103,20 @@ export default function ProjectDetailPage(): ReactNode {
         </div>
 
         <div className="project-tab-content">
-          {activeTab === 'gantt' && <GanttTabPlaceholder project={project} />}
+          {activeTab === 'gantt' && (
+            <GanttChart
+              tasks={gantt.ganttTasks}
+              dependencies={gantt.ganttDependencies}
+              loading={gantt.ganttLoading}
+              error={gantt.ganttError}
+              onRefetch={gantt.refetch}
+              onTaskInserted={gantt.handleTaskInserted}
+              onTaskUpdated={gantt.handleTaskUpdated}
+              onTaskDeleted={gantt.handleTaskDeleted}
+              onDependencyInserted={gantt.handleDependencyInserted}
+              onDependencyDeleted={gantt.handleDependencyDeleted}
+            />
+          )}
           {activeTab === 'tasks' && <TasksTabPlaceholder project={project} />}
           {activeTab === 'comments' && <CommentsTabPlaceholder />}
           {activeTab === 'files' && <FilesTabPlaceholder />}
@@ -109,19 +124,6 @@ export default function ProjectDetailPage(): ReactNode {
         </div>
       </div>
     </PMLayout>
-  );
-}
-
-function GanttTabPlaceholder({ project }: { project: Project }): ReactNode {
-  return (
-    <div className="tab-placeholder">
-      <div className="placeholder-icon">
-        <i className="dx-icon-chart"></i>
-      </div>
-      <h3>Gantt Chart</h3>
-      <p>Interactive Gantt chart view for "{project.name}" will be available in the next update.</p>
-      <p className="placeholder-hint">This will show tasks, groups, and dependencies in a timeline view.</p>
-    </div>
   );
 }
 
