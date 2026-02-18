@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 import { DataGrid } from 'devextreme-react/data-grid';
 import {
   Column,
@@ -12,22 +12,51 @@ import {
   Item,
 } from 'devextreme-react/data-grid';
 import { Button } from 'devextreme-react/button';
+import { supabase } from '@/lib/supabase';
+import { useAuthStore } from '@/lib/auth-store';
 import './UsersPage.css';
 
-// Sample data - will be replaced with real data from Supabase
-const sampleUsers = [
-  {
-    id: '1',
-    email: 'admin@nanumauth.com',
-    full_name: 'Admin User',
-    role: 'admin',
-    is_active: true,
-    last_login_at: new Date(),
-    created_at: new Date(),
-  },
-];
+interface UserRow {
+  id: string;
+  email: string;
+  full_name: string | null;
+  role: string;
+  is_active: boolean;
+  last_login_at: string | null;
+  created_at: string;
+}
 
 export default function UsersPage(): ReactNode {
+  const tenantId = useAuthStore((s) => s.profile?.tenant_id);
+  const [users, setUsers] = useState<UserRow[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!tenantId) return;
+
+    let cancelled = false;
+    const fetchUsers = async () => {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, email, full_name, role, is_active, last_login_at, created_at')
+        .eq('tenant_id', tenantId)
+        .order('created_at', { ascending: true });
+
+      if (!cancelled) {
+        if (error) {
+          console.error('Failed to load users:', error);
+        } else {
+          setUsers(data as UserRow[]);
+        }
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
+    return () => { cancelled = true; };
+  }, [tenantId]);
+
   const onExporting = (e: { component: { beginUpdate: () => void; endUpdate: () => void } }) => {
     e.component.beginUpdate();
     e.component.endUpdate();
@@ -42,7 +71,8 @@ export default function UsersPage(): ReactNode {
 
       <div className="users-grid-container">
         <DataGrid
-          dataSource={sampleUsers}
+          dataSource={users}
+          noDataText={loading ? 'Loading...' : 'No users found'}
           keyExpr="id"
           showBorders={true}
           showRowLines={true}
