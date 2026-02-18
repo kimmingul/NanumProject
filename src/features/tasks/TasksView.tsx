@@ -23,6 +23,13 @@ const itemTypeIcons: Record<string, string> = {
   milestone: 'event',
 };
 
+const statusLabels: Record<string, string> = {
+  todo: 'To Do',
+  in_progress: 'In Progress',
+  review: 'Review',
+  done: 'Done',
+};
+
 export default function TasksView({ projectId }: TasksViewProps): ReactNode {
   const { items, resources, assignments, loading, error } = useProjectItems(projectId);
   const setSelectedTaskId = usePMStore((s) => s.setSelectedTaskId);
@@ -152,6 +159,20 @@ export default function TasksView({ projectId }: TasksViewProps): ReactNode {
               <span className="progress-text">{data.value}%</span>
             </div>
           )}
+        />
+
+        <Column
+          dataField="task_status"
+          caption="Status"
+          width={120}
+          cellRender={(data: { value: string; data: { item_type: string } }) => {
+            if (data.data.item_type !== 'task') return null;
+            return (
+              <span className={`task-status-badge status-${data.value}`}>
+                {statusLabels[data.value] || data.value}
+              </span>
+            );
+          }}
         />
 
         <Column dataField="assignee_names" caption="Assignees" width={180} />

@@ -82,6 +82,13 @@ export default function TaskDetailPanel({ projectId, itemId }: TaskDetailPanelPr
               {task.item_type}
             </span>
           </div>
+          {task.item_type === 'task' && (
+            <div className="task-info-item">
+              <span className={`task-status-badge status-${task.task_status}`}>
+                {task.task_status === 'in_progress' ? 'In Progress' : task.task_status === 'todo' ? 'To Do' : task.task_status === 'review' ? 'Review' : 'Done'}
+              </span>
+            </div>
+          )}
           {task.start_date && (
             <div className="task-info-item">
               <i className="dx-icon-event" />

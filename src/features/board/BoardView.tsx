@@ -4,17 +4,15 @@ import type { DragEndEvent } from 'devextreme/ui/sortable';
 import { useProjectItems } from '@/hooks/useProjectItems';
 import { usePMStore } from '@/lib/pm-store';
 import { supabase } from '@/lib/supabase';
-import type { ProjectItem } from '@/types';
+import type { ProjectItem, TaskStatus } from '@/types';
 import './BoardView.css';
 
 interface BoardViewProps {
   projectId: string;
 }
 
-type BoardStatus = 'todo' | 'in_progress' | 'review' | 'done';
-
 interface BoardColumn {
-  id: BoardStatus;
+  id: TaskStatus;
   label: string;
 }
 
@@ -24,19 +22,6 @@ const COLUMNS: BoardColumn[] = [
   { id: 'review', label: 'Review' },
   { id: 'done', label: 'Done' },
 ];
-
-function getBoardStatus(item: ProjectItem): BoardStatus {
-  const status = item.custom_fields?.board_status;
-  if (
-    status === 'todo' ||
-    status === 'in_progress' ||
-    status === 'review' ||
-    status === 'done'
-  ) {
-    return status as BoardStatus;
-  }
-  return 'todo';
-}
 
 export default function BoardView({ projectId }: BoardViewProps): ReactNode {
   const { items, resources, assignments, loading, error, refetch } =
@@ -63,16 +48,16 @@ export default function BoardView({ projectId }: BoardViewProps): ReactNode {
     [assignments, resourceMap],
   );
 
-  // Group tasks by board status
+  // Group tasks by task_status
   const grouped = useMemo(() => {
-    const map: Record<BoardStatus, ProjectItem[]> = {
+    const map: Record<TaskStatus, ProjectItem[]> = {
       todo: [],
       in_progress: [],
       review: [],
       done: [],
     };
     for (const t of tasks) {
-      map[getBoardStatus(t)].push(t);
+      map[t.task_status || 'todo'].push(t);
     }
     return map;
   }, [tasks]);
@@ -82,8 +67,8 @@ export default function BoardView({ projectId }: BoardViewProps): ReactNode {
     async (e: DragEndEvent) => {
       const { fromData, toData, fromIndex, toIndex } = e;
       if (fromData === undefined || toData === undefined) return;
-      const fromCol = fromData as BoardStatus;
-      const toCol = toData as BoardStatus;
+      const fromCol = fromData as TaskStatus;
+      const toCol = toData as TaskStatus;
 
       // Find the dragged item
       const sourceItems = grouped[fromCol];
@@ -96,16 +81,11 @@ export default function BoardView({ projectId }: BoardViewProps): ReactNode {
       try {
         await supabase
           .from('project_items')
-          .update({
-            custom_fields: {
-              ...draggedItem.custom_fields,
-              board_status: toCol,
-            },
-          })
+          .update({ task_status: toCol })
           .eq('id', draggedItem.id);
         await refetch();
       } catch (err) {
-        console.error('Failed to update board status:', err);
+        console.error('Failed to update task status:', err);
       }
     },
     [grouped, refetch],

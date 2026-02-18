@@ -231,6 +231,7 @@ export interface Database {
           is_milestone: boolean;
           is_time_tracking_enabled: boolean;
           is_starred: boolean;
+          task_status: string;
           custom_fields: unknown;
           is_active: boolean;
           created_by: string | null;
@@ -255,6 +256,7 @@ export interface Database {
           actual_hours?: number;
           is_estimated_hours_enabled?: boolean;
           is_milestone?: boolean;
+          task_status?: string;
           custom_fields?: unknown;
           created_by?: string | null;
           tg_id?: number | null;
@@ -279,6 +281,7 @@ export interface Database {
           is_milestone?: boolean;
           is_time_tracking_enabled?: boolean;
           is_starred?: boolean;
+          task_status?: string;
           custom_fields?: unknown;
           is_active?: boolean;
           tg_id?: number | null;

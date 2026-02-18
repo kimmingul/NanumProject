@@ -65,6 +65,7 @@ project_items
 | `start_date` | `start` | 시작일 |
 | `end_date` | `end` | 종료일 |
 | `percent_complete` | `progress` | 진행률 (0-100) |
+| `task_status` | - | 태스크 상태 (todo/in_progress/review/done) |
 | `color` | `color` | 바 색상 |
 
 ---
@@ -119,6 +120,7 @@ projects ←──── tenant_id ───────────────
 | `member_permission` | admin, edit, own_progress, view | 권한 계층 |
 | `member_status` | pending, accepted, declined | 초대 상태 |
 | `item_type` | group, task, milestone | 아이템 구분 |
+| `task_status` | todo, in_progress, review, done | 태스크 상태 |
 | `dependency_type` | fs, ss, ff, sf | Gantt 의존성 |
 | `comment_target` | project, item | 다형성 대상 |
 | `time_entry_type` | punched, manual | 시간 기록 방식 |

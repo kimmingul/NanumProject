@@ -13,6 +13,7 @@ export type ItemType = 'group' | 'task' | 'milestone';
 export type DependencyType = 'fs' | 'ss' | 'ff' | 'sf';
 export type CommentTarget = 'project' | 'item';
 export type TimeEntryType = 'punched' | 'manual';
+export type TaskStatus = 'todo' | 'in_progress' | 'review' | 'done';
 export type ViewType = 'gantt' | 'board' | 'list' | 'calendar';
 
 // ========================================
@@ -82,6 +83,7 @@ export interface ProjectItem {
   is_milestone: boolean;
   is_time_tracking_enabled: boolean;
   is_starred: boolean;
+  task_status: TaskStatus;
   custom_fields: Record<string, unknown>;
   is_active: boolean;
   created_by: string | null;
