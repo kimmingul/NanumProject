@@ -1,0 +1,15 @@
+{
+  "inputs": [],
+  "servers": {
+    "dxdocs": {
+      "type": "sse",
+      "url": "https://api.devexpress.com/mcp/docs",
+      "headers": {}
+    },
+	 "supabase": {
+      "type": "sse",
+      "url": "https://mcp.supabase.com/mcp",
+      "headers": {}
+    }
+  }
+}

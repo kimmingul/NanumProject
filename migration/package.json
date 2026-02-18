@@ -1,0 +1,28 @@
+{
+  "name": "nanum-teamgantt-migration",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "migrate": "tsx src/index.ts",
+    "migrate:discover": "tsx src/index.ts --discover-only",
+    "migrate:verify": "tsx src/index.ts --verify-only",
+    "migrate:resume": "tsx src/index.ts --resume",
+    "import": "tsx src/importers/index.ts",
+    "import:users": "tsx src/importers/index.ts --only=users",
+    "import:projects": "tsx src/importers/index.ts --only=projects",
+    "import:tasks": "tsx src/importers/index.ts --only=tasks",
+    "import:comments": "tsx src/importers/index.ts --only=comments",
+    "import:time": "tsx src/importers/index.ts --only=time",
+    "import:resume": "tsx src/importers/index.ts --resume"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.2",
+    "dotenv": "^16.4.7",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "typescript": "~5.7.0",
+    "@types/node": "^22.10.0"
+  }
+}
