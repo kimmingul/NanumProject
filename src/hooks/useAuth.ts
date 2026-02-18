@@ -16,19 +16,26 @@ export function useAuth() {
   const { user, session, profile, isLoading, isAuthenticated, setSession, setProfile, setLoading, reset } = store;
 
   useEffect(() => {
+    let mounted = true;
+
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
       setSession(session);
       if (session?.user) {
         loadUserProfile(session.user.id);
       }
       setLoading(false);
+    }).catch((err) => {
+      console.error('getSession error:', err);
+      if (mounted) setLoading(false);
     });
 
     // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (!mounted) return;
       setSession(session);
       if (session?.user) {
         await loadUserProfile(session.user.id);
@@ -39,6 +46,7 @@ export function useAuth() {
     });
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
   }, [setSession, setProfile, setLoading]);

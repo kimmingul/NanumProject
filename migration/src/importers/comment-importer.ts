@@ -150,7 +150,7 @@ export async function importComments(
         commentRows.push({
           tenant_id: config.IMPORT_TENANT_ID,
           tg_id: comment.id,
-          target_type: 'task',
+          target_type: 'item',
           target_id: taskUuid,
           project_id: projectUuid,
           message: comment.message,
@@ -170,7 +170,7 @@ export async function importComments(
             documentData.push({
               commentTgId: comment.id,
               projectUuid,
-              targetType: 'task',
+              targetType: 'item',
               targetUuid: taskUuid,
               doc,
             });

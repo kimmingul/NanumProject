@@ -1,0 +1,116 @@
+.calendar-view {
+  min-height: 500px;
+}
+
+.calendar-loading,
+.calendar-error,
+.calendar-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  color: #64748b;
+}
+
+.calendar-error i,
+.calendar-empty i {
+  font-size: 2.5rem;
+  color: #94a3b8;
+  margin-bottom: 1rem;
+}
+
+.calendar-empty h3 {
+  margin: 0 0 0.5rem 0;
+  color: #334155;
+}
+
+.calendar-empty p {
+  margin: 0;
+}
+
+/* Override Scheduler default sizing */
+.calendar-view .dx-scheduler {
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+/* Appointment type colors */
+.calendar-appointment-group {
+  background: #3b82f6 !important;
+}
+
+.calendar-appointment-task {
+  background: #22c55e !important;
+}
+
+.calendar-appointment-milestone {
+  background: #f59e0b !important;
+}
+
+/* Tooltip styling */
+.calendar-tooltip {
+  padding: 0.5rem;
+  min-width: 180px;
+}
+
+.calendar-tooltip-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #1e293b;
+  margin-bottom: 0.35rem;
+}
+
+.calendar-tooltip-type {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  margin-bottom: 0.35rem;
+}
+
+.calendar-tooltip-type.type-group {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.calendar-tooltip-type.type-task {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.calendar-tooltip-type.type-milestone {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.calendar-tooltip-dates {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-bottom: 0.25rem;
+}
+
+.calendar-tooltip-progress {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.calendar-tooltip-progress-bar {
+  width: 60px;
+  height: 4px;
+  background: #e2e8f0;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.calendar-tooltip-progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: #3b82f6;
+}

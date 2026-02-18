@@ -1,0 +1,208 @@
+.board-view {
+  min-height: 400px;
+}
+
+.board-loading,
+.board-error,
+.board-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  color: #64748b;
+}
+
+.board-error i,
+.board-empty i {
+  font-size: 2.5rem;
+  color: #94a3b8;
+  margin-bottom: 1rem;
+}
+
+.board-empty h3 {
+  margin: 0 0 0.5rem 0;
+  color: #334155;
+}
+
+.board-empty p {
+  margin: 0;
+}
+
+/* Kanban columns container */
+.board-columns {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+  min-height: 500px;
+  align-items: flex-start;
+}
+
+/* Individual column */
+.board-column {
+  flex: 1;
+  min-width: 260px;
+  max-width: 340px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+}
+
+.board-column-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-bottom: 2px solid;
+  border-radius: 8px 8px 0 0;
+  background: white;
+}
+
+.board-column-header h4 {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.board-column-count {
+  background: #e2e8f0;
+  color: #475569;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  border-radius: 10px;
+}
+
+/* Column color themes */
+.board-column-todo .board-column-header {
+  border-bottom-color: #94a3b8;
+}
+
+.board-column-todo .board-column-header h4 {
+  color: #475569;
+}
+
+.board-column-in_progress .board-column-header {
+  border-bottom-color: #3b82f6;
+}
+
+.board-column-in_progress .board-column-header h4 {
+  color: #2563eb;
+}
+
+.board-column-review .board-column-header {
+  border-bottom-color: #f59e0b;
+}
+
+.board-column-review .board-column-header h4 {
+  color: #d97706;
+}
+
+.board-column-done .board-column-header {
+  border-bottom-color: #22c55e;
+}
+
+.board-column-done .board-column-header h4 {
+  color: #16a34a;
+}
+
+/* Cards container inside column */
+.board-column-cards {
+  padding: 0.5rem;
+  flex: 1;
+  min-height: 100px;
+}
+
+/* Card */
+.board-card {
+  background: white;
+  border-radius: 6px;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  border: 1px solid #e2e8f0;
+  cursor: pointer;
+  transition: box-shadow 0.15s, border-color 0.15s;
+}
+
+.board-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-color: #cbd5e1;
+}
+
+.board-card-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+.board-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.board-card-assignee {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.board-card-assignee i {
+  font-size: 0.8rem;
+}
+
+.board-card-dates {
+  font-size: 0.7rem;
+  color: #94a3b8;
+}
+
+.board-card-progress {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-left: auto;
+}
+
+.board-card-progress-bar {
+  width: 48px;
+  height: 4px;
+  background: #e2e8f0;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.board-card-progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: #3b82f6;
+  transition: width 0.2s;
+}
+
+.board-card-progress-text {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+/* Drag states */
+.board-card.dx-sortable-source {
+  opacity: 0.4;
+}
+
+.board-column-cards .dx-sortable-placeholder {
+  background: #e0f2fe;
+  border: 2px dashed #3b82f6;
+  border-radius: 6px;
+  min-height: 60px;
+}

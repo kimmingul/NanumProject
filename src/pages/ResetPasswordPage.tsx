@@ -1,32 +1,229 @@
-import { type ReactNode, useState, useCallback } from 'react';
+import { type ReactNode, useState, useCallback, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { TextBox, Button, ValidationGroup, Validator } from 'devextreme-react';
 import { RequiredRule, EmailRule } from 'devextreme-react/validator';
-import { useAuth } from '@/hooks';
+import { supabase } from '@/lib/supabase';
 import './ResetPasswordPage.css';
 
+/**
+ * Detects if the current URL hash contains a Supabase recovery token.
+ */
+function isRecoveryCallback(): boolean {
+  return window.location.hash.includes('type=recovery');
+}
+
 export default function ResetPasswordPage(): ReactNode {
-  const { resetPassword } = useAuth();
-  
+  const navigate = useNavigate();
+
+  const [mode, setMode] = useState<'request' | 'update' | 'loading'>(
+    isRecoveryCallback() ? 'loading' : 'request',
+  );
+  const [sessionReady, setSessionReady] = useState(false);
+
+  // Request mode state
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
+  // Update mode state
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [updateSuccess, setUpdateSuccess] = useState(false);
+
+  // Wait for Supabase to process the recovery token from the URL hash
+  useEffect(() => {
+    if (!isRecoveryCallback()) return;
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (event === 'PASSWORD_RECOVERY' && session) {
+          setSessionReady(true);
+          setMode('update');
+        } else if (event === 'SIGNED_IN' && session) {
+          // Some versions fire SIGNED_IN instead of PASSWORD_RECOVERY
+          setSessionReady(true);
+          setMode('update');
+        }
+      },
+    );
+
+    // Fallback: check if session is already available (token was fast)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        setSessionReady(true);
+        setMode('update');
+      }
+    });
+
+    // Timeout fallback after 10 seconds
+    const timeout = setTimeout(() => {
+      if (!sessionReady) {
+        setMode('update');
+        setError('Session may not be ready. Please try requesting a new reset link.');
+      }
+    }, 10000);
+
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(timeout);
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleRequestSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
     try {
-      await resetPassword({ email });
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (resetError) throw resetError;
       setSuccess(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to send reset email');
     } finally {
       setLoading(false);
     }
-  }, [email, resetPassword]);
+  }, [email]);
 
+  const handleUpdateSubmit = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    if (newPassword.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    // Verify session exists before attempting update
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      setError('Recovery session expired. Please request a new reset link.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+
+      if (updateError) throw updateError;
+
+      setUpdateSuccess(true);
+      setTimeout(() => navigate('/projects'), 2000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update password');
+    } finally {
+      setLoading(false);
+    }
+  }, [newPassword, confirmPassword, navigate]);
+
+  // --- Loading: waiting for recovery session ---
+  if (mode === 'loading') {
+    return (
+      <div className="reset-password-page">
+        <div className="reset-container">
+          <div className="reset-card">
+            <div className="reset-header">
+              <h1>Verifying...</h1>
+              <p>Processing your recovery link, please wait.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // --- Update password mode ---
+  if (mode === 'update') {
+    return (
+      <div className="reset-password-page">
+        <div className="reset-container">
+          <div className="reset-card">
+            <div className="reset-header">
+              <h1>Set New Password</h1>
+              <p>Enter your new password below</p>
+            </div>
+
+            {updateSuccess ? (
+              <div className="success-message">
+                <h3>Password Updated!</h3>
+                <p>Your password has been changed successfully.</p>
+                <p>Redirecting to projects...</p>
+              </div>
+            ) : (
+              <ValidationGroup>
+                <form onSubmit={handleUpdateSubmit} className="reset-form">
+                  {error && (
+                    <div className="error-message">
+                      {error}
+                    </div>
+                  )}
+
+                  <div className="form-group">
+                    <label htmlFor="new-password">New Password</label>
+                    <TextBox
+                      id="new-password"
+                      value={newPassword}
+                      onValueChanged={(e) => setNewPassword(e.value)}
+                      placeholder="Enter new password (min 6 characters)"
+                      stylingMode="outlined"
+                      mode="password"
+                      disabled={loading}
+                    >
+                      <Validator>
+                        <RequiredRule message="Password is required" />
+                      </Validator>
+                    </TextBox>
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="confirm-password">Confirm Password</label>
+                    <TextBox
+                      id="confirm-password"
+                      value={confirmPassword}
+                      onValueChanged={(e) => setConfirmPassword(e.value)}
+                      placeholder="Confirm new password"
+                      stylingMode="outlined"
+                      mode="password"
+                      disabled={loading}
+                    >
+                      <Validator>
+                        <RequiredRule message="Please confirm your password" />
+                      </Validator>
+                    </TextBox>
+                  </div>
+
+                  <Button
+                    text={loading ? 'Updating...' : 'Update Password'}
+                    type="default"
+                    stylingMode="contained"
+                    useSubmitBehavior={true}
+                    width="100%"
+                    disabled={loading}
+                  />
+
+                  <div className="back-link">
+                    <a href="/reset-password">Request a new reset link</a>
+                  </div>
+                </form>
+              </ValidationGroup>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // --- Request reset email mode ---
   return (
     <div className="reset-password-page">
       <div className="reset-container">
@@ -47,7 +244,7 @@ export default function ResetPasswordPage(): ReactNode {
             </div>
           ) : (
             <ValidationGroup>
-              <form onSubmit={handleSubmit} className="reset-form">
+              <form onSubmit={handleRequestSubmit} className="reset-form">
                 {error && (
                   <div className="error-message">
                     {error}

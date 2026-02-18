@@ -64,8 +64,8 @@ export async function importGroups(
         tenant_id: config.IMPORT_TENANT_ID,
         tg_id: child.id,
         project_id: projectUuid,
-        parent_group_id: null,
-        group_type: 'group',
+        parent_id: null,
+        item_type: 'group',
         name: child.name,
         wbs: child.wbs ?? null,
         sort_order: child.sort ?? 0,
@@ -74,6 +74,7 @@ export async function importGroups(
         end_date: child.end_date ?? null,
         days: child.days ?? null,
         percent_complete: child.percent_complete ?? 0,
+        is_milestone: false,
         is_active: true,
       });
       topGroupTgIds.push(child.id);
@@ -89,8 +90,8 @@ export async function importGroups(
               tenant_id: config.IMPORT_TENANT_ID,
               tg_id: subChild.id,
               project_id: projectUuid,
-              // parent_group_id will be set after pass 1
-              group_type: 'subgroup',
+              // parent_id will be set after pass 1
+              item_type: 'group',
               name: subChild.name,
               wbs: subChild.wbs ?? null,
               sort_order: subChild.sort ?? 0,
@@ -99,6 +100,7 @@ export async function importGroups(
               end_date: subChild.end_date ?? null,
               days: subChild.days ?? null,
               percent_complete: subChild.percent_complete ?? 0,
+              is_milestone: false,
               is_active: true,
             },
             parentTgId: child.id,
@@ -112,11 +114,11 @@ export async function importGroups(
   // Pass 1: Insert top-level groups
   console.log(`Pass 1: ${topGroups.length} top-level groups`);
   if (topGroups.length > 0) {
-    await batchInsert(supabase, 'task_groups', topGroups, config.IMPORT_BATCH_SIZE, 'task_groups (top)');
+    await batchInsert(supabase, 'project_items', topGroups, config.IMPORT_BATCH_SIZE, 'project_items (groups/top)');
 
     // Fetch back UUIDs
     const { data: inserted, error } = await supabase
-      .from('task_groups')
+      .from('project_items')
       .select('id, tg_id')
       .in('tg_id', topGroupTgIds);
 
@@ -144,16 +146,16 @@ export async function importGroups(
         console.warn(`Skipping subgroup ${row.tg_id}: parent group ${parentTgId} not mapped`);
         continue;
       }
-      row.parent_group_id = parentUuid;
+      row.parent_id = parentUuid;
       subGroupRows.push(row);
     }
 
     if (subGroupRows.length > 0) {
-      await batchInsert(supabase, 'task_groups', subGroupRows, config.IMPORT_BATCH_SIZE, 'task_groups (sub)');
+      await batchInsert(supabase, 'project_items', subGroupRows, config.IMPORT_BATCH_SIZE, 'project_items (groups/sub)');
 
       // Fetch back UUIDs for subgroups
       const { data: inserted, error } = await supabase
-        .from('task_groups')
+        .from('project_items')
         .select('id, tg_id')
         .in('tg_id', subGroupTgIds);
 

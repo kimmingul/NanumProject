@@ -107,7 +107,8 @@ export async function importTasks(
         tenant_id: config.IMPORT_TENANT_ID,
         tg_id: task.id,
         project_id: projectUuid,
-        group_id: groupUuid ?? null,
+        parent_id: groupUuid ?? null,
+        item_type: isMilestone ? 'milestone' : 'task',
         name: task.name,
         wbs: task.wbs ?? null,
         sort_order: task.sort ?? 0,
@@ -147,7 +148,7 @@ export async function importTasks(
   // Batch insert tasks
   console.log(`Found ${taskRows.length} tasks to import`);
   if (taskRows.length > 0) {
-    await batchInsert(supabase, 'tasks', taskRows, config.IMPORT_BATCH_SIZE, 'tasks');
+    await batchInsert(supabase, 'project_items', taskRows, config.IMPORT_BATCH_SIZE, 'project_items (tasks)');
 
     // Fetch back inserted tasks in chunks (Supabase IN clause has limits)
     console.log('Fetching task UUIDs...');
@@ -155,7 +156,7 @@ export async function importTasks(
     for (let i = 0; i < taskTgIds.length; i += chunkSize) {
       const chunk = taskTgIds.slice(i, i + chunkSize);
       const { data: inserted, error } = await supabase
-        .from('tasks')
+        .from('project_items')
         .select('id, tg_id')
         .in('tg_id', chunk);
 
@@ -199,7 +200,7 @@ export async function importTasks(
     assigneeRows.push({
       tenant_id: config.IMPORT_TENANT_ID,
       tg_id: resource.id,
-      task_id: taskUuid,
+      item_id: taskUuid,
       user_id: userUuid,
       project_id: projectUuid,
       hours_per_day: resource.hours_per_day ?? 0,

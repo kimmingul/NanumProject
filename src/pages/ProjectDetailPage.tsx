@@ -3,7 +3,15 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Tabs } from 'devextreme-react';
 import { PMLayout } from '@/components/PMLayout';
 import { useProject } from '@/hooks';
-import type { Project } from '@/types';
+import GanttView from '@/features/gantt/GanttView';
+import TasksView from '@/features/tasks/TasksView';
+import BoardView from '@/features/board/BoardView';
+import CalendarView from '@/features/calendar/CalendarView';
+import CommentsView from '@/features/comments/CommentsView';
+import FilesView from '@/features/files/FilesView';
+import ActivityView from '@/features/activity/ActivityView';
+import TimeTrackingView from '@/features/time-tracking/TimeTrackingView';
+import ProjectSettingsView from '@/features/settings/ProjectSettingsView';
 import './ProjectDetailPage.css';
 
 const statusLabels: Record<string, string> = {
@@ -16,15 +24,19 @@ const statusLabels: Record<string, string> = {
 const projectTabs = [
   { id: 'gantt', text: 'Gantt Chart', icon: 'chart' },
   { id: 'tasks', text: 'Tasks', icon: 'detailslayout' },
+  { id: 'board', text: 'Board', icon: 'contentlayout' },
+  { id: 'calendar', text: 'Calendar', icon: 'event' },
   { id: 'comments', text: 'Comments', icon: 'comment' },
   { id: 'files', text: 'Files', icon: 'doc' },
+  { id: 'time', text: 'Time', icon: 'clock' },
+  { id: 'activity', text: 'Activity', icon: 'fieldchooser' },
   { id: 'settings', text: 'Settings', icon: 'preferences' },
 ];
 
 export default function ProjectDetailPage(): ReactNode {
   const { projectId, tab } = useParams<{ projectId: string; tab?: string }>();
   const navigate = useNavigate();
-  const { project, loading } = useProject(projectId);
+  const { project, loading, refetch } = useProject(projectId);
 
   const activeTab = tab || 'gantt';
   const selectedIndex = useMemo(
@@ -101,75 +113,19 @@ export default function ProjectDetailPage(): ReactNode {
         </div>
 
         <div className="project-tab-content">
-          {activeTab === 'gantt' && <GanttTabPlaceholder project={project} />}
-          {activeTab === 'tasks' && <TasksTabPlaceholder project={project} />}
-          {activeTab === 'comments' && <CommentsTabPlaceholder />}
-          {activeTab === 'files' && <FilesTabPlaceholder />}
-          {activeTab === 'settings' && <SettingsTabPlaceholder project={project} />}
+          {activeTab === 'gantt' && projectId && <GanttView projectId={projectId} />}
+          {activeTab === 'tasks' && projectId && <TasksView projectId={projectId} />}
+          {activeTab === 'board' && projectId && <BoardView projectId={projectId} />}
+          {activeTab === 'calendar' && projectId && <CalendarView projectId={projectId} />}
+          {activeTab === 'comments' && projectId && <CommentsView projectId={projectId} />}
+          {activeTab === 'files' && projectId && <FilesView projectId={projectId} />}
+          {activeTab === 'time' && projectId && <TimeTrackingView projectId={projectId} />}
+          {activeTab === 'activity' && projectId && <ActivityView projectId={projectId} />}
+          {activeTab === 'settings' && (
+            <ProjectSettingsView project={project} onProjectUpdated={() => refetch()} />
+          )}
         </div>
       </div>
     </PMLayout>
-  );
-}
-
-function GanttTabPlaceholder({ project }: { project: Project }): ReactNode {
-  return (
-    <div className="tab-placeholder">
-      <div className="placeholder-icon">
-        <i className="dx-icon-chart"></i>
-      </div>
-      <h3>Gantt Chart</h3>
-      <p>Interactive Gantt chart view for "{project.name}" will be available in the next update.</p>
-      <p className="placeholder-hint">This will show tasks, groups, and dependencies in a timeline view.</p>
-    </div>
-  );
-}
-
-function TasksTabPlaceholder({ project }: { project: Project }): ReactNode {
-  return (
-    <div className="tab-placeholder">
-      <div className="placeholder-icon">
-        <i className="dx-icon-detailslayout"></i>
-      </div>
-      <h3>Tasks</h3>
-      <p>Task list and board views for "{project.name}" will be available soon.</p>
-      <p className="placeholder-hint">You'll be able to view, create, and manage tasks here.</p>
-    </div>
-  );
-}
-
-function CommentsTabPlaceholder(): ReactNode {
-  return (
-    <div className="tab-placeholder">
-      <div className="placeholder-icon">
-        <i className="dx-icon-comment"></i>
-      </div>
-      <h3>Comments</h3>
-      <p>Project-level comments and discussions coming soon.</p>
-    </div>
-  );
-}
-
-function FilesTabPlaceholder(): ReactNode {
-  return (
-    <div className="tab-placeholder">
-      <div className="placeholder-icon">
-        <i className="dx-icon-doc"></i>
-      </div>
-      <h3>Files & Documents</h3>
-      <p>Document management with version history coming soon.</p>
-    </div>
-  );
-}
-
-function SettingsTabPlaceholder({ project }: { project: Project }): ReactNode {
-  return (
-    <div className="tab-placeholder">
-      <div className="placeholder-icon">
-        <i className="dx-icon-preferences"></i>
-      </div>
-      <h3>Project Settings</h3>
-      <p>Configure "{project.name}" settings, members, and permissions.</p>
-    </div>
   );
 }

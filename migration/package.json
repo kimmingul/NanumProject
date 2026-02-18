@@ -8,6 +8,7 @@
     "migrate:verify": "tsx src/index.ts --verify-only",
     "migrate:resume": "tsx src/index.ts --resume",
     "import": "tsx src/importers/index.ts",
+    "import:clean": "tsx src/importers/index.ts --clean",
     "import:users": "tsx src/importers/index.ts --only=users",
     "import:projects": "tsx src/importers/index.ts --only=projects",
     "import:tasks": "tsx src/importers/index.ts --only=tasks",

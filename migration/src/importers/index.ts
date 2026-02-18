@@ -1,6 +1,7 @@
 import { join } from 'node:path';
-import { existsSync } from 'node:fs';
-import { getImportConfig, getSupabaseAdmin } from './supabase-admin.js';
+import { existsSync, unlinkSync } from 'node:fs';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import { getImportConfig, getSupabaseAdmin, type ImportConfig } from './supabase-admin.js';
 import { IdMapper } from './id-mapper.js';
 import { importUsers } from './user-importer.js';
 import { importProjects } from './project-importer.js';
@@ -19,12 +20,53 @@ const onlyArg = args.find((a) => a.startsWith('--only='));
 const onlyStep = onlyArg ? onlyArg.split('=')[1] : null;
 const isResume = args.includes('--resume');
 const isDryRun = args.includes('--dry-run');
+const isClean = args.includes('--clean');
 
 // =============================================
 // Paths
 // =============================================
 const OUTPUT_DIR = join(import.meta.dirname, '..', '..', 'output');
 const ID_MAP_PATH = join(OUTPUT_DIR, '_import', 'id-map.json');
+
+// =============================================
+// Cleanup (delete existing PM data for tenant)
+// =============================================
+async function cleanTenantData(
+  supabase: SupabaseClient,
+  config: ImportConfig,
+): Promise<void> {
+  console.log('\n🗑  Cleaning existing PM data...');
+  const tenantId = config.IMPORT_TENANT_ID;
+
+  // Delete in FK-safe order (children first, parents last)
+  const tables = [
+    'time_entries',
+    'checklist_items',
+    'document_versions',
+    'documents',
+    'task_dependencies',
+    'task_assignees',
+    'comments',
+    'project_items',
+    'project_members',
+    'projects',
+  ];
+
+  for (const table of tables) {
+    const { error, count } = await supabase
+      .from(table)
+      .delete({ count: 'exact' })
+      .eq('tenant_id', tenantId);
+
+    if (error) {
+      console.error(`  [${table}] Delete error: ${error.message}`);
+    } else {
+      console.log(`  [${table}] Deleted ${count ?? '?'} rows`);
+    }
+  }
+
+  console.log('Clean complete.\n');
+}
 
 // =============================================
 // Main
@@ -69,6 +111,17 @@ async function main(): Promise<void> {
 
   // Get Supabase client
   const supabase = getSupabaseAdmin();
+
+  // Clean existing data if --clean
+  if (isClean) {
+    await cleanTenantData(supabase, config);
+
+    // Remove old id-map so we start fresh
+    if (existsSync(ID_MAP_PATH)) {
+      unlinkSync(ID_MAP_PATH);
+      console.log('Removed old ID map file.\n');
+    }
+  }
 
   // Define import steps
   const steps: { name: string; key: string; fn: () => Promise<void> }[] = [

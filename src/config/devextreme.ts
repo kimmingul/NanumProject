@@ -1,18 +1,13 @@
 /**
  * DevExtreme configuration and license
  */
+import config from 'devextreme/core/config';
 
-// Set DevExtreme license key (dynamic import to handle version differences)
+// Set DevExtreme license key synchronously before any components render
 const DEVEXTREME_KEY = import.meta.env.VITE_DEVEXTREME_KEY || '';
 
 if (DEVEXTREME_KEY) {
-  import('devextreme/common').then((mod) => {
-    if ('licenseKey' in mod && typeof mod.licenseKey === 'function') {
-      mod.licenseKey(DEVEXTREME_KEY);
-    }
-  }).catch(() => {
-    // licenseKey not available in this DevExtreme version
-  });
+  config({ licenseKey: DEVEXTREME_KEY });
 }
 
 // Theme configuration

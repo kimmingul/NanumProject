@@ -83,7 +83,7 @@ export async function importProjects(
       lock_milestone_dates: project.lock_milestone_dates ?? false,
       allow_scheduling_on_holidays: project.allow_scheduling_on_holidays ?? false,
       in_resource_management: project.in_resource_management ?? false,
-      is_active: !(project.is_disabled ?? false),
+      is_active: true, // TeamGantt marks all exported projects as is_disabled=true; ignore it
       created_at: project.created_date ?? new Date().toISOString(),
     });
     projectTgIds.push(tgId);

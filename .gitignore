@@ -29,3 +29,6 @@ dist-ssr
 # Migration output
 migration/output/
 migration/dist/
+
+# Binary data files
+*.xlsx

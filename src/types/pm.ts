@@ -57,6 +57,7 @@ export interface ProjectMember {
   updated_at: string;
 }
 
+/** Unified project_items table (groups/tasks/milestones with parent_id tree) */
 export interface ProjectItem {
   id: string;
   tenant_id: string;
@@ -75,8 +76,10 @@ export interface ProjectItem {
   percent_complete: number;
   estimated_hours: number;
   actual_hours: number;
+  is_estimated_hours_enabled: boolean;
   is_critical: boolean | null;
   slack: number | null;
+  is_milestone: boolean;
   is_time_tracking_enabled: boolean;
   is_starred: boolean;
   custom_fields: Record<string, unknown>;
@@ -223,5 +226,5 @@ export interface ProjectMemberWithProfile extends ProjectMember {
     full_name: string | null;
     email: string;
     avatar_url: string | null;
-  };
+  } | undefined;
 }

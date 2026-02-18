@@ -63,7 +63,7 @@ export async function importTimeEntries(
       tenant_id: config.IMPORT_TENANT_ID,
       tg_id: block.id,
       project_id: projectUuid,
-      task_id: taskUuid,
+      item_id: taskUuid,
       user_id: userUuid,
       entry_type: entryType,
       start_time: block.start_time,

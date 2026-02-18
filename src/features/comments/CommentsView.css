@@ -1,0 +1,152 @@
+.comments-view {
+  max-width: 800px;
+}
+
+.comments-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  color: #666;
+}
+
+.comments-loading .loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #e0e0e0;
+  border-top-color: #0078d4;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 12px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Input section */
+.comment-input-section {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.comment-input-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.comment-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #0078d4;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.comment-input-wrapper {
+  flex: 1;
+}
+
+.comment-input-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+/* Error */
+.comments-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  color: #dc2626;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+/* List */
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.comments-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3rem 0;
+  color: #9ca3af;
+}
+
+.comments-empty i {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+/* Individual comment */
+.comment-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.comment-body {
+  flex: 1;
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+
+.comment-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.comment-author {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.comment-time {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.comment-delete-btn {
+  background: none;
+  border: none;
+  padding: 2px 4px;
+  cursor: pointer;
+  color: #9ca3af;
+  margin-left: auto;
+  border-radius: 4px;
+  transition: color 0.15s, background 0.15s;
+}
+
+.comment-delete-btn:hover {
+  color: #dc2626;
+  background: #fef2f2;
+}
+
+.comment-message {
+  font-size: 0.9rem;
+  color: #374151;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
