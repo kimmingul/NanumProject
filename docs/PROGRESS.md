@@ -162,7 +162,7 @@
   - Production branch: `master`
   - 환경변수: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_DEVEXTREME_KEY`
 
-### Phase 10: task_status 컬럼 추가
+### Phase 10: task_status 컬럼 추가 + UsersPage 실데이터 연동
 
 - **DB 마이그레이션** (`004_add_task_status.sql`):
   - `task_status` enum 타입 생성 (`todo`, `in_progress`, `review`, `done`)
@@ -175,6 +175,7 @@
 - **TaskDetailPanel 개선**: 태스크 상태 배지 표시
 - **TypeScript 타입 업데이트**: `TaskStatus` 타입 추가 (`pm.ts`, `supabase.ts`)
 - **DB 문서 업데이트**: `DATABASE.md`에 `task_status` enum 및 컬럼 문서화
+- **UsersPage 실데이터 연동**: 하드코딩된 `sampleUsers` 제거 → Supabase `profiles` 테이블에서 `tenant_id` 기반 실시간 조회
 
 ### Bugfix: 새로고침 시 데이터 미로딩 (Supabase Auth 데드락)
 
