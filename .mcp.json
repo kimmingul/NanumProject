@@ -1,6 +1,11 @@
 {
   "inputs": [],
   "servers": {
+    "chrome-devtools": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "chrome-devtools-mcp@latest"]
+    },
     "dxdocs": {
       "type": "sse",
       "url": "https://api.devexpress.com/mcp/docs",

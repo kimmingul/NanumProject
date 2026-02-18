@@ -17,7 +17,6 @@ import { TextBox } from 'devextreme-react/text-box';
 import { TextArea } from 'devextreme-react/text-area';
 import { DateBox } from 'devextreme-react/date-box';
 import { SelectBox } from 'devextreme-react/select-box';
-import { PMLayout } from '@/components/PMLayout';
 import { useProjects, useProjectCrud } from '@/hooks';
 import type { ProjectStatus } from '@/types';
 import './ProjectListPage.css';
@@ -82,7 +81,6 @@ export default function ProjectListPage(): ReactNode {
   }, [formData, createProject, refetch]);
 
   return (
-    <PMLayout breadcrumbs={[{ label: 'Projects' }]}>
       <div className="project-list-page">
         <div className="page-header">
           <div className="page-header-row">
@@ -276,6 +274,5 @@ export default function ProjectListPage(): ReactNode {
           </div>
         </Popup>
       </div>
-    </PMLayout>
   );
 }

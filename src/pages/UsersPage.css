@@ -74,24 +74,7 @@
   justify-content: center;
 }
 
-.action-icon {
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: transparent;
-  border-radius: 4px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #64748b;
-  transition: all 0.2s;
-}
-
-.action-icon:hover {
-  background: #f1f5f9;
-  color: #334155;
-}
+/* Action buttons use DevExtreme text Buttons */
 
 /* DevExtreme overrides */
 .users-grid-container .dx-datagrid {

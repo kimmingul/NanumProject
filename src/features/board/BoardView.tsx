@@ -1,8 +1,8 @@
-import { type ReactNode, useCallback, useMemo, useState } from 'react';
+import { type ReactNode, useCallback, useMemo } from 'react';
 import Sortable, { type DragEndEvent } from 'devextreme-react/sortable';
 import { useProjectItems } from '@/hooks/useProjectItems';
+import { usePMStore } from '@/lib/pm-store';
 import { supabase } from '@/lib/supabase';
-import TaskDetailPopup from '@/features/tasks/TaskDetailPopup';
 import type { ProjectItem } from '@/types';
 import './BoardView.css';
 
@@ -40,7 +40,7 @@ function getBoardStatus(item: ProjectItem): BoardStatus {
 export default function BoardView({ projectId }: BoardViewProps): ReactNode {
   const { items, resources, assignments, loading, error, refetch } =
     useProjectItems(projectId);
-  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+  const setSelectedTaskId = usePMStore((s) => s.setSelectedTaskId);
 
   // Only tasks (no groups / milestones)
   const tasks = useMemo(() => items.filter((i) => i.item_type === 'task'), [items]);
@@ -165,7 +165,7 @@ export default function BoardView({ projectId }: BoardViewProps): ReactNode {
                     <div
                       key={task.id}
                       className="board-card"
-                      onClick={() => setSelectedItemId(task.id)}
+                      onClick={() => setSelectedTaskId(task.id)}
                     >
                       <div className="board-card-name">{task.name}</div>
                       <div className="board-card-meta">
@@ -198,14 +198,6 @@ export default function BoardView({ projectId }: BoardViewProps): ReactNode {
           );
         })}
       </div>
-
-      <TaskDetailPopup
-        visible={selectedItemId !== null}
-        projectId={projectId}
-        itemId={selectedItemId}
-        onHiding={() => setSelectedItemId(null)}
-        onTaskUpdated={refetch}
-      />
     </div>
   );
 }

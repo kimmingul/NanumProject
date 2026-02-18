@@ -18,63 +18,78 @@
 ```
 NanumProject/
 ├── src/
-│   ├── components/          # 공통 UI 컴포넌트
-│   │   ├── PMLayout.tsx     #   PM 페이지 공통 레이아웃 (헤더, 네비게이션)
-│   │   ├── ProtectedRoute.tsx #  인증 가드
-│   │   └── MainLayout.tsx   #   기본 레이아웃
-│   ├── pages/               # 페이지 컴포넌트
-│   │   ├── HomePage.tsx     #   랜딩 페이지
-│   │   ├── LoginPage.tsx    #   로그인
-│   │   ├── SignUpPage.tsx   #   회원가입
+│   ├── components/            # 공통 UI 컴포넌트
+│   │   ├── IDELayout.tsx      #   3-Panel CSS Grid 쉘 (left/center/right)
+│   │   ├── IDEHeader.tsx      #   40px 슬림 헤더 (네비, 검색, 유저)
+│   │   ├── LeftPanel.tsx      #   좌측 패널 (대시보드 네비 / 프로젝트 트리)
+│   │   ├── RightPanel.tsx     #   우측 패널 (태스크 상세 인라인)
+│   │   ├── ResizeHandle.tsx   #   4px 드래그 핸들 (패널 리사이즈)
+│   │   └── ProtectedRoute.tsx #   인증 가드 + 리다이렉트
+│   ├── pages/                 # 페이지 컴포넌트
+│   │   ├── HomePage.tsx       #   랜딩 페이지
+│   │   ├── LoginPage.tsx      #   로그인
+│   │   ├── SignUpPage.tsx     #   회원가입
 │   │   ├── ResetPasswordPage.tsx # 비밀번호 재설정
-│   │   ├── DashboardPage.tsx #  대시보드 (통계 카드)
-│   │   ├── UsersPage.tsx    #   사용자 관리 (DataGrid)
-│   │   ├── ProjectListPage.tsx # 프로젝트 목록 (DataGrid + CRUD)
+│   │   ├── DashboardPage.tsx  #   대시보드 (통계 카드)
+│   │   ├── UsersPage.tsx      #   사용자 관리 (DataGrid)
+│   │   ├── AuditLogPage.tsx   #   감사 로그 뷰어
+│   │   ├── ProjectListPage.tsx #  프로젝트 목록 (DataGrid + CRUD)
 │   │   └── ProjectDetailPage.tsx # 프로젝트 상세 (탭 기반)
-│   ├── features/            # 기능 모듈 (프로젝트 상세 탭)
-│   │   ├── gantt/GanttView.tsx     # DevExtreme Gantt 차트
-│   │   ├── tasks/TasksView.tsx     # TreeList 기반 태스크 목록
-│   │   ├── comments/CommentsView.tsx # 코멘트 뷰
-│   │   └── settings/ProjectSettingsView.tsx # 프로젝트 설정
-│   ├── hooks/               # React 커스텀 훅
-│   │   ├── useAuth.ts       #   인증 상태 + 로그인/로그아웃
-│   │   ├── useProjects.ts   #   프로젝트 목록 조회
-│   │   ├── useProject.ts    #   단일 프로젝트 조회
-│   │   ├── useProjectCrud.ts #  프로젝트 생성/수정/삭제
-│   │   ├── useProjectItems.ts # 태스크/의존성/리소스 조회
-│   │   ├── useProjectMembers.ts # 프로젝트 멤버 관리
-│   │   └── useComments.ts   #   코멘트 CRUD
-│   ├── lib/                 # 코어 라이브러리
-│   │   ├── supabase.ts      #   Supabase 클라이언트 (typed + untyped)
-│   │   ├── auth-store.ts    #   Zustand 인증 스토어 (persistent)
-│   │   └── pm-store.ts      #   Zustand PM 스토어 (in-memory)
-│   ├── types/               # TypeScript 타입 정의
-│   │   ├── pm.ts            #   PM 모듈 타입 (11개 엔티티 + enum)
-│   │   ├── database.ts      #   Auth 모듈 타입 (Tenant, Profile 등)
-│   │   ├── auth.ts          #   인증 관련 타입
-│   │   └── supabase.ts      #   Supabase 생성 타입
-│   ├── config/              # 설정
-│   │   ├── index.ts         #   Supabase URL/Key, 앱 정보
-│   │   └── devextreme.ts    #   DevExtreme 라이선스, 테마
-│   ├── routes/index.tsx     # 라우터 설정 (12개 라우트)
-│   ├── App.tsx              # 루트 컴포넌트
-│   └── main.tsx             # 엔트리포인트
-├── supabase/                # DB 스키마 & 마이그레이션
+│   ├── features/              # 기능 모듈 (프로젝트 상세 탭)
+│   │   ├── gantt/GanttView.tsx        # DevExtreme Gantt 차트
+│   │   ├── tasks/TasksView.tsx        # TreeList 기반 태스크 목록
+│   │   ├── tasks/TaskDetailPanel.tsx  # 태스크 상세 인라인 패널
+│   │   ├── board/BoardView.tsx        # Kanban 보드 (Sortable)
+│   │   ├── calendar/CalendarView.tsx  # Scheduler 캘린더 뷰
+│   │   ├── comments/CommentsView.tsx  # 코멘트 뷰
+│   │   ├── files/FilesView.tsx        # 파일 관리
+│   │   ├── activity/ActivityView.tsx  # 활동 로그 타임라인
+│   │   ├── time-tracking/TimeTrackingView.tsx # 시간 추적
+│   │   └── settings/ProjectSettingsView.tsx   # 프로젝트 설정
+│   ├── hooks/                 # React 커스텀 훅
+│   │   ├── useAuth.ts         #   인증 상태 + 로그인/로그아웃
+│   │   ├── useProjects.ts     #   프로젝트 목록 조회
+│   │   ├── useProject.ts      #   단일 프로젝트 조회
+│   │   ├── useProjectCrud.ts  #   프로젝트 생성/수정/삭제
+│   │   ├── useProjectItems.ts #   태스크/의존성/리소스 조회
+│   │   ├── useProjectMembers.ts #  프로젝트 멤버 관리
+│   │   ├── useComments.ts     #   코멘트 CRUD
+│   │   ├── useDocuments.ts    #   문서 CRUD, 버전 관리
+│   │   ├── useActivityLog.ts  #   활동 로그 조회
+│   │   ├── useAuditLog.ts     #   감사 로그 조회
+│   │   ├── useTimeEntries.ts  #   시간 기록 CRUD
+│   │   └── useChecklist.ts    #   체크리스트 CRUD + 토글
+│   ├── lib/                   # 코어 라이브러리
+│   │   ├── supabase.ts        #   Supabase 클라이언트 (typed)
+│   │   ├── auth-store.ts      #   Zustand 인증 스토어 (persistent)
+│   │   └── pm-store.ts        #   Zustand PM 스토어 (in-memory)
+│   ├── types/                 # TypeScript 타입 정의
+│   │   ├── pm.ts              #   PM 모듈 타입 (11개 엔티티 + enum)
+│   │   ├── database.ts        #   Auth 모듈 타입 (Tenant, Profile 등)
+│   │   ├── auth.ts            #   인증 관련 타입
+│   │   └── supabase.ts        #   Supabase 생성 타입
+│   ├── config/                # 설정
+│   │   ├── index.ts           #   Supabase URL/Key, 앱 정보
+│   │   └── devextreme.ts      #   DevExtreme 라이선스, 테마
+│   ├── routes/index.tsx       # 라우터 설정 (IDELayout + Outlet 중첩)
+│   ├── App.tsx                # 루트 컴포넌트
+│   └── main.tsx               # 엔트리포인트
+├── supabase/                  # DB 스키마 & 마이그레이션
 │   ├── migrations/
-│   │   ├── 001_auth.sql     #   Auth 모듈 (테이블 + RLS + 트리거 + 함수)
-│   │   └── 002_pm.sql       #   PM 모듈 (Enum + 테이블 + RLS + 트리거)
-│   ├── COMPLETE_MIGRATION.sql    # Auth 모듈 통합 SQL
-│   ├── COMPLETE_PM_MIGRATION.sql # PM 모듈 통합 SQL
-│   └── DATABASE.md          # DB 스키마 문서
-├── migration/               # TeamGantt 마이그레이션 도구 (별도 npm 패키지)
+│   │   ├── 001_auth.sql       #   Auth 모듈 (테이블 + RLS + 트리거 + 함수)
+│   │   └── 002_pm.sql         #   PM 모듈 (Enum + 테이블 + RLS + 트리거)
+│   ├── COMPLETE_MIGRATION.sql     # Auth 모듈 통합 SQL
+│   ├── COMPLETE_PM_MIGRATION.sql  # PM 모듈 통합 SQL
+│   └── DATABASE.md            # DB 스키마 문서
+├── migration/                 # TeamGantt 마이그레이션 도구 (별도 npm 패키지)
 │   ├── src/
-│   │   ├── api/             #   TeamGantt API 클라이언트 (Cognito 인증)
-│   │   ├── extractors/      #   데이터 추출 모듈
-│   │   ├── importers/       #   Supabase 임포트 모듈 (10단계)
-│   │   └── utils/           #   로거, Rate Limiter, 프로그레스
+│   │   ├── api/               #   TeamGantt API 클라이언트 (Cognito 인증)
+│   │   ├── extractors/        #   데이터 추출 모듈
+│   │   ├── importers/         #   Supabase 임포트 모듈 (10단계)
+│   │   └── utils/             #   로거, Rate Limiter, 프로그레스
 │   └── package.json
-├── scripts/                 # 빌드/유틸 스크립트
-├── docs/                    # 개발 문서
+├── scripts/                   # 빌드/유틸 스크립트
+├── docs/                      # 개발 문서
 └── package.json
 ```
 
@@ -122,18 +137,62 @@ projects ──┬── project_members ──→ auth.users
 | `/reset-password` | 비밀번호 재설정 | - |
 | `/dashboard` | 대시보드 (통계) | 필요 |
 | `/dashboard/users` | 사용자 관리 | 필요 |
+| `/dashboard/audit` | 감사 로그 뷰어 | 필요 |
 | `/projects` | 프로젝트 목록 | 필요 |
 | `/projects/:id` | 프로젝트 상세 (기본: gantt) | 필요 |
-| `/projects/:id/:tab` | 프로젝트 상세 탭 (gantt/tasks/comments/files/settings) | 필요 |
+| `/projects/:id/:tab` | 프로젝트 상세 탭 (gantt/tasks/board/calendar/comments/files/time/activity/settings) | 필요 |
+
+모든 인증 필요 라우트는 `ProtectedRoute > IDELayout > Outlet` 중첩 구조.
 
 ## 5. 상태 관리
 
 | 스토어 | 라이브러리 | 영속성 | 내용 |
 |--------|-----------|--------|------|
-| `auth-store` | Zustand | localStorage | user, session, profile, isAuthenticated |
-| `pm-store` | Zustand | in-memory | projects[], activeProject |
+| `auth-store` | Zustand | localStorage (`nanumauth-auth`) | user, session, profile, isAuthenticated, isLoading |
+| `pm-store` | Zustand | in-memory | projects[], activeProject, 패널 상태 (left/right open/width), selectedTaskId |
 
-## 6. 환경 변수
+### 새로고침 시 인증 복원 흐름
+
+```
+1. zustand persist → localStorage에서 session/profile 복원
+2. auth-store merge → isAuthenticated=true, isLoading=false (즉시)
+3. ProtectedRoute → 인증됨으로 판단, 자식 렌더링
+4. Supabase GoTrueClient._initialize() → navigator.locks 획득 후 세션 복원
+5. 데이터 fetching 훅 → Supabase 쿼리 (내부적으로 initializePromise 대기 후 실행)
+```
+
+## 6. Supabase Auth 주의사항
+
+### onAuthStateChange 콜백 내 Supabase 쿼리 금지
+
+Supabase JS v2는 `_initialize()` 실행 중 `navigator.locks`를 보유한 상태에서 `onAuthStateChange` 콜백을 호출한다. 이 콜백 안에서 Supabase 쿼리를 `await`하면 **데드락**이 발생한다:
+
+- Supabase 쿼리 → `_getAccessToken()` → `getSession()` → `await initializePromise`
+- `initializePromise`는 `_initialize()` 완료를 기다림
+- `_initialize()`는 콜백 완료를 기다림 → **데드락**
+
+```typescript
+// ❌ 데드락 발생
+supabase.auth.onAuthStateChange(async (_event, session) => {
+  if (session?.user) {
+    await supabase.from('profiles').select('*').eq('user_id', session.user.id);
+  }
+});
+
+// ✅ fire-and-forget으로 호출
+supabase.auth.onAuthStateChange((_event, session) => {
+  if (session?.user) {
+    supabase.from('profiles').select('*').eq('user_id', session.user.id)
+      .then(({ data }) => { /* ... */ });
+  }
+});
+```
+
+### 데이터 fetching 시 getSession() guard 불필요
+
+Supabase 클라이언트는 쿼리 실행 시 `_getAccessToken()`을 통해 자동으로 auth 토큰을 포함한다. 별도의 `getSession()` guard는 불필요하며, 초기화 지연 시 불필요한 대기를 유발할 수 있다. `auth-store`의 `profile.tenant_id` 등으로 guard하는 것이 적절하다.
+
+## 7. 환경 변수
 
 ```env
 VITE_SUPABASE_URL=          # Supabase 프로젝트 URL

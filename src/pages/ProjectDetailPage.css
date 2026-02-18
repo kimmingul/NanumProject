@@ -1,133 +1,108 @@
-.project-detail-page {
-  /* container within PMLayout */
+/* Project Workspace */
+.project-workspace {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
-.project-detail-header {
-  margin-bottom: 1.5rem;
-}
-
-.project-title-row {
+/* Workspace Toolbar */
+.workspace-toolbar {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  margin-bottom: 0.5rem;
+  justify-content: space-between;
+  height: 44px;
+  min-height: 44px;
+  padding: 0 12px;
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  gap: 12px;
 }
 
-.project-title-row h2 {
-  margin: 0;
-  font-size: 1.75rem;
-  font-weight: 700;
+.workspace-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.workspace-project-name {
+  font-size: 14px;
+  font-weight: 600;
   color: #1e293b;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .project-star {
   color: #f59e0b;
 }
 
-.project-dates {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-  color: #64748b;
-}
-
-.date-sep {
-  color: #94a3b8;
-}
-
 .project-status-badge {
   display: inline-block;
-  padding: 0.25rem 0.75rem;
-  border-radius: 12px;
-  font-size: 0.8rem;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
   font-weight: 600;
   text-transform: capitalize;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
-.status-active {
-  background: #d1fae5;
-  color: #059669;
+.status-active { background: #d1fae5; color: #059669; }
+.status-on_hold { background: #fef3c7; color: #d97706; }
+.status-complete { background: #dbeafe; color: #2563eb; }
+.status-archived { background: #f1f5f9; color: #64748b; }
+
+/* Tab icon buttons */
+.workspace-tab-buttons {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
 }
 
-.status-on_hold {
-  background: #fef3c7;
-  color: #d97706;
-}
-
-.status-complete {
-  background: #dbeafe;
-  color: #2563eb;
-}
-
-.status-archived {
-  background: #f1f5f9;
+/* DevExtreme Button reset for workspace tabs */
+.dx-button.workspace-tab-btn {
+  min-width: 32px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
   color: #64748b;
+  padding: 0;
+  transition: background 0.15s, color 0.15s;
 }
 
-.project-tabs-container {
-  background: white;
-  border-radius: 8px;
-  padding: 0.75rem 1rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  margin-bottom: 1.5rem;
-}
-
-.project-tab-content {
-  background: white;
-  border-radius: 8px;
-  padding: 2rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  min-height: 400px;
-}
-
-/* Placeholder styles */
-.tab-placeholder {
+.dx-button.workspace-tab-btn .dx-button-content {
+  padding: 0;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 4rem 2rem;
-  text-align: center;
 }
 
-.placeholder-icon {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
+.dx-button.workspace-tab-btn .dx-icon {
+  font-size: 16px;
+  color: inherit;
+}
+
+.dx-button.workspace-tab-btn:hover,
+.dx-button.workspace-tab-btn.dx-state-hover {
   background: #f1f5f9;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 1.5rem;
-}
-
-.placeholder-icon i {
-  font-size: 2.5rem;
-  color: #94a3b8;
-}
-
-.tab-placeholder h3 {
-  margin: 0 0 0.75rem 0;
-  font-size: 1.5rem;
   color: #334155;
 }
 
-.tab-placeholder p {
-  margin: 0 0 0.5rem 0;
-  color: #64748b;
-  font-size: 1rem;
-  max-width: 500px;
+.dx-button.workspace-tab-btn.active {
+  background: #eff6ff;
+  color: #2563eb;
 }
 
-.placeholder-hint {
-  font-size: 0.85rem !important;
-  color: #94a3b8 !important;
-  font-style: italic;
+/* Workspace content */
+.workspace-content {
+  flex: 1;
+  overflow: auto;
+  padding: 0;
 }
 
 /* Loading state */
@@ -150,9 +125,7 @@
 }
 
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  to { transform: rotate(360deg); }
 }
 
 .project-detail-loading p {
@@ -187,17 +160,4 @@
   color: #64748b;
 }
 
-.back-btn {
-  padding: 0.6rem 1.5rem;
-  background: #667eea;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.back-btn:hover {
-  background: #5a6fd6;
-}
+/* Back button uses DevExtreme outlined Button */

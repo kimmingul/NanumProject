@@ -1,5 +1,5 @@
 import { type ReactNode } from 'react';
-import 'devextreme/dist/css/dx.fluent.blue.light.css';
+import 'devextreme/dist/css/dx.fluent.blue.light.compact.css';
 
 interface MainLayoutProps {
   children: ReactNode;

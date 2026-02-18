@@ -7,5 +7,6 @@ export { useComments } from './useComments';
 export { useProjectMembers } from './useProjectMembers';
 export { useDocuments } from './useDocuments';
 export { useActivityLog } from './useActivityLog';
+export { useAuditLog } from './useAuditLog';
 export { useTimeEntries } from './useTimeEntries';
 export { useChecklist } from './useChecklist';

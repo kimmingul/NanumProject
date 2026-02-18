@@ -113,6 +113,52 @@
 - **PM 스토어** (`pm-store.ts`): Zustand in-memory (projects[], activeProject)
 - **PM 타입** (`types/pm.ts`): 11개 엔티티 인터페이스 + 8개 enum + UI 합성 타입
 
+### Phase 7: IDE-Style 3-Panel Layout
+
+- **IDELayout** (`components/IDELayout.tsx`): 3-Panel CSS Grid 쉘 (left/center/right)
+- **IDEHeader** (`components/IDEHeader.tsx`): 40px 슬림 헤더 (햄버거, 앱 타이틀, 글로벌 내비 아이콘, 검색 placeholder, 유저 영역)
+- **LeftPanel** (`components/LeftPanel.tsx`): 경로 기반 컨텍스트 분기 (DashboardNav / ProjectTree)
+- **RightPanel** (`components/RightPanel.tsx`): 태스크 상세 인라인 패널 (toggle)
+- **TaskDetailPanel** (`features/tasks/TaskDetailPanel.tsx`): TaskDetailPopup에서 Popup 래퍼 제거한 인라인 버전
+- **ResizeHandle** (`components/ResizeHandle.tsx`): 4px 드래그 핸들 (좌/우 패널 리사이즈)
+- **pm-store 확장**: leftPanelOpen/rightPanelOpen, 패널 너비, selectedTaskId 상태 관리
+- **라우트 통합**: 모든 인증 라우트를 `IDELayout + Outlet` 중첩 구조로 변경
+- **기존 페이지 적응**: PMLayout 래퍼 제거, 프로젝트 탭을 아이콘 버튼으로 교체
+- **Feature View 수정**: GanttView/TasksView/BoardView/CalendarView에서 TaskDetailPopup 제거, usePMStore.setSelectedTaskId 사용
+- **CSS 정리**: Vite 보일러플레이트 제거, dark mode → light mode 기본값, max-width 제약 제거
+
+### Bugfix: 새로고침 시 데이터 미로딩 (Supabase Auth 데드락)
+
+**증상**: 페이지 새로고침(F5) 시 프로젝트 목록, 대시보드 통계 등 모든 데이터가 로드되지 않음. 콘솔 에러 없이 빈 화면 표시.
+
+**근본 원인**: Supabase JS v2.89의 `navigator.locks` API와 `onAuthStateChange` 콜백 간 데드락.
+
+```
+_initialize() → navigator.locks 획득 → _recoverAndRefresh()
+  → _notifyAllSubscribers('SIGNED_IN')
+    → useAuth의 onAuthStateChange 콜백 실행
+      → await loadUserProfile()
+        → supabase.from('profiles').select()
+          → 내부적으로 _getAccessToken() → getSession()
+            → await initializePromise (_initialize 완료 대기)
+              → 💀 DEADLOCK (서로 완료를 기다림)
+```
+
+데드락으로 `initializePromise`가 영원히 resolve되지 않아, `getSession()`을 호출하는 모든 코드(데이터 fetching 훅 포함)가 무한 대기.
+
+**수정 내용**:
+
+| 파일 | 변경 | 이유 |
+|------|------|------|
+| `src/hooks/useAuth.ts` | `onAuthStateChange` 콜백을 non-async로 변경, `loadUserProfile()`을 fire-and-forget으로 호출 | 데드락 해소: 콜백이 즉시 반환되어 `_initialize()` 완료 가능 |
+| `src/hooks/useProjects.ts` | `getSession()` guard 제거 | Supabase 클라이언트가 자체적으로 auth 토큰 관리하므로 불필요. 데드락 시 무한 대기 유발 |
+| `src/pages/DashboardPage.tsx` | `getSession()` guard를 `profile?.tenant_id` 체크로 교체 | 동일 사유 |
+
+**핵심 교훈**:
+- Supabase `onAuthStateChange` 콜백 안에서 Supabase 쿼리를 `await`하면 안 됨 (내부적으로 `getSession()` → `initializePromise` 대기 → 데드락)
+- 데이터 fetching 시 `getSession()` guard는 불필요 — Supabase 클라이언트가 `_getAccessToken()`을 통해 자동으로 auth 토큰을 포함함
+- `auth-store`의 zustand persist에서 복원된 `profile.tenant_id`로 guard하는 것이 더 적절
+
 ---
 
 ## 미완료 / 진행 예정
@@ -140,7 +186,7 @@
 | 항목 | 설명 |
 |------|------|
 | Application 관리 | OAuth2/OIDC 앱 관리 페이지 |
-| Audit 로그 뷰어 | 감사 로그 필터링/조회 |
+| ~~Audit 로그 뷰어~~ | **완료** — AuditLogPage + useAuditLog 훅, DataGrid (날짜/사용자/액션/리소스/메타데이터), 프로필 조인, 필터/검색/내보내기 |
 | MFA 구현 | TOTP, SMS 인증 |
 | 실시간 업데이트 | Supabase Realtime 구독 |
 | 테넌트 설정 | 브랜딩, 보안 정책 |

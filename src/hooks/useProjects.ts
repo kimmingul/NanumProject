@@ -24,6 +24,7 @@ export function useProjects(options: UseProjectsOptions = {}) {
 
   const fetchProjects = useCallback(async () => {
     if (!profile?.tenant_id) return;
+
     setProjectsLoading(true);
     setProjectsError(null);
 

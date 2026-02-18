@@ -155,23 +155,35 @@
   color: #9ca3af;
 }
 
-.checklist-delete-btn {
-  background: none;
+/* DevExtreme Button reset for checklist delete */
+.dx-button.checklist-delete-btn {
+  min-width: 24px;
+  height: 24px;
   border: none;
-  padding: 2px 4px;
-  cursor: pointer;
-  color: #d1d5db;
-  border-radius: 4px;
-  transition: color 0.15s, background 0.15s;
+  background: transparent;
   opacity: 0;
+  transition: opacity 0.15s;
 }
 
-.checklist-item:hover .checklist-delete-btn {
+.dx-button.checklist-delete-btn .dx-button-content {
+  padding: 2px 4px;
+}
+
+.dx-button.checklist-delete-btn .dx-icon {
+  color: #d1d5db;
+}
+
+.checklist-item:hover .dx-button.checklist-delete-btn {
   opacity: 1;
 }
 
-.checklist-delete-btn:hover {
+.dx-button.checklist-delete-btn:hover .dx-icon,
+.dx-button.checklist-delete-btn.dx-state-hover .dx-icon {
   color: #dc2626;
+}
+
+.dx-button.checklist-delete-btn:hover,
+.dx-button.checklist-delete-btn.dx-state-hover {
   background: #fef2f2;
 }
 

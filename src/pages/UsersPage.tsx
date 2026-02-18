@@ -11,6 +11,7 @@ import {
   Toolbar,
   Item,
 } from 'devextreme-react/data-grid';
+import { Button } from 'devextreme-react/button';
 import './UsersPage.css';
 
 // Sample data - will be replaced with real data from Supabase
@@ -125,12 +126,8 @@ export default function UsersPage(): ReactNode {
             caption="Actions"
             cellRender={() => (
               <div className="action-buttons">
-                <button className="action-icon" title="Edit">
-                  <i className="dx-icon-edit"></i>
-                </button>
-                <button className="action-icon" title="Delete">
-                  <i className="dx-icon-trash"></i>
-                </button>
+                <Button icon="edit" stylingMode="text" hint="Edit" />
+                <Button icon="trash" stylingMode="text" hint="Delete" />
               </div>
             )}
           />

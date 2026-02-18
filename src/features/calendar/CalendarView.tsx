@@ -1,7 +1,7 @@
-import { type ReactNode, useMemo, useState } from 'react';
+import { type ReactNode, useMemo } from 'react';
 import Scheduler, { View, Resource } from 'devextreme-react/scheduler';
 import { useProjectItems } from '@/hooks/useProjectItems';
-import TaskDetailPopup from '@/features/tasks/TaskDetailPopup';
+import { usePMStore } from '@/lib/pm-store';
 import type { ProjectItem } from '@/types';
 import './CalendarView.css';
 
@@ -34,8 +34,8 @@ function toDate(dateStr: string): Date {
 }
 
 export default function CalendarView({ projectId }: CalendarViewProps): ReactNode {
-  const { items, loading, error, refetch } = useProjectItems(projectId);
-  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+  const { items, loading, error } = useProjectItems(projectId);
+  const setSelectedTaskId = usePMStore((s) => s.setSelectedTaskId);
 
   const appointments = useMemo<CalendarAppointment[]>(() => {
     return items
@@ -62,7 +62,7 @@ export default function CalendarView({ projectId }: CalendarViewProps): ReactNod
 
   const handleAppointmentClick = (e: { appointmentData?: CalendarAppointment }) => {
     if (e.appointmentData) {
-      setSelectedItemId(e.appointmentData.id);
+      setSelectedTaskId(e.appointmentData.id);
     }
   };
 
@@ -137,7 +137,7 @@ export default function CalendarView({ projectId }: CalendarViewProps): ReactNod
       <Scheduler
         dataSource={appointments}
         defaultCurrentView="month"
-        height={650}
+        height="calc(100vh - 90px)"
         startDayHour={0}
         endDayHour={24}
         editing={false}
@@ -161,14 +161,6 @@ export default function CalendarView({ projectId }: CalendarViewProps): ReactNod
         <View type="week" />
         <View type="agenda" />
       </Scheduler>
-
-      <TaskDetailPopup
-        visible={selectedItemId !== null}
-        projectId={projectId}
-        itemId={selectedItemId}
-        onHiding={() => setSelectedItemId(null)}
-        onTaskUpdated={refetch}
-      />
     </div>
   );
 }

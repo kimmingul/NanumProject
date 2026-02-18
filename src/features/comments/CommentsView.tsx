@@ -112,13 +112,13 @@ export default function CommentsView({
                     {new Date(comment.created_at).toLocaleString()}
                   </span>
                   {comment.created_by === profile?.user_id && (
-                    <button
+                    <Button
+                      icon="trash"
+                      stylingMode="text"
+                      hint="Delete comment"
                       className="comment-delete-btn"
                       onClick={() => deleteComment(comment.id)}
-                      title="Delete comment"
-                    >
-                      <i className="dx-icon-trash" />
-                    </button>
+                    />
                   )}
                 </div>
                 <div className="comment-message">{comment.message}</div>

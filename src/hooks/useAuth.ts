@@ -32,13 +32,17 @@ export function useAuth() {
     });
 
     // Listen for auth changes
+    // IMPORTANT: Do NOT await Supabase queries inside this callback.
+    // This callback runs during Supabase's _initialize() which holds a lock.
+    // Supabase queries internally call getSession() which waits for _initialize()
+    // to complete, creating a deadlock.
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!mounted) return;
       setSession(session);
       if (session?.user) {
-        await loadUserProfile(session.user.id);
+        loadUserProfile(session.user.id);
       } else {
         setProfile(null);
       }

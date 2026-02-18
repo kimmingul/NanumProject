@@ -1,4 +1,4 @@
-import { type ReactNode, useMemo, useState } from 'react';
+import { type ReactNode, useMemo } from 'react';
 import TreeList, {
   Column,
   Editing,
@@ -10,7 +10,7 @@ import TreeList, {
   Item,
 } from 'devextreme-react/tree-list';
 import { useProjectItems } from '@/hooks/useProjectItems';
-import TaskDetailPopup from './TaskDetailPopup';
+import { usePMStore } from '@/lib/pm-store';
 import './TasksView.css';
 
 interface TasksViewProps {
@@ -24,8 +24,8 @@ const itemTypeIcons: Record<string, string> = {
 };
 
 export default function TasksView({ projectId }: TasksViewProps): ReactNode {
-  const { items, resources, assignments, loading, error, refetch } = useProjectItems(projectId);
-  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+  const { items, resources, assignments, loading, error } = useProjectItems(projectId);
+  const setSelectedTaskId = usePMStore((s) => s.setSelectedTaskId);
 
   // Build a map of user_id → name for display
   const resourceMap = useMemo(() => {
@@ -81,7 +81,7 @@ export default function TasksView({ projectId }: TasksViewProps): ReactNode {
 
   const handleRowClick = (e: { data?: { id: string; item_type: string } }) => {
     if (e.data && e.data.item_type !== 'group') {
-      setSelectedItemId(e.data.id);
+      setSelectedTaskId(e.data.id);
     }
   };
 
@@ -99,7 +99,7 @@ export default function TasksView({ projectId }: TasksViewProps): ReactNode {
         hoverStateEnabled={true}
         columnAutoWidth={true}
         autoExpandAll={true}
-        height="calc(100vh - 280px)"
+        height="calc(100vh - 90px)"
         onRowClick={handleRowClick}
       >
         <FilterRow visible={true} />
@@ -164,14 +164,6 @@ export default function TasksView({ projectId }: TasksViewProps): ReactNode {
           allowAdding={true}
         />
       </TreeList>
-
-      <TaskDetailPopup
-        visible={selectedItemId !== null}
-        projectId={projectId}
-        itemId={selectedItemId}
-        onHiding={() => setSelectedItemId(null)}
-        onTaskUpdated={refetch}
-      />
     </div>
   );
 }

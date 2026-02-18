@@ -85,19 +85,28 @@
   white-space: nowrap;
 }
 
-/* Version link */
-.version-link {
-  background: none;
+/* DevExtreme Button reset for version link */
+.dx-button.version-link {
+  min-width: auto;
+  height: auto;
   border: 1px solid #e5e7eb;
   padding: 2px 8px;
   border-radius: 10px;
-  cursor: pointer;
-  font-size: 0.8rem;
-  color: #0078d4;
+  background: none;
   transition: background 0.15s, border-color 0.15s;
 }
 
-.version-link:hover {
+.dx-button.version-link .dx-button-content {
+  padding: 0;
+}
+
+.dx-button.version-link .dx-button-text {
+  font-size: 0.8rem;
+  color: #0078d4;
+}
+
+.dx-button.version-link:hover,
+.dx-button.version-link.dx-state-hover {
   background: #eff6ff;
   border-color: #0078d4;
 }

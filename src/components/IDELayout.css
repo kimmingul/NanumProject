@@ -1,0 +1,416 @@
+/* ====================== */
+/* IDE Layout Shell        */
+/* ====================== */
+
+.ide-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  background: #f8fafc;
+}
+
+/* ====================== */
+/* IDE Header (40px)       */
+/* ====================== */
+
+.ide-header {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  min-height: 40px;
+  padding: 0 8px;
+  background: #1e293b;
+  color: #e2e8f0;
+  gap: 8px;
+  z-index: 100;
+}
+
+.ide-header-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* DevExtreme Button reset for IDE header */
+.dx-button.ide-header-btn {
+  min-width: 32px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #94a3b8;
+  padding: 0;
+  transition: background 0.15s, color 0.15s;
+}
+
+.dx-button.ide-header-btn .dx-button-content {
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dx-button.ide-header-btn .dx-icon {
+  font-size: 16px;
+  color: inherit;
+}
+
+.dx-button.ide-header-btn:hover,
+.dx-button.ide-header-btn.dx-state-hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #e2e8f0;
+}
+
+.ide-hamburger {
+  margin-right: 2px;
+}
+
+.ide-app-title {
+  font-weight: 700;
+  font-size: 14px;
+  color: #f1f5f9;
+  cursor: pointer;
+  margin-right: 8px;
+  white-space: nowrap;
+}
+
+.ide-header-nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 4px;
+}
+
+.dx-button.ide-nav-btn.active {
+  background: rgba(255, 255, 255, 0.15);
+  color: #f1f5f9;
+}
+
+/* Center: Search trigger */
+.ide-header-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  min-width: 0;
+}
+
+.ide-search-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 14px;
+  height: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #64748b;
+  font-size: 13px;
+  cursor: not-allowed;
+  max-width: 280px;
+  width: 100%;
+}
+
+.ide-search-trigger i {
+  font-size: 14px;
+}
+
+.ide-search-trigger span {
+  flex: 1;
+  text-align: left;
+}
+
+.ide-search-trigger kbd {
+  font-size: 11px;
+  padding: 1px 5px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #64748b;
+  font-family: inherit;
+}
+
+/* Right: User */
+.ide-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ide-user-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ide-user-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.ide-user-name {
+  font-size: 13px;
+  color: #cbd5e1;
+  white-space: nowrap;
+}
+
+.dx-button.ide-signout-btn {
+  color: #64748b;
+}
+
+.dx-button.ide-signout-btn:hover,
+.dx-button.ide-signout-btn.dx-state-hover {
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.1);
+}
+
+/* ====================== */
+/* IDE Body (3-col grid)   */
+/* ====================== */
+
+.ide-body {
+  display: grid;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Left Panel */
+.ide-left-panel {
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: #ffffff;
+  border-right: 1px solid #e2e8f0;
+}
+
+.left-panel-section {
+  padding: 8px 0;
+}
+
+.left-panel-section-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+  padding: 6px 14px;
+}
+
+.left-panel-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+/* DevExtreme Button reset for left panel nav */
+.dx-button.left-panel-nav-item {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  height: auto;
+  padding: 7px 14px;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  color: #475569;
+  font-size: 13px;
+  text-align: left;
+  transition: background 0.12s;
+}
+
+.dx-button.left-panel-nav-item .dx-button-content {
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-start;
+}
+
+.dx-button.left-panel-nav-item .dx-icon {
+  font-size: 16px;
+  width: 18px;
+  text-align: center;
+  color: inherit;
+  margin: 0;
+}
+
+.dx-button.left-panel-nav-item .dx-button-text {
+  color: inherit;
+  font-weight: inherit;
+}
+
+.dx-button.left-panel-nav-item:hover,
+.dx-button.left-panel-nav-item.dx-state-hover {
+  background: #f1f5f9;
+}
+
+.dx-button.left-panel-nav-item.active {
+  background: #eff6ff;
+  color: #2563eb;
+  font-weight: 600;
+}
+
+/* Project tree */
+.left-panel-project-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+}
+
+.left-panel-project-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border: none;
+  background: transparent;
+  color: #475569;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.12s;
+  width: 100%;
+  min-width: 0;
+}
+
+.left-panel-project-item:hover {
+  background: #f1f5f9;
+}
+
+.left-panel-project-item.active {
+  background: #eff6ff;
+  color: #2563eb;
+  font-weight: 600;
+}
+
+/* RightPanel close button */
+.dx-button.right-panel-close {
+  min-width: 24px;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: #94a3b8;
+  padding: 0;
+}
+
+.dx-button.right-panel-close .dx-button-content {
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dx-button.right-panel-close .dx-icon {
+  color: inherit;
+}
+
+.dx-button.right-panel-close:hover,
+.dx-button.right-panel-close.dx-state-hover {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.left-panel-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.left-panel-project-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.left-panel-loading,
+.left-panel-empty {
+  padding: 12px 14px;
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+/* Center */
+.ide-center {
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: #f8fafc;
+}
+
+/* Resize handle */
+.ide-resize-handle {
+  width: 4px;
+  cursor: col-resize;
+  background: transparent;
+  transition: background 0.15s;
+  z-index: 10;
+}
+
+.ide-resize-handle:hover {
+  background: #cbd5e1;
+}
+
+/* Right Panel */
+.ide-right-panel {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #ffffff;
+  border-left: 1px solid #e2e8f0;
+}
+
+.right-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 40px;
+  min-height: 40px;
+  padding: 0 12px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.right-panel-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+/* .right-panel-close styles moved to .dx-button.right-panel-close above */
+
+.right-panel-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+}
+
+.right-panel-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: #94a3b8;
+  text-align: center;
+}
+
+.right-panel-empty i {
+  font-size: 2rem;
+  margin-bottom: 8px;
+}
+
+.right-panel-empty p {
+  font-size: 13px;
+  margin: 0;
+}

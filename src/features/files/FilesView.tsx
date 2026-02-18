@@ -176,13 +176,13 @@ export default function FilesView({ projectId }: FilesViewProps): ReactNode {
             width={80}
             alignment="center"
             cellRender={(data: { data: DocumentWithVersion }) => (
-              <button
+              <Button
+                text={`v${data.data.current_version?.version_number ?? 1}`}
+                stylingMode="text"
+                hint="View version history"
                 className="version-link"
                 onClick={() => handleShowVersions(data.data)}
-                title="View version history"
-              >
-                v{data.data.current_version?.version_number ?? 1}
-              </button>
+              />
             )}
           />
 

@@ -1,0 +1,104 @@
+.audit-log-page {
+  padding: 2rem;
+}
+
+.audit-log-page .page-header {
+  margin-bottom: 2rem;
+}
+
+.audit-log-page .page-header h1 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.75rem;
+  color: #1e293b;
+  font-weight: 700;
+}
+
+.audit-log-page .page-header p {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.audit-log-grid-container {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Action badges */
+.action-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.action-badge.action-created {
+  background: #d1fae5;
+  color: #059669;
+}
+
+.action-badge.action-updated {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.action-badge.action-deleted {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+/* Resource type badge */
+.resource-type-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: #f1f5f9;
+  color: #475569;
+}
+
+/* Metadata cell */
+.metadata-cell {
+  font-size: 0.8rem;
+  color: #64748b;
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Loading & error states */
+.audit-log-page .loading-container,
+.audit-log-page .error-container,
+.audit-log-page .empty-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  color: #64748b;
+}
+
+.audit-log-page .error-container {
+  color: #dc2626;
+}
+
+/* DevExtreme overrides */
+.audit-log-grid-container .dx-datagrid {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.audit-log-grid-container .dx-datagrid-headers {
+  background: #f8fafc;
+  font-weight: 600;
+}
+
+.audit-log-grid-container .dx-datagrid-rowsview .dx-row-alt {
+  background: #f8fafc;
+}

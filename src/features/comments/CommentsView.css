@@ -128,19 +128,30 @@
   color: #9ca3af;
 }
 
-.comment-delete-btn {
-  background: none;
-  border: none;
-  padding: 2px 4px;
-  cursor: pointer;
-  color: #9ca3af;
+/* DevExtreme Button reset for comment delete */
+.dx-button.comment-delete-btn {
   margin-left: auto;
-  border-radius: 4px;
-  transition: color 0.15s, background 0.15s;
+  min-width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
 }
 
-.comment-delete-btn:hover {
+.dx-button.comment-delete-btn .dx-button-content {
+  padding: 2px 4px;
+}
+
+.dx-button.comment-delete-btn .dx-icon {
+  color: #9ca3af;
+}
+
+.dx-button.comment-delete-btn:hover .dx-icon,
+.dx-button.comment-delete-btn.dx-state-hover .dx-icon {
   color: #dc2626;
+}
+
+.dx-button.comment-delete-btn:hover,
+.dx-button.comment-delete-btn.dx-state-hover {
   background: #fef2f2;
 }
 

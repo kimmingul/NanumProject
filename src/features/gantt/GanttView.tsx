@@ -1,4 +1,4 @@
-import { type ReactNode, useCallback, useMemo, useState } from 'react';
+import { type ReactNode, useCallback, useMemo } from 'react';
 import Gantt, {
   Tasks,
   Dependencies,
@@ -13,9 +13,9 @@ import Gantt, {
 import 'devexpress-gantt/dist/dx-gantt.css';
 import { supabase, dbUpdate } from '@/lib/supabase';
 import { useAuthStore } from '@/lib/auth-store';
+import { usePMStore } from '@/lib/pm-store';
 import { useProjectItems } from '@/hooks/useProjectItems';
 import type { DependencyType } from '@/types';
-import TaskDetailPopup from '@/features/tasks/TaskDetailPopup';
 import './GanttView.css';
 
 interface GanttViewProps {
@@ -41,14 +41,14 @@ export default function GanttView({ projectId }: GanttViewProps): ReactNode {
   const { items, dependencies, resources, assignments, loading, error, refetch } =
     useProjectItems(projectId);
   const profile = useAuthStore((s) => s.profile);
-  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+  const setSelectedTaskId = usePMStore((s) => s.setSelectedTaskId);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleTaskClick = useCallback((e: any) => {
     if (e.key) {
-      setSelectedItemId(e.key);
+      setSelectedTaskId(e.key);
     }
-  }, []);
+  }, [setSelectedTaskId]);
 
   // Transform project_items → Gantt tasks format
   const ganttTasks = useMemo(
@@ -248,7 +248,7 @@ export default function GanttView({ projectId }: GanttViewProps): ReactNode {
       <Gantt
         taskListWidth={400}
         scaleType="weeks"
-        height="calc(100vh - 280px)"
+        height="calc(100vh - 90px)"
         rootValue=""
         showResources={true}
         showDependencies={true}
@@ -320,14 +320,6 @@ export default function GanttView({ projectId }: GanttViewProps): ReactNode {
           allowResourceDeleting={true}
         />
       </Gantt>
-
-      <TaskDetailPopup
-        visible={selectedItemId !== null}
-        projectId={projectId}
-        itemId={selectedItemId}
-        onHiding={() => setSelectedItemId(null)}
-        onTaskUpdated={refetch}
-      />
     </div>
   );
 }

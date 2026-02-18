@@ -46,6 +46,17 @@ export const useAuthStore = create<AuthStore>()(
         user: state.user,
         profile: state.profile,
       }),
+      merge: (persisted, current) => {
+        const persistedState = (persisted || {}) as Partial<AuthState>;
+        return {
+          ...current,
+          ...persistedState,
+          // Compute auth state from persisted session so ProtectedRoute
+          // doesn't get stuck on "Loading..." after page refresh
+          isAuthenticated: !!persistedState.session,
+          isLoading: !persistedState.session,
+        };
+      },
     }
   )
 );
