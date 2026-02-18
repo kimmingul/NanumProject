@@ -12,8 +12,9 @@ Supabase (PostgreSQL) 기반 멀티테넌트 프로젝트 관리 서비스.
 | `004_add_task_status.sql` | task_status enum + project_items 컬럼 추가 |
 | `005_avatars_bucket.sql` | avatars Storage 버킷 (public) + RLS 정책 |
 | `006_update_roles.sql` | Role 체계 변경: admin/manager/member/viewer |
+| `007_create_tenant_user.sql` | handle_new_user 수정 + create_tenant_user RPC |
 
-> 실행 순서: 001 → 002 → 003 → 004 → 005 → 006
+> 실행 순서: 001 → 002 → 003 → 004 → 005 → 006 → 007
 
 ---
 
@@ -209,6 +210,7 @@ tenants, applications, projects, project_members, project_items
 | `reactivate_user(UUID)` | 계정 재활성화 | admin |
 | `get_active_sessions_count(UUID)` | 활성 세션 수 | authenticated |
 | `rotate_application_secret(UUID)` | 앱 시크릿 갱신 | admin/developer |
+| `create_tenant_user(TEXT, TEXT, TEXT)` | 테넌트 내 사용자 생성 (auth.users + identities + profiles) | admin |
 
 ---
 

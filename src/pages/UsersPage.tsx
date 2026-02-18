@@ -61,6 +61,7 @@ export default function UsersPage(): ReactNode {
     deactivateUser,
     reactivateUser,
     sendPasswordReset,
+    createUser,
   } = useUserManagement();
 
   const [users, setUsers] = useState<UserRow[]>([]);
@@ -77,6 +78,14 @@ export default function UsersPage(): ReactNode {
   const [formError, setFormError] = useState('');
   const [formSuccess, setFormSuccess] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Add User popup state
+  const [addUserOpen, setAddUserOpen] = useState(false);
+  const [addEmail, setAddEmail] = useState('');
+  const [addFullName, setAddFullName] = useState('');
+  const [addRole, setAddRole] = useState<UserRole>('member');
+  const [addSaving, setAddSaving] = useState(false);
+  const [addError, setAddError] = useState('');
 
   const fetchUsers = useCallback(async () => {
     if (!tenantId) return;
@@ -118,6 +127,37 @@ export default function UsersPage(): ReactNode {
 
   const isSelf = editUser?.user_id === currentUserId;
   const isAdmin = currentRole === 'admin';
+
+  const openAddUserPopup = () => {
+    setAddEmail('');
+    setAddFullName('');
+    setAddRole('member');
+    setAddError('');
+    setAddUserOpen(true);
+  };
+
+  const closeAddUserPopup = () => {
+    setAddUserOpen(false);
+    setAddError('');
+  };
+
+  const handleCreateUser = async () => {
+    if (!addEmail.trim()) {
+      setAddError('Email is required');
+      return;
+    }
+    setAddSaving(true);
+    setAddError('');
+    try {
+      await createUser(addEmail.trim(), addFullName.trim(), addRole);
+      await fetchUsers();
+      closeAddUserPopup();
+    } catch (err) {
+      setAddError(err instanceof Error ? err.message : 'Failed to create user');
+    } finally {
+      setAddSaving(false);
+    }
+  };
 
   const handleSave = async () => {
     if (!editUser) return;
@@ -289,6 +329,7 @@ export default function UsersPage(): ReactNode {
 
           <Toolbar>
             <Item name="searchPanel" />
+            {isAdmin && (
             <Item
               widget="dxButton"
               options={{
@@ -296,9 +337,10 @@ export default function UsersPage(): ReactNode {
                 text: 'Add User',
                 type: 'default',
                 stylingMode: 'contained',
-                onClick: () => alert('Add User - Coming soon!'),
+                onClick: openAddUserPopup,
               }}
             />
+            )}
             <Item name="exportButton" />
           </Toolbar>
 
@@ -400,6 +442,73 @@ export default function UsersPage(): ReactNode {
           <Paging defaultPageSize={10} />
         </DataGrid>
       </div>
+
+      {/* Add User Popup */}
+      <Popup
+        visible={addUserOpen}
+        onHiding={closeAddUserPopup}
+        title="Add User"
+        showCloseButton={true}
+        width={420}
+        height="auto"
+        maxHeight="80vh"
+      >
+        <div className="user-edit-form">
+          <div className="form-field">
+            <label>Email *</label>
+            <TextBox
+              value={addEmail}
+              onValueChanged={(e) => setAddEmail(e.value)}
+              placeholder="user@example.com"
+              stylingMode="outlined"
+              mode="email"
+            />
+          </div>
+
+          <div className="form-field">
+            <label>Full Name</label>
+            <TextBox
+              value={addFullName}
+              onValueChanged={(e) => setAddFullName(e.value)}
+              placeholder="Enter full name"
+              stylingMode="outlined"
+            />
+          </div>
+
+          <div className="form-field">
+            <label>Role</label>
+            <SelectBox
+              dataSource={roleOptions}
+              displayExpr="label"
+              valueExpr="value"
+              value={addRole}
+              onValueChanged={(e) => setAddRole(e.value)}
+              stylingMode="outlined"
+            />
+          </div>
+
+          <div className="add-user-note">
+            A password setup email will be sent to the user after creation.
+          </div>
+
+          {addError && <div className="form-error">{addError}</div>}
+
+          <div className="form-actions">
+            <Button
+              text="Cancel"
+              stylingMode="outlined"
+              onClick={closeAddUserPopup}
+            />
+            <Button
+              text={addSaving ? 'Creating...' : 'Create User'}
+              type="default"
+              stylingMode="contained"
+              onClick={handleCreateUser}
+              disabled={addSaving}
+            />
+          </div>
+        </div>
+      </Popup>
 
       {/* Edit User Popup */}
       {editUser && (

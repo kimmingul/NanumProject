@@ -2,10 +2,17 @@ import { useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/lib/auth-store';
 
-/** Call an RPC function. Supabase generated types have Functions: Record<string, never> so we cast. */
+/** Call an RPC function (void return). Supabase generated types have Functions: Record<string, never> so we cast. */
 async function rpc(fn: string, params: Record<string, unknown>): Promise<void> {
   const { error } = await (supabase.rpc as unknown as (fn: string, params: Record<string, unknown>) => Promise<{ error: { message: string } | null }>)(fn, params);
   if (error) throw error;
+}
+
+/** Call an RPC function that returns data. */
+async function rpcWithReturn<T>(fn: string, params: Record<string, unknown>): Promise<T> {
+  const { data, error } = await (supabase.rpc as unknown as (fn: string, params: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }>)(fn, params);
+  if (error) throw error;
+  return data as T;
 }
 
 interface UpdateProfileData {
@@ -108,6 +115,24 @@ export function useUserManagement() {
     if (error) throw error;
   }, []);
 
+  const createUser = useCallback(
+    async (email: string, fullName: string, role: string): Promise<string> => {
+      const userId = await rpcWithReturn<string>('create_tenant_user', {
+        p_email: email,
+        p_full_name: fullName,
+        p_role: role,
+      });
+
+      // Send password reset email so the new user can set their password
+      await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      return userId;
+    },
+    [],
+  );
+
   return {
     updateProfile,
     uploadAvatar,
@@ -115,5 +140,6 @@ export function useUserManagement() {
     deactivateUser,
     reactivateUser,
     sendPasswordReset,
+    createUser,
   };
 }

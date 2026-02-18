@@ -31,7 +31,7 @@ NanumProject/
 │   │   ├── SignUpPage.tsx     #   회원가입
 │   │   ├── ResetPasswordPage.tsx # 비밀번호 재설정
 │   │   ├── DashboardPage.tsx  #   대시보드 (통계 카드)
-│   │   ├── UsersPage.tsx      #   사용자 관리 (DataGrid + Edit Popup)
+│   │   ├── UsersPage.tsx      #   사용자 관리 (DataGrid + Edit/Add User Popup)
 │   │   ├── AuditLogPage.tsx   #   감사 로그 뷰어
 │   │   ├── ProjectListPage.tsx #  프로젝트 목록 (DataGrid + CRUD)
 │   │   └── ProjectDetailPage.tsx # 프로젝트 상세 (탭 기반)
@@ -48,7 +48,7 @@ NanumProject/
 │   │   └── settings/ProjectSettingsView.tsx   # 프로젝트 설정
 │   ├── hooks/                 # React 커스텀 훅
 │   │   ├── useAuth.ts         #   인증 상태 + 로그인/로그아웃
-│   │   ├── useUserManagement.ts # 사용자 관리 (프로필 수정, 아바타, 비활성화)
+│   │   ├── useUserManagement.ts # 사용자 관리 (프로필 수정, 아바타, 비활성화, 생성)
 │   │   ├── useProjects.ts     #   프로젝트 목록 조회
 │   │   ├── useProject.ts      #   단일 프로젝트 조회
 │   │   ├── useProjectCrud.ts  #   프로젝트 생성/수정/삭제
@@ -81,7 +81,8 @@ NanumProject/
 │   │   ├── 002_pm.sql         #   PM 모듈 (Enum + 테이블 + RLS + 트리거)
 │   │   ├── 004_add_task_status.sql # task_status enum + 컬럼 추가
 │   │   ├── 005_avatars_bucket.sql  # avatars Storage 버킷 + RLS
-│   │   └── 006_update_roles.sql    # Role 체계 변경 (admin/manager/member/viewer)
+│   │   ├── 006_update_roles.sql    # Role 체계 변경 (admin/manager/member/viewer)
+│   │   └── 007_create_tenant_user.sql # handle_new_user 수정 + create_tenant_user RPC
 │   ├── COMPLETE_MIGRATION.sql     # Auth 모듈 통합 SQL
 │   ├── COMPLETE_PM_MIGRATION.sql  # PM 모듈 통합 SQL
 │   └── DATABASE.md            # DB 스키마 문서

@@ -219,6 +219,17 @@
   flex: 1;
 }
 
+/* Add User note */
+.add-user-note {
+  padding: 0.625rem 0.75rem;
+  background: #eff6ff;
+  color: #1e40af;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+  border: 1px solid #bfdbfe;
+}
+
 /* Error / Success */
 .form-error {
   padding: 0.5rem 0.75rem;

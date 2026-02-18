@@ -208,6 +208,23 @@
   - Delete 버튼 → Deactivate/Reactivate 토글 (자기 자신은 disabled)
   - Role 배지 색상: Admin(빨강), Manager(노랑), Member(파랑), Viewer(보라)
 
+### Phase 12: Add User 기능
+
+- **DB 마이그레이션** (`007_create_tenant_user.sql`):
+  - `handle_new_user` 트리거 수정: `'user'` → `'member'` (006 role CHECK 호환)
+  - `create_tenant_user(p_email, p_full_name, p_role)` RPC 함수 (SECURITY DEFINER)
+  - `auth.users` + `auth.identities` INSERT → `handle_new_user` 트리거가 profiles 자동 생성 → tenant/role 업데이트
+  - Admin 전용, 중복 이메일 체크, 유효 role 검증
+- **useUserManagement 확장**:
+  - `rpcWithReturn<T>()` 헬퍼 추가 (데이터 반환 RPC 호출용)
+  - `createUser(email, fullName, role)` — RPC 호출 후 비밀번호 설정 이메일 자동 발송
+- **UsersPage Add User 팝업**:
+  - Email (필수), Full Name, Role (SelectBox) 입력 폼
+  - 안내 메시지: "생성 후 비밀번호 설정 이메일이 발송됩니다"
+  - 생성 성공 → DataGrid 재조회 + Popup 닫기
+  - Admin만 Add User 버튼 표시
+  - 에러 처리 (중복 이메일 등)
+
 ### Bugfix: 새로고침 시 데이터 미로딩 (Supabase Auth 데드락)
 
 **증상**: 페이지 새로고침(F5) 시 프로젝트 목록, 대시보드 통계 등 모든 데이터가 로드되지 않음. 콘솔 에러 없이 빈 화면 표시.
