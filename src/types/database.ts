@@ -46,7 +46,7 @@ export interface Profile {
   updated_at: string;
 }
 
-export type UserRole = 'admin' | 'user' | 'developer';
+export type UserRole = 'admin' | 'manager' | 'member' | 'viewer';
 
 export interface Application {
   id: string;

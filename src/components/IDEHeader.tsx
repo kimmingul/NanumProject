@@ -69,7 +69,11 @@ export function IDEHeader(): ReactNode {
       <div className="ide-header-right">
         <div className="ide-user-info">
           <div className="ide-user-avatar">
-            {profile?.full_name?.charAt(0).toUpperCase() || 'U'}
+            {profile?.avatar_url ? (
+              <img src={profile.avatar_url} alt="" className="ide-user-avatar-img" />
+            ) : (
+              profile?.full_name?.charAt(0).toUpperCase() || 'U'
+            )}
           </div>
           <span className="ide-user-name">{profile?.full_name || 'User'}</span>
         </div>

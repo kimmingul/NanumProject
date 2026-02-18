@@ -10,3 +10,4 @@ export { useActivityLog } from './useActivityLog';
 export { useAuditLog } from './useAuditLog';
 export { useTimeEntries } from './useTimeEntries';
 export { useChecklist } from './useChecklist';
+export { useUserManagement } from './useUserManagement';
