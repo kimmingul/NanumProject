@@ -42,25 +42,32 @@ export default function DashboardPage(): ReactNode {
             .eq('is_active', true)
             .eq('status', 'active'),
           supabase
-            .from('tasks')
-            .select('*', { count: 'exact', head: true })
-            .eq('is_active', true),
-          supabase
-            .from('tasks')
+            .from('project_items')
             .select('*', { count: 'exact', head: true })
             .eq('is_active', true)
+            .in('item_type', ['task', 'milestone']),
+          supabase
+            .from('project_items')
+            .select('*', { count: 'exact', head: true })
+            .eq('is_active', true)
+            .in('item_type', ['task', 'milestone'])
             .eq('percent_complete', 100),
+          // Fetch actual user_ids to count unique members
           supabase
             .from('project_members')
-            .select('user_id', { count: 'exact', head: true })
+            .select('user_id')
             .eq('is_active', true),
         ]);
+
+        const uniqueMembers = membersRes.data
+          ? new Set(membersRes.data.map((m: { user_id: string }) => m.user_id)).size
+          : 0;
 
         setStats({
           activeProjects: projectsRes.count ?? 0,
           totalTasks: tasksRes.count ?? 0,
           completedTasks: completedRes.count ?? 0,
-          teamMembers: membersRes.count ?? 0,
+          teamMembers: uniqueMembers,
         });
       } catch (err) {
         console.error('Failed to load dashboard stats:', err);

@@ -1,583 +1,180 @@
-# Project Progress
+# ê°œë°œ ì§„í–‰ í˜„í™©
 
-## 2024-12-20 - Session 1: Initial Project Setup ?
+## ì™„ë£Œëœ ì‘ì—…
 
-### Completed Tasks
+### Phase 1: í”„ë¡œì íŠ¸ ì¸í”„ë¼
 
-#### 1. TypeScript Configuration ?
-- ? Configured strict TypeScript mode with all type-checking options enabled
-- ? Added path aliases (@/) for clean imports
-- ? Enabled strict linting rules (noUnusedLocals, noImplicitReturns, etc.)
+- TypeScript strict mode ì„¤ì • (path alias `@/`)
+- Vite 7 ë¹Œë“œ í™˜ê²½
+- ESLint + typescript-eslint ë¦°íŒ…
+- í™˜ê²½ ë³€ìˆ˜ ì„¤ì • (Supabase URL/Key, DevExtreme Key)
 
-#### 2. Dependencies Installation ?
-- ? DevExtreme 25.2.3 and devextreme-react added
-- ? Supabase client (@supabase/supabase-js) added
-- ? React Router DOM 7.x for routing
-- ? Zustand 4.x for state management
-- ? React 19.x with full type definitions
-- ? All packages installed successfully (235 packages, 0 vulnerabilities)
+### Phase 2: Auth ëª¨ë“ˆ DB
 
-#### 3. Project Structure ?
-```
-NanumAuth/
-¦§¦¡¦¡ src/
-¦¢   ¦§¦¡¦¡ components/      # Shared UI components
-¦¢   ¦¢   ¦§¦¡¦¡ MainLayout.tsx
-¦¢   ¦¢   ¦§¦¡¦¡ ProtectedRoute.tsx
-¦¢   ¦¢   ¦¦¦¡¦¡ index.ts
-¦¢   ¦§¦¡¦¡ config/          # Configuration files
-¦¢   ¦¢   ¦¦¦¡¦¡ index.ts
-¦¢   ¦§¦¡¦¡ features/        # Feature modules (future)
-¦¢   ¦§¦¡¦¡ hooks/           # React hooks
-¦¢   ¦¢   ¦§¦¡¦¡ useAuth.ts
-¦¢   ¦¢   ¦¦¦¡¦¡ index.ts
-¦¢   ¦§¦¡¦¡ lib/             # Utility libraries
-¦¢   ¦¢   ¦§¦¡¦¡ supabase.ts
-¦¢   ¦¢   ¦§¦¡¦¡ auth-store.ts
-¦¢   ¦¢   ¦¦¦¡¦¡ index.ts
-¦¢   ¦§¦¡¦¡ pages/           # Page components
-¦¢   ¦¢   ¦§¦¡¦¡ HomePage.tsx
-¦¢   ¦¢   ¦§¦¡¦¡ LoginPage.tsx
-¦¢   ¦¢   ¦¦¦¡¦¡ DashboardPage.tsx
-¦¢   ¦§¦¡¦¡ routes/          # Routing configuration
-¦¢   ¦¢   ¦¦¦¡¦¡ index.tsx
-¦¢   ¦¦¦¡¦¡ types/           # TypeScript type definitions
-¦¢       ¦§¦¡¦¡ database.ts
-¦¢       ¦§¦¡¦¡ auth.ts
-¦¢       ¦§¦¡¦¡ supabase.ts
-¦¢       ¦¦¦¡¦¡ index.ts
-¦§¦¡¦¡ supabase/            # Database schema and migrations
-¦¢   ¦§¦¡¦¡ migrations/
-¦¢   ¦¢   ¦§¦¡¦¡ 001_initial_schema.sql
-¦¢   ¦¢   ¦§¦¡¦¡ 002_rls_policies.sql
-¦¢   ¦¢   ¦§¦¡¦¡ 003_triggers.sql
-¦¢   ¦¢   ¦§¦¡¦¡ 004_functions.sql
-¦¢   ¦¢   ¦¦¦¡¦¡ 005_seed_data.sql
-¦¢   ¦§¦¡¦¡ COMPLETE_MIGRATION.sql  # ?? All-in-one migration
-¦¢   ¦¦¦¡¦¡ README.md
-¦§¦¡¦¡ scripts/             # ?? Helper scripts
-¦¢   ¦¦¦¡¦¡ migrate.mjs
-¦§¦¡¦¡ docs/
-¦¢   ¦§¦¡¦¡ PRD.md
-¦¢   ¦§¦¡¦¡ ARCHITECTURE.md
-¦¢   ¦¦¦¡¦¡ PROGRESS.md
-¦§¦¡¦¡ MIGRATION_GUIDE.md   # ?? Quick start guide
-¦§¦¡¦¡ DEV_SERVER_GUIDE.md  # ?? Dev server guide
-¦§¦¡¦¡ .env                 # Environment variables (configured)
-¦¦¦¡¦¡ .env.example
-```
+- **í…Œì´ë¸” 5ê°œ**: tenants, profiles, applications, audit_logs, sessions
+- **RLS**: í…Œë„ŒíŠ¸ ê²©ë¦¬, RBAC (admin/user/developer)
+- **íŠ¸ë¦¬ê±°**: updated_at ìë™ ê°±ì‹ , í”„ë¡œí•„ ìë™ ìƒì„±, ì„¸ì…˜ ì •ë¦¬
+- **í•¨ìˆ˜ 10+ê°œ**: get_user_profile, search_users, update_user_role, get_tenant_stats ë“±
+- **ì‹œë“œ ë°ì´í„°**: ê¸°ë³¸ í…Œë„ŒíŠ¸
 
-#### 4. Type Definitions ?
-- ? Database schema types (Tenant, Profile, Application, AuditLog)
-- ? Authentication types (AuthUser, AuthSession, LoginCredentials)
-- ? Supabase generated types structure
+### Phase 3: Auth UI
 
-#### 5. Core Modules ?
-- ? Supabase client configuration with type safety
-- ? Authentication store using Zustand with persistence
-- ? useAuth hook for authentication operations
-- ? Protected route component for authorization
+- **ë¡œê·¸ì¸** (`LoginPage.tsx`): DevExtreme TextBox, ìœ íš¨ì„± ê²€ì¦, Remember me
+- **íšŒì›ê°€ì…** (`SignUpPage.tsx`): ì´ë©”ì¼ ì¸ì¦ í”Œë¡œìš°, ë¹„ë°€ë²ˆí˜¸ í™•ì¸
+- **ë¹„ë°€ë²ˆí˜¸ ì¬ì„¤ì •** (`ResetPasswordPage.tsx`): ì´ë©”ì¼ ê¸°ë°˜ ë³µêµ¬
+- **ëŒ€ì‹œë³´ë“œ** (`DashboardPage.tsx`): í†µê³„ ì¹´ë“œ (í”„ë¡œì íŠ¸ ìˆ˜, íƒœìŠ¤í¬ ìˆ˜, ì™„ë£Œìœ¨, ë©¤ë²„ ìˆ˜)
+- **ì‚¬ìš©ì ê´€ë¦¬** (`UsersPage.tsx`): DataGrid, ì—­í•  ë°°ì§€, ìƒíƒœ í‘œì‹œ
+- **ì¸ì¦ í›…** (`useAuth.ts`): signIn, signUp, signOut, resetPassword, updatePassword
+- **ì¸ì¦ ìŠ¤í† ì–´** (`auth-store.ts`): Zustand persistent store
+- **Protected Route**: ì¸ì¦ ê°€ë“œ + ë¦¬ë‹¤ì´ë ‰íŠ¸
 
-#### 6. Routing Setup ?
-- ? React Router configured with protected routes
-- ? Basic pages created (Home, Login, Dashboard)
-- ? Route protection implemented
+### Phase 4: PM ëª¨ë“ˆ DB
 
-#### 7. Layout Components ?
-- ? MainLayout component with DevExtreme Fluent theme
-- ? Vite path alias configuration
+- **Enum 8ê°œ**: project_status, member_permission, member_status, item_type, dependency_type, comment_target, time_entry_type, view_type
+- **í…Œì´ë¸” 11ê°œ**: projects, project_members, project_items, task_assignees, task_dependencies, comments, documents, document_versions, time_entries, checklist_items, activity_log
+- **í•µì‹¬ ì„¤ê³„**: `project_items` í†µí•© í…Œì´ë¸” (group/task/milestone + parent_id íŠ¸ë¦¬)
+- **RLS**: í”„ë¡œì íŠ¸ ë©¤ë²„ ê¸°ë°˜ ì ‘ê·¼ ì œì–´ + **í…Œë„ŒíŠ¸ admin bypass** (adminì€ ëª¨ë“  í”„ë¡œì íŠ¸ ì ‘ê·¼)
+- **í—¬í¼ í•¨ìˆ˜**: is_project_member, has_project_permission, get_current_tenant_id, is_current_user_admin
+- **ë§ˆì´ê·¸ë ˆì´ì…˜ íŒŒì¼**: `001_auth.sql`, `002_pm.sql`, `COMPLETE_MIGRATION.sql`, `COMPLETE_PM_MIGRATION.sql`
+- **DB ë¬¸ì„œ**: `supabase/DATABASE.md`
 
-#### 8. Environment Configuration ?
-- ? Supabase URL configured
-- ? Supabase Anon Key configured
-- ? DevExtreme license key configured
+### Phase 5: TeamGantt ë°ì´í„° ë§ˆì´ê·¸ë ˆì´ì…˜
 
-#### 9. Build Verification ?
-- ? TypeScript compilation successful
-- ? No build errors
-- ? All type definitions valid
+ë³„ë„ npm íŒ¨í‚¤ì§€ (`migration/`)ë¡œ êµ¬í˜„.
 
-## 2024-12-20 - Database Schema Setup ?
+- **ì¶”ì¶œ**: TeamGantt API (Cognito ì¸ì¦) â†’ JSON íŒŒì¼ ì €ì¥
+  - íšŒì‚¬ ì •ë³´, í”„ë¡œì íŠ¸, íƒœìŠ¤í¬, ì½”ë©˜íŠ¸, ë¬¸ì„œ, ì‹œê°„ ê¸°ë¡, ë³´ë“œ
+- **ì„í¬íŠ¸**: JSON â†’ Supabase (10ë‹¨ê³„ íŒŒì´í”„ë¼ì¸)
+  1. Users (auth.users + profiles)
+  2. Projects
+  3. Project Members
+  4. Groups (project_items: item_type=group)
+  5. Tasks (project_items: item_type=task)
+  6. Task Assignees
+  7. Task Dependencies
+  8. Comments
+  9. Documents + Versions
+  10. Time Entries
+- **CLI ì˜µì…˜**: `--clean` (ì „ì²´ ì‚­ì œ í›„ ì¬ì„í¬íŠ¸), `--resume`, `--only=users|projects|tasks|...`
+- **ì„í¬íŠ¸ ê²°ê³¼**: 368 í”„ë¡œì íŠ¸, 15,272 íƒœìŠ¤í¬, 43,873 ì½”ë©˜íŠ¸, 4,086 ë‹´ë‹¹ì, 550 ë¬¸ì„œ, 89 ì˜ì¡´ì„±, 7 ì‹œê°„ ê¸°ë¡
 
-### Completed Tasks
+### Phase 6: PM UI
 
-#### 10. Database Schema Design ?
-- ? **Core Tables Created**:
-  - `public.tenants` - Tenant/organization management
-  - `public.profiles` - Extended user profiles with tenant association
-  - `public.applications` - OAuth2/OIDC client applications
-  - `public.audit_logs` - Security audit trail
-  - `public.sessions` - Active session tracking
+- **í”„ë¡œì íŠ¸ ëª©ë¡** (`ProjectListPage.tsx`):
+  - DataGrid (ì´ë¦„, ìƒíƒœ, ì‹œì‘ì¼, ì¢…ë£Œì¼)
+  - í”„ë¡œì íŠ¸ ìƒì„± íŒì—…
+  - ìƒíƒœ ë°°ì§€ (active/on_hold/complete/archived)
+  - ì¦ê²¨ì°¾ê¸° í‘œì‹œ
+- **í”„ë¡œì íŠ¸ ìƒì„¸** (`ProjectDetailPage.tsx`):
+  - 7ê°œ íƒ­: Gantt / Tasks / Comments / Files / Time / Activity / Settings
+  - í”„ë¡œì íŠ¸ ì´ë¦„, ìƒíƒœ, ê¸°ê°„ í‘œì‹œ
+- **Gantt ì°¨íŠ¸** (`features/gantt/GanttView.tsx`):
+  - DevExtreme Gantt ì»´í¬ë„ŒíŠ¸
+  - project_items â†’ Gantt í¬ë§· ë³€í™˜
+  - íƒœìŠ¤í¬ CRUD (ì¶”ê°€/ìˆ˜ì •/ì‚­ì œ)
+  - ì˜ì¡´ì„± ê´€ë¦¬ (FS/SS/FF/SF)
+  - ë¦¬ì†ŒìŠ¤ í• ë‹¹/í•´ì œ
+  - íˆ´ë°” (Undo/Redo, Expand/Collapse, Zoom, FullScreen)
+- **íƒœìŠ¤í¬ ëª©ë¡** (`features/tasks/TasksView.tsx`):
+  - TreeList ì»´í¬ë„ŒíŠ¸ (ê³„ì¸µ í‘œì‹œ)
+  - ì•„ì´í…œ íƒ€ì… ì•„ì´ì½˜ (folder/task/milestone)
+  - ì§„í–‰ë¥  ë°”
+  - ë‹´ë‹¹ì ì´ë¦„ í‘œì‹œ
+  - ê²€ìƒ‰/í•„í„°
+- **íŒŒì¼ ê´€ë¦¬** (`features/files/FilesView.tsx`):
+  - DataGrid (íŒŒì¼ëª…, í¬ê¸°, ë²„ì „, ì—…ë¡œë”, ë‚ ì§œ)
+  - Supabase Storage íŒŒì¼ ì—…ë¡œë“œ/ë‹¤ìš´ë¡œë“œ
+  - ë²„ì „ íˆìŠ¤í† ë¦¬ íŒì—…
+  - íŒŒì¼ íƒ€ì…ë³„ ì•„ì´ì½˜
+- **í™œë™ ë¡œê·¸** (`features/activity/ActivityView.tsx`):
+  - ë‚ ì§œë³„ ê·¸ë£¹í•‘ íƒ€ì„ë¼ì¸ ë·°
+  - í•„í„°: ì•¡ì…˜ íƒ€ì…, ë‚ ì§œ ë²”ìœ„
+  - ì•„ë°”íƒ€, ì•¡ì…˜ ì„¤ëª…, íƒ€ì„ìŠ¤íƒ¬í”„ í‘œì‹œ
+- **ì‹œê°„ ì¶”ì ** (`features/time-tracking/TimeTrackingView.tsx`):
+  - DataGrid (íƒœìŠ¤í¬ëª…, ì‚¬ìš©ì, ìœ í˜•, ì‹œì‘/ì¢…ë£Œ, ì‹œê°„, ë©”ëª¨)
+  - "Log Time" íŒì—… (íƒœìŠ¤í¬ ì„ íƒ, ë‚ ì§œ/ì‹œê°„, ë¶„, ë©”ëª¨)
+  - Summary ì´ ì‹œê°„ í•©ê³„, ì‚¬ìš©ì/ë‚ ì§œ í•„í„°
+- **íƒœìŠ¤í¬ ìƒì„¸ íŒì—…** (`features/tasks/TaskDetailPopup.tsx`):
+  - íƒœìŠ¤í¬ ì •ë³´ (íƒ€ì…, ë‚ ì§œ, ì§„í–‰ë¥ )
+  - ì²´í¬ë¦¬ìŠ¤íŠ¸ CRUD (ì¶”ê°€, í† ê¸€, ì‚­ì œ)
+  - ì§„í–‰ ë°” ("X of Y completed")
+  - Tasks TreeList í–‰ í´ë¦­ / Gantt íƒœìŠ¤í¬ í´ë¦­ ì‹œ ì—´ë¦¼
+- **PM í›…**:
+  - `useProjects.ts`: í”„ë¡œì íŠ¸ ëª©ë¡ ì¡°íšŒ (ìƒíƒœ í•„í„°, ì´ë¦„ ê²€ìƒ‰)
+  - `useProject.ts`: ë‹¨ì¼ í”„ë¡œì íŠ¸ ì¡°íšŒ
+  - `useProjectCrud.ts`: í”„ë¡œì íŠ¸ ìƒì„±/ìˆ˜ì •/ì‚­ì œ
+  - `useProjectItems.ts`: íƒœìŠ¤í¬, ì˜ì¡´ì„±, ë¦¬ì†ŒìŠ¤ ì¡°íšŒ
+  - `useProjectMembers.ts`: ë©¤ë²„ ê´€ë¦¬
+  - `useComments.ts`: ì½”ë©˜íŠ¸ CRUD
+  - `useDocuments.ts`: ë¬¸ì„œ CRUD, ë²„ì „ ê´€ë¦¬, íŒŒì¼ ì—…ë¡œë“œ/ë‹¤ìš´ë¡œë“œ
+  - `useActivityLog.ts`: í™œë™ ë¡œê·¸ ì¡°íšŒ (í”„ë¡œì íŠ¸ë³„, í•„í„°ë§)
+  - `useTimeEntries.ts`: ì‹œê°„ ê¸°ë¡ CRUD
+  - `useChecklist.ts`: ì²´í¬ë¦¬ìŠ¤íŠ¸ CRUD + í† ê¸€
+- **PM ìŠ¤í† ì–´** (`pm-store.ts`): Zustand in-memory (projects[], activeProject)
+- **PM íƒ€ì…** (`types/pm.ts`): 11ê°œ ì—”í‹°í‹° ì¸í„°í˜ì´ìŠ¤ + 8ê°œ enum + UI í•©ì„± íƒ€ì…
 
-#### 11. Row Level Security (RLS) ?
-- ? **Tenant Isolation**:
-  - All tables have RLS enabled
-  - `get_current_tenant_id()` helper function
-  - Strict tenant boundary enforcement
-  
-- ? **Role-Based Access Control**:
-  - `is_current_user_admin()` helper function
-  - `has_role(TEXT)` role checking function
-  - Policies for admin, user, and developer roles  
-  
-- ? **Security Policies**:
-  - Tenants: View own, admins can update
-  - Profiles: Users view/edit own, admins manage all in tenant
-  - Applications: Devs and admins can create/update
-  - Audit Logs: Admins read-only, immutable records
-  - Sessions: Users manage own, admins view all in tenant
+---
 
-#### 12. Database Triggers ?
-- ? **Automated Operations**:
-  - Auto-update `updated_at` timestamps
-  - Auto-create profile on user signup
-  - Track `last_login_at` on user login
-  - Auto-generate `client_id` and `client_secret`
-  - Auto-cleanup expired sessions
-  
-- ? **Data Integrity**:
-  - Validate profile email matches auth.users
-  - Prevent audit log modifications
-  
-- ? **Audit Trail**:
-  - Auto-log tenant changes
-  - Auto-log application changes
+## ë¯¸ì™„ë£Œ / ì§„í–‰ ì˜ˆì •
 
-#### 13. Database Functions ?
-- ? **User Management**:
-  - `get_user_profile()` - Comprehensive profile retrieval
-  - `search_users()` - Search within tenant
-  - `update_user_role()` - Admin role management
-  - `deactivate_user()` / `reactivate_user()` - Account control
-  
-- ? **Tenant Operations**:
-  - `get_tenant_stats()` - Aggregated statistics  
-  
-- ? **Session Management**:
-  - `get_active_sessions_count()` - Session tracking
-  - `revoke_user_sessions()` - Security control  
-  
-- ? **Application Management**:
-  - `rotate_application_secret()` - Credential rotation  
-  
-- ? **Audit & Compliance**:
-  - `get_audit_logs()` - Filtered audit log retrieval
+### ìš°ì„ ìˆœìœ„ ë†’ìŒ â†’ ì™„ë£Œë¨
 
-#### 14. Seed Data ?
-- ? Default tenant configuration
-- ? Demo tenant for testing
-- ? Utility view for monitoring (`seed_data_status`)
+| í•­ëª© | ìƒíƒœ | ì„¤ëª… |
+|------|------|------|
+| ì½”ë©˜íŠ¸ UI ì™„ì„± | **ì™„ë£Œ** | CommentsView + useComments í›…ìœ¼ë¡œ CRUD ì—°ê²° ì™„ë£Œ |
+| íŒŒì¼ ê´€ë¦¬ UI | **ì™„ë£Œ** | FilesView + useDocuments í›…, Supabase Storage ì—…ë¡œë“œ/ë‹¤ìš´ë¡œë“œ, ë²„ì „ íˆìŠ¤í† ë¦¬ |
+| í”„ë¡œì íŠ¸ ì„¤ì • UI | **ì™„ë£Œ** | ProjectSettingsView + useProjectCrud/useProjectMembers í›…, í”„ë¡œì íŠ¸ ì •ë³´ ìˆ˜ì • + ë©¤ë²„ ê¶Œí•œ ê´€ë¦¬ |
 
-#### 15. Documentation ?
-- ? Comprehensive database schema documentation
-- ? RLS policy reference
-- ? Function usage guide
-- ? Migration instructions
-- ? Security best practices
-- ? Performance optimization tips
+### ìš°ì„ ìˆœìœ„ ì¤‘ê°„
 
-## 2024-12-20 - Migration Automation ?
+| í•­ëª© | ìƒíƒœ | ì„¤ëª… |
+|------|------|------|
+| ì‹œê°„ ì¶”ì  UI | **ì™„ë£Œ** | TimeTrackingView + useTimeEntries í›…, Log Time íŒì—…, DataGrid + Summary |
+| ì²´í¬ë¦¬ìŠ¤íŠ¸ UI | **ì™„ë£Œ** | TaskDetailPopup + useChecklist í›…, ì²´í¬ë¦¬ìŠ¤íŠ¸ CRUD + í† ê¸€ |
+| í™œë™ ë¡œê·¸ ë·° | **ì™„ë£Œ** | ActivityView + useActivityLog í›…, ë‚ ì§œë³„ ê·¸ë£¹í•‘ íƒ€ì„ë¼ì¸, í•„í„° |
+| ë³´ë“œ ë·° (Kanban) | **ì™„ë£Œ** | BoardView + DevExtreme Sortable, 4ì¹¼ëŸ¼ Kanban (To Do/In Progress/Review/Done), ë“œë˜ê·¸ì•¤ë“œë¡­, custom_fields.board_status ì €ì¥ |
+| ìº˜ë¦°ë” ë·° | **ì™„ë£Œ** | CalendarView + DevExtreme Scheduler, ì›”ê°„/ì£¼ê°„/ì–´ì  ë‹¤ ë·°, ì•„ì´í…œ íƒ€ì…ë³„ ìƒ‰ìƒ, ì½ê¸° ì „ìš© |
 
-### Completed Tasks
+### ìš°ì„ ìˆœìœ„ ë‚®ìŒ
 
-#### 16. Migration Tooling ?
-- ? **Complete Migration Bundle**:
-  - Created `COMPLETE_MIGRATION.sql` with all migrations combined
-  - Single-file execution for Supabase Dashboard
-  - Includes all tables, RLS, triggers, functions, and seed data
-  
-- ? **Migration Helper Scripts**:
-  - `scripts/migrate.mjs` - Migration information display
-  - npm script: `npm run migrate`
-  
-- ? **Documentation**:
-  - `MIGRATION_GUIDE.md` - 2-minute quick start
-  - `DEV_SERVER_GUIDE.md` - Development server setup
-  - Step-by-step instructions with screenshots
+| í•­ëª© | ì„¤ëª… |
+|------|------|
+| Application ê´€ë¦¬ | OAuth2/OIDC ì•± ê´€ë¦¬ í˜ì´ì§€ |
+| Audit ë¡œê·¸ ë·°ì–´ | ê°ì‚¬ ë¡œê·¸ í•„í„°ë§/ì¡°íšŒ |
+| MFA êµ¬í˜„ | TOTP, SMS ì¸ì¦ |
+| ì‹¤ì‹œê°„ ì—…ë°ì´íŠ¸ | Supabase Realtime êµ¬ë… |
+| í…Œë„ŒíŠ¸ ì„¤ì • | ë¸Œëœë”©, ë³´ì•ˆ ì •ì±… |
+| ì•Œë¦¼ ì‹œìŠ¤í…œ | ë©˜ì…˜, í• ë‹¹ ì•Œë¦¼ |
+| ~~Supabase íƒ€ì… ìƒì„±~~ | **ì™„ë£Œ** â€” `db` any-cast ì œê±°, `Database` íƒ€ì… ë™ê¸°í™”, `dbUpdate()` í—¬í¼, `gen:types` ìŠ¤í¬ë¦½íŠ¸ ì¶”ê°€ |
 
-#### 17. Migration Ready ?
-- ? All SQL files validated
-- ? Migration order documented
-- ? Rollback procedures documented
-- ? Verification queries included
+---
 
-### Database Features Summary
+## ê¸°ìˆ  ìŠ¤íƒ
 
-| Feature | Status | Details |
-|---------|--------|---------|
-| Multi-Tenancy | ? | Complete tenant isolation via RLS |
-| RBAC | ? | Admin, User, Developer roles |
-| Audit Trail | ? | Immutable audit logs |
-| Auto Triggers | ? | 8+ automated operations |
-| Helper Functions | ? | 10+ reusable functions |
-| Security | ? | RLS on all tables, role checks |
-| Type Safety | ? | TypeScript types ready for generation |
-| Migration Tools | ? | One-click deployment ready |
+| ì˜ì—­ | ê¸°ìˆ  | ë²„ì „ |
+|------|------|------|
+| Frontend | React + TypeScript (strict) | 19.x / 5.9 |
+| UI | DevExtreme + devexpress-gantt | 25.2.3 / 4.1.65 |
+| Backend | Supabase (PostgreSQL + Auth + RLS) | supabase-js 2.x |
+| State | Zustand | 4.5 |
+| Routing | React Router DOM | 7.x |
+| Build | Vite | 7.x |
 
-### Quick Start Instructions
-
-#### ?? Apply Migrations (2 minutes)
-
-1. **Open Supabase Dashboard**:
-   ```
-   https://supabase.com/dashboard/project/xtrusktfudailwpqjdga/sql
-   ```
-
-2. **Execute Migration**:
-   - Copy entire content from `NanumAuth\supabase\COMPLETE_MIGRATION.sql`
-   - Paste into SQL Editor
-   - Click **Run** (or Ctrl+Enter)
-   - ? Verify: `SELECT * FROM seed_data_status;`
-
-3. **Start Development Server**:
-   ```bash
-   cd D:\repo\NanumAuth\nanumauth
-   npm run dev
-   ```
-
-4. **Open Browser**:
-   ```
-   http://localhost:5173
-   ```
-
-### Migration Files
-
-Execute in Supabase Dashboard:
-
-1. ? `COMPLETE_MIGRATION.sql` - **Recommended** (all-in-one)
-
-Or individually:
-1. ? `001_initial_schema.sql` - Tables and indexes
-2. ? `002_rls_policies.sql` - Security policies
-3. ? `003_triggers.sql` - Automated operations
-4. ? `004_functions.sql` - Stored procedures
-5. ? `005_seed_data.sql` - Initial data
-
-### Next Steps
-
-1. **Apply Database Migrations** ?
-   - Follow `MIGRATION_GUIDE.md`
-   - Execute `COMPLETE_MIGRATION.sql` in Supabase Dashboard
-   - Verify with test queries
-   - Expected: 2 tenants created
-
-2. **Start Development Server** ?
-   - Run `npm run dev`
-   - Verify app loads at http://localhost:5173
-   - Test routing (/, /login, /dashboard)
-
-3. **Universal Login UI** ??
-   - Implement login form with DevExtreme components
-   - Add sign-up form with validation
-   - Implement password reset flow
-   - Add MFA enrollment UI
-   - Tenant-specific branding
-
-4. **Admin Dashboard** ??
-   - Create dashboard layout with DevExtreme
-   - User management DataGrid
-   - Application management
-   - Audit log viewer
-   - Tenant settings editor
-   - Analytics widgets
-
-5. **API Integration** ??
-   - Connect frontend to Supabase functions
-   - Implement error handling
-   - Add loading states
-   - Toast notifications with DevExtreme
-
-6. **Testing & Security** ??
-   - Unit tests for functions
-   - E2E tests for auth flows
-   - Security audit
-   - Performance testing
-
-### Running the Application
+## ì‹¤í–‰ ë°©ë²•
 
 ```bash
-# Development server
+# ê°œë°œ ì„œë²„
 npm run dev
 
-# Build for production
+# í”„ë¡œë•ì…˜ ë¹Œë“œ
 npm run build
 
-# Preview production build
-npm run preview
-
-# Run linter
+# ë¦°íŠ¸
 npm run lint
 
-# Migration info
-npm run migrate
+# TeamGantt ë§ˆì´ê·¸ë ˆì´ì…˜ (migration/ ë””ë ‰í† ë¦¬)
+cd migration
+npm run import          # ì „ì²´ ì„í¬íŠ¸
+npm run import:clean    # í´ë¦° ì„í¬íŠ¸ (ê¸°ì¡´ ë°ì´í„° ì‚­ì œ í›„)
+npm run import:resume   # ì´ì–´ì„œ ì„í¬íŠ¸
 ```
-
-### Environment Variables
-
-The following environment variables are configured in `.env`:
-
-- `VITE_SUPABASE_URL`: https://xtrusktfudailwpqjdga.supabase.co
-- `VITE_SUPABASE_ANON_KEY`: (configured)
-- `DEVEXTREME_KEY`: (configured)
-
-### Technical Stack
-
-- **Frontend**: React 19.x + TypeScript (strict mode)
-- **UI Library**: DevExtreme 25.2.3 (Fluent theme)
-- **Backend**: Supabase (PostgreSQL + Auth + Edge Functions)
-- **State Management**: Zustand 4.x with persistence
-- **Routing**: React Router 7.x with protected routes
-- **Build Tool**: Vite 7.x with path aliases
-- **Database**: PostgreSQL 15+ with RLS
-
-### Status
-
-?? **Phase 1 Complete**: Project infrastructure ready  
-?? **Phase 2 Complete**: Database schema fully designed and documented  
-?? **Phase 3 Complete**: Migration tools ready and deployed  
-?? **Phase 4 Complete**: UI/UX implementation with DevExtreme ?
-
----
-
-## 2024-12-20 - Session 2: UI Implementation ?
-
-### Completed Tasks
-
-#### 18. DevExtreme Configuration ?
-- ? DevExtreme license key integration
-- ? Fluent theme configuration
-- ? Common component defaults
-- ? Theme customization setup
-
-#### 19. Universal Login UI ?
-- ? **Login Page** (`LoginPage.tsx`):
-  - DevExtreme TextBox for email/password
-  - Validation with RequiredRule and EmailRule
-  - Remember me checkbox
-  - Forgot password link
-  - Professional styling with gradients
-  - Error handling and loading states
-  
-- ? **Sign Up Page** (`SignUpPage.tsx`):
-  - Full name, email, password fields
-  - Password confirmation with CompareRule
-  - Email verification flow
-  - Success message with redirect
-  - Comprehensive validation rules
-  
-- ? **Password Reset Page** (`ResetPasswordPage.tsx`):
-  - Email-based reset request
-  - Success confirmation
-  - Back to login navigation
-
-#### 20. Admin Dashboard ?
-- ? **Dashboard Layout** (`DashboardPage.tsx`):
-  - Professional header with user info
-  - Tenant name display
-  - Sign out functionality
-  - DevExtreme Tabs for navigation
-  - Statistics cards (Users, Apps, Status, Logs)
-  - Quick action buttons
-  - Getting started guide
-  - Responsive design
-  
-- ? **User Management** (`UsersPage.tsx`):
-  - DevExtreme DataGrid with full features
-  - Search and filter capabilities
-  - Role badges (admin/user/developer)
-  - Status indicators (active/inactive)
-  - Export functionality
-  - Pagination with page size options
-  - Action buttons (Edit/Delete)
-
-#### 21. Enhanced Home Page ?
-- ? Hero section with gradient background
-- ? Call-to-action buttons (Get Started / Sign In)
-- ? Feature highlights:
-  - Multi-Tenancy
-  - Role-Based Access Control
-  - Multi-Factor Authentication
-  - Comprehensive Audit Logs
-- ? DevExtreme Button integration
-- ? Responsive design
-
-#### 22. Routing & Navigation ?
-- ? Complete route structure:
-  - `/` - Landing page
-  - `/login` - Universal login
-  - `/signup` - User registration
-  - `/reset-password` - Password recovery
-  - `/dashboard` - Overview (protected)
-  - `/dashboard/overview` - Dashboard home
-  - `/dashboard/users` - User management
-  - `/dashboard/applications` - Apps (placeholder)
-  - `/dashboard/audit` - Audit logs (placeholder)
-  - `/dashboard/settings` - Settings (placeholder)
-- ? Protected route middleware
-- ? Redirect after authentication
-
-#### 23. Component Organization ?
-- ? Barrel exports for pages
-- ? Barrel exports for components
-- ? DevExtreme components re-exported
-- ? CSS modules for styling
-- ? Type-safe component props
-
-### UI/UX Features Implemented
-
-| Feature | Status | Details |
-|---------|--------|---------|
-| Universal Login | ? | Full auth flow with validation |
-| Sign Up | ? | Email verification ready |
-| Password Reset | ? | Email-based recovery |
-| Dashboard Layout | ? | Professional admin interface |
-| User Management | ? | DataGrid with CRUD operations |
-| Navigation | ? | Tab-based with routing |
-| Theme | ? | DevExtreme Fluent Blue Light |
-| Responsive | ? | Mobile-friendly layouts |
-| Loading States | ? | User feedback during async ops |
-| Error Handling | ? | Validation and error messages |
-
-### Project Structure (Updated)
-
-```
-NanumAuth/
-¦§¦¡¦¡ src/
-¦¢   ¦§¦¡¦¡ components/
-¦¢   ¦¢   ¦§¦¡¦¡ MainLayout.tsx
-¦¢   ¦¢   ¦§¦¡¦¡ ProtectedRoute.tsx
-¦¢   ¦¢   ¦¦¦¡¦¡ index.ts (with DevExtreme exports)
-¦¢   ¦§¦¡¦¡ config/
-¦¢   ¦¢   ¦§¦¡¦¡ index.ts
-¦¢   ¦¢   ¦¦¦¡¦¡ devextreme.ts ??
-¦¢   ¦§¦¡¦¡ pages/
-¦¢   ¦¢   ¦§¦¡¦¡ HomePage.tsx ? (Enhanced)
-¦¢   ¦¢   ¦§¦¡¦¡ HomePage.css ??
-¦¢   ¦¢   ¦§¦¡¦¡ LoginPage.tsx ? (Complete)
-¦¢   ¦¢   ¦§¦¡¦¡ LoginPage.css ??
-¦¢   ¦¢   ¦§¦¡¦¡ SignUpPage.tsx ??
-¦¢   ¦¢   ¦§¦¡¦¡ SignUpPage.css ??
-¦¢   ¦¢   ¦§¦¡¦¡ ResetPasswordPage.tsx ??
-¦¢   ¦¢   ¦§¦¡¦¡ ResetPasswordPage.css ??
-¦¢   ¦¢   ¦§¦¡¦¡ DashboardPage.tsx ? (Complete)
-¦¢   ¦¢   ¦§¦¡¦¡ DashboardPage.css ??
-¦¢   ¦¢   ¦§¦¡¦¡ UsersPage.tsx ??
-¦¢   ¦¢   ¦§¦¡¦¡ UsersPage.css ??
-¦¢   ¦¢   ¦¦¦¡¦¡ index.ts (with all exports)
-¦¢   ¦§¦¡¦¡ routes/
-¦¢   ¦¢   ¦¦¦¡¦¡ index.tsx ? (Complete routing)
-¦¢   ¦¦¦¡¦¡ [other folders...]
-¦¦¦¡¦¡ [rest of structure...]
-```
-
-### Next Steps
-
-1. **Connect Real Data** ??
-   - Integrate Supabase queries into UserManagement
-   - Load tenant statistics in Dashboard
-   - Implement CRUD operations for users
-   - Connect profile data to UI
-
-2. **Application Management** ??
-   - Create ApplicationsPage with DataGrid
-   - OAuth2 client credentials display
-   - Add/Edit/Delete applications
-   - Test callback URLs
-
-3. **Audit Log Viewer** ??
-   - Create AuditLogsPage with filtering
-   - Date range picker
-   - Action type filter
-   - Export audit reports
-
-4. **Tenant Settings** ??
-   - Branding customization (logo, colors)
-   - Security settings (password policy, MFA)
-   - Feature toggles (SSO, passwordless)
-   - Tenant domain configuration
-
-5. **MFA Implementation** ??
-   - TOTP enrollment flow
-   - SMS verification option
-   - Backup codes generation
-   - MFA settings page
-
-6. **Advanced Features** ??
-   - Session management UI
-   - Role assignment interface
-   - Bulk user operations
-   - Advanced analytics dashboard
-
-### How to Test
-
-1. **Start Development Server**:
-   ```bash
-   cd D:\repo\NanumAuth\nanumauth
-   npm run dev
-   ```
-
-2. **Test Pages**:
-   - http://localhost:5173 - Landing page
-   - http://localhost:5173/login - Login page
-   - http://localhost:5173/signup - Sign up page
-   - http://localhost:5173/reset-password - Password reset
-   - http://localhost:5173/dashboard - Dashboard (requires auth)
-
-3. **Test Authentication**:
-   - Sign up with a test email
-   - Check Supabase Auth dashboard for new user
-   - Verify profile created in `public.profiles`
-   - Test login with credentials
-   - Access dashboard after login
-
-### Current Status
-
-?? **All Core UI Complete**  
-- ? Authentication flows (Login, Signup, Reset)
-- ? Protected routing
-- ? Admin dashboard layout
-- ? User management interface
-- ? Professional styling with DevExtreme
-
-?? **Ready for Data Integration**  
-- Connect Supabase queries
-- Implement CRUD operations
-- Add real-time updates
-- Load tenant-specific data
-
-?? **Production-Ready Features**  
-- Type-safe TypeScript throughout
-- Comprehensive validation
-- Error handling
-- Loading states
-- Responsive design
-- DevExtreme Fluent theme
-
----
-
-### Files Added in Session 2
-
-- ? `src/config/devextreme.ts` - DevExtreme configuration
-- ? `src/pages/LoginPage.tsx` & `.css` - Complete login UI
-- ? `src/pages/SignUpPage.tsx` & `.css` - Registration UI
-- ? `src/pages/ResetPasswordPage.tsx` & `.css` - Password reset UI
-- ? `src/pages/DashboardPage.tsx` & `.css` - Admin dashboard
-- ? `src/pages/UsersPage.tsx` & `.css` - User management
-- ? `src/pages/HomePage.tsx` & `.css` - Enhanced landing page
-- ? Updated `src/routes/index.tsx` - Complete routing
-- ? Updated `src/pages/index.ts` - Page exports
-- ? Updated `src/components/index.ts` - Component exports
-
-### Technical Achievements
-
-- ? **TypeScript Strict Mode**: All files pass strict type checking
-- ? **DevExtreme Integration**: Fluent theme applied throughout
-- ? **Supabase Auth**: Ready for production authentication
-- ? **React Router 7**: Modern routing with protected routes
-- ? **Zustand State**: Persistent auth state management
-- ? **Responsive Design**: Works on mobile, tablet, desktop
-- ? **Validation**: Comprehensive form validation with DevExtreme
-- ? **Error Handling**: User-friendly error messages
-- ? **Loading States**: Proper UX during async operations
-
-?? **Ready for Production Testing!**
