@@ -12,7 +12,7 @@
 ### Phase 2: Auth 모듈 DB
 
 - **테이블 5개**: tenants, profiles, applications, audit_logs, sessions
-- **RLS**: 테넌트 격리, RBAC (admin/user/developer)
+- **RLS**: 테넌트 격리, RBAC (admin/manager/member/viewer)
 - **트리거**: updated_at 자동 갱신, 프로필 자동 생성, 세션 정리
 - **함수 10+개**: get_user_profile, search_users, update_user_role, get_tenant_stats 등
 - **시드 데이터**: 기본 테넌트
@@ -176,6 +176,37 @@
 - **TypeScript 타입 업데이트**: `TaskStatus` 타입 추가 (`pm.ts`, `supabase.ts`)
 - **DB 문서 업데이트**: `DATABASE.md`에 `task_status` enum 및 컬럼 문서화
 - **UsersPage 실데이터 연동**: 하드코딩된 `sampleUsers` 제거 → Supabase `profiles` 테이블에서 `tenant_id` 기반 실시간 조회
+
+### Phase 11: User Management 기능 구현
+
+- **사용자 편집 팝업** (`UsersPage.tsx`):
+  - Edit 버튼 클릭 → DevExtreme Popup 열림
+  - Full Name 수정 (TextBox)
+  - Role 변경: Admin / Manager / Member / Viewer (SelectBox, admin만 가능)
+  - Status 변경: Active / Inactive (SelectBox, admin만, 자기 자신은 비활성화 불가)
+  - 아바타 업로드 (2MB/image 제한) + 제거 기능
+  - 비밀번호: 본인=직접 변경, 타인=리셋 메일 발송
+  - 저장 후 DataGrid 재조회 + 본인이면 auth-store 즉시 동기화
+- **Role 체계 변경** (`006_update_roles.sql`):
+  - 기존: `admin` / `user` / `developer`
+  - 변경: `admin` / `manager` / `member` / `viewer`
+  - CHECK 제약조건 + `update_user_role` 함수 + `get_tenant_stats` 함수 업데이트
+  - 기존 `user`/`developer` 데이터 → `member`로 자동 마이그레이션
+- **아바타 Storage** (`005_avatars_bucket.sql`):
+  - `avatars` public 버킷 생성
+  - RLS: 같은 tenant 사용자만 업로드/삭제, 공개 읽기
+  - 경로: `{tenant_id}/{user_id}.{ext}` (upsert)
+- **IDEHeader 아바타**: `avatar_url`이 있으면 `<img>` 표시, 없으면 이니셜 fallback
+- **useUserManagement 훅** (NEW):
+  - `updateProfile(userId, { full_name, role })` — profiles UPDATE + `update_user_role` RPC
+  - `uploadAvatar(userId, file)` → Storage upload + `avatar_url` 업데이트 → public URL 반환
+  - `removeAvatar(userId)` → `avatar_url` null + Storage 파일 삭제
+  - `deactivateUser(userId)` / `reactivateUser(userId)` → RPC 호출
+  - `sendPasswordReset(email)` → `supabase.auth.resetPasswordForEmail()`
+- **DataGrid 개선**:
+  - 아바타 컬럼 추가 (32px 원형 이미지 / 이니셜 fallback)
+  - Delete 버튼 → Deactivate/Reactivate 토글 (자기 자신은 disabled)
+  - Role 배지 색상: Admin(빨강), Manager(노랑), Member(파랑), Viewer(보라)
 
 ### Bugfix: 새로고침 시 데이터 미로딩 (Supabase Auth 데드락)
 

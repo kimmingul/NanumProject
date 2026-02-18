@@ -9,8 +9,11 @@ Supabase (PostgreSQL) 기반 멀티테넌트 프로젝트 관리 서비스.
 | `001_auth.sql` | Auth 모듈: 테이블 + RLS + 트리거 + 함수 |
 | `002_pm.sql` | PM 모듈: Enum + 테이블 + RLS + 트리거 |
 | `003_seed.sql` | 초기 데이터 (기본 Tenant) |
+| `004_add_task_status.sql` | task_status enum + project_items 컬럼 추가 |
+| `005_avatars_bucket.sql` | avatars Storage 버킷 (public) + RLS 정책 |
+| `006_update_roles.sql` | Role 체계 변경: admin/manager/member/viewer |
 
-> 실행 순서: 001 → 002 → 003
+> 실행 순서: 001 → 002 → 003 → 004 → 005 → 006
 
 ---
 
@@ -135,6 +138,9 @@ projects ←──── tenant_id ───────────────
 ### 권한 계층
 
 ```
+테넌트 역할 (profiles.role)
+  admin > manager > member > viewer
+
 테넌트 admin (profiles.role = 'admin')
   └── 모든 프로젝트에 대해 전체 접근 (project_members 등록 불필요)
 
@@ -203,3 +209,16 @@ tenants, applications, projects, project_members, project_items
 | `reactivate_user(UUID)` | 계정 재활성화 | admin |
 | `get_active_sessions_count(UUID)` | 활성 세션 수 | authenticated |
 | `rotate_application_secret(UUID)` | 앱 시크릿 갱신 | admin/developer |
+
+---
+
+## Storage 버킷
+
+| 버킷 | Public | 경로 패턴 | 용도 |
+|------|--------|-----------|------|
+| `documents` | No | `{tenant_id}/{project_id}/{timestamp}_{filename}` | 프로젝트 문서 |
+| `avatars` | Yes | `{tenant_id}/{user_id}.{ext}` | 사용자 아바타 (upsert) |
+
+### avatars RLS
+- **읽기**: 공개 (public bucket)
+- **업로드/수정/삭제**: 같은 tenant 사용자만 (folder = tenant_id 체크)
