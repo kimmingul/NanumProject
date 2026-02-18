@@ -38,7 +38,7 @@ NanumProject/
 │   ├── features/              # 기능 모듈 (프로젝트 상세 탭)
 │   │   ├── gantt/GanttView.tsx        # DevExtreme Gantt 차트
 │   │   ├── tasks/TasksView.tsx        # TreeList 기반 태스크 목록
-│   │   ├── tasks/TaskDetailPanel.tsx  # 태스크 상세 인라인 패널
+│   │   ├── tasks/TaskDetailPanel.tsx  # 태스크 상세 인라인 패널 (RightPanel용)
 │   │   ├── board/BoardView.tsx        # Kanban 보드 (Sortable)
 │   │   ├── calendar/CalendarView.tsx  # Scheduler 캘린더 뷰
 │   │   ├── comments/CommentsView.tsx  # 코멘트 뷰
@@ -199,3 +199,50 @@ VITE_SUPABASE_URL=          # Supabase 프로젝트 URL
 VITE_SUPABASE_ANON_KEY=     # Supabase Anonymous Key
 VITE_DEVEXTREME_KEY=        # DevExtreme 라이선스 키
 ```
+
+## 8. UI 컴포넌트 컨벤션
+
+모든 버튼은 DevExtreme `<Button>` 컴포넌트를 사용한다 (네이티브 `<button>` 사용 금지):
+
+```tsx
+// Primary action
+<Button text="New Project" icon="plus" type="default" stylingMode="contained" onClick={handler} />
+
+// Secondary action
+<Button text="Cancel" stylingMode="outlined" onClick={handler} />
+
+// Icon-only action
+<Button icon="trash" stylingMode="text" hint="Delete" onClick={handler} />
+```
+
+- DevExtreme React `<Button>`은 `cssClass`가 아닌 **`className`**으로 커스텀 CSS 클래스 적용
+- CSS 셀렉터는 `.dx-button.class-name` 패턴 사용 (예: `.dx-button.ide-header-btn`)
+
+## 9. DevExtreme 라이센스 설정
+
+DevExtreme 라이선스 키는 `index.html`의 인라인 `<script>`에서 설정한다:
+
+```html
+<script>
+  window.DevExpress = window.DevExpress || {};
+  window.DevExpress.config = { licenseKey: '%VITE_DEVEXTREME_KEY%' };
+</script>
+```
+
+**`config()` 함수 대신 `window.DevExpress.config`을 사용하는 이유:**
+
+Vite 프로덕션 번들러가 `devextreme/core/config` import를 비동기 preload 패턴(`.then()`)으로 변환하여, `config({licenseKey})` 호출이 위젯 초기화 **이후에** 실행된다. 반면 `window.DevExpress.config`은:
+1. 인라인 `<script>`로 모듈 스크립트보다 먼저 동기 실행됨
+2. Vite가 빌드 시 `%VITE_DEVEXTREME_KEY%`를 실제 값으로 치환함
+3. DevExtreme의 `m_config.js`가 초기화 시 `typeof DevExpress !== "undefined" && DevExpress.config` 체크로 자동 감지
+
+> `src/config/devextreme.ts`의 `config({licenseKey})` 호출은 fallback으로 유지하되, 실제 라이선스 적용은 `index.html`에서 이루어진다.
+
+## 10. Vercel 배포
+
+- **URL**: https://nanum-project-nu.vercel.app/
+- **Production branch**: `master`
+- **빌드 커맨드**: `tsc -b && vite build` (package.json `build` 스크립트)
+- **SPA 라우팅**: `vercel.json`에 `{ "source": "/(.*)", "destination": "/index.html" }` 리라이트 규칙
+- **환경변수**: Vercel Settings > Environment Variables에서 `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_DEVEXTREME_KEY` 설정 (All Environments)
+- **주의**: Vite 환경변수는 **빌드 타임**에 치환되므로, 환경변수 변경 후 반드시 **Redeploy** 필요

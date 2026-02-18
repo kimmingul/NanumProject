@@ -94,11 +94,11 @@
   - DataGrid (태스크명, 사용자, 유형, 시작/종료, 시간, 메모)
   - "Log Time" 팝업 (태스크 선택, 날짜/시간, 분, 메모)
   - Summary 총 시간 합계, 사용자/날짜 필터
-- **태스크 상세 팝업** (`features/tasks/TaskDetailPopup.tsx`):
+- **태스크 상세 패널** (`features/tasks/TaskDetailPanel.tsx`):
   - 태스크 정보 (타입, 날짜, 진행률)
   - 체크리스트 CRUD (추가, 토글, 삭제)
   - 진행 바 ("X of Y completed")
-  - Tasks TreeList 행 클릭 / Gantt 태스크 클릭 시 열림
+  - Tasks TreeList 행 클릭 / Gantt 태스크 클릭 시 RightPanel에 열림
 - **PM 훅**:
   - `useProjects.ts`: 프로젝트 목록 조회 (상태 필터, 이름 검색)
   - `useProject.ts`: 단일 프로젝트 조회
@@ -126,6 +126,41 @@
 - **기존 페이지 적응**: PMLayout 래퍼 제거, 프로젝트 탭을 아이콘 버튼으로 교체
 - **Feature View 수정**: GanttView/TasksView/BoardView/CalendarView에서 TaskDetailPopup 제거, usePMStore.setSelectedTaskId 사용
 - **CSS 정리**: Vite 보일러플레이트 제거, dark mode → light mode 기본값, max-width 제약 제거
+
+### Phase 8: DevExtreme Button 통일 + 코드 정리
+
+- **네이티브 `<button>` → DevExtreme `<Button>` 전면 교체** (8개 TSX 파일):
+  - `IDEHeader.tsx`: 햄버거, 네비, 로그아웃 버튼
+  - `LeftPanel.tsx`: 대시보드 네비 버튼
+  - `RightPanel.tsx`: 닫기 버튼
+  - `ProjectDetailPage.tsx`: 뒤로가기 + 9개 워크스페이스 탭 버튼
+  - `DashboardPage.tsx`: 3개 액션 버튼
+  - `UsersPage.tsx`: 편집/삭제 아이콘 버튼
+  - `CommentsView.tsx`: 삭제 버튼
+  - `TaskDetailPanel.tsx`: 체크리스트 삭제 버튼
+  - `FilesView.tsx`: 버전 링크 버튼
+- **CSS 셀렉터 업데이트**: `button.class` → `.dx-button.class` (7개 CSS 파일)
+- **데드 코드 삭제**: `PMLayout.tsx/css` (미사용), `TaskDetailPopup.tsx` (TaskDetailPanel로 대체됨)
+- **DevExtreme React `<Button>` 컨벤션**: `cssClass` 아닌 `className` 사용
+
+### Phase 9: TypeScript 빌드 에러 수정 + Vercel 배포
+
+- **Supabase 타입 수정** (`types/supabase.ts`):
+  - 14개 테이블 정의에 `Relationships: []` 추가 (`@supabase/postgrest-js` v2 필수)
+  - 이 누락으로 `.insert()`, `.update()`, `.select()` 파라미터가 `never`로 추론 → 41개 빌드 에러 발생
+- **`exactOptionalPropertyTypes` 대응** (8개 에러):
+  - `value ?? null` 패턴 (DevExtreme DateBox props)
+  - `{ ...(val ? { key: val } : {}) }` 스프레드 패턴 (함수 인자)
+- **`.select()` 반환 타입 캐스팅** (12개 에러): `data as Type[]` 캐스팅
+- **DevExtreme 타입 import 수정** (3개 에러): `DragEndEvent`, `AppointmentClickEvent`, `customizeText` 시그니처
+- **`vercel.json`** SPA 리라이트 규칙 추가
+- **DevExtreme 라이센스 수정** (`index.html`):
+  - **문제**: Vite 번들러가 `devextreme/core/config` import를 비동기 `.then()` 패턴으로 변환 → 위젯 초기화 이후에 `config({licenseKey})` 실행됨
+  - **해결**: `index.html`에 인라인 `<script>`로 `window.DevExpress.config = { licenseKey: '%VITE_DEVEXTREME_KEY%' }` 설정 (모듈 로드 전 동기 실행)
+  - DevExtreme의 `m_config.js`가 초기화 시 `window.DevExpress.config`을 자동 감지
+- **Vercel 프로덕션 배포**: https://nanum-project-nu.vercel.app/
+  - Production branch: `master`
+  - 환경변수: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_DEVEXTREME_KEY`
 
 ### Bugfix: 새로고침 시 데이터 미로딩 (Supabase Auth 데드락)
 
