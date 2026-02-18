@@ -162,6 +162,20 @@
   - Production branch: `master`
   - 환경변수: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_DEVEXTREME_KEY`
 
+### Phase 10: task_status 컬럼 추가
+
+- **DB 마이그레이션** (`004_add_task_status.sql`):
+  - `task_status` enum 타입 생성 (`todo`, `in_progress`, `review`, `done`)
+  - `project_items` 테이블에 `task_status` 컬럼 추가 (기본값 `'todo'`)
+  - 기존 `custom_fields.board_status` JSON 데이터를 새 컬럼으로 마이그레이션
+  - `custom_fields`에서 `board_status` 키 제거
+  - `(project_id, task_status)` 인덱스 추가
+- **BoardView 개선**: `custom_fields.board_status` JSON → `task_status` 컬럼 직접 사용 (데이터 무결성 확보, update 쿼리 단순화)
+- **TasksView 개선**: Status 컬럼 추가 (컬러 배지: To Do / In Progress / Review / Done)
+- **TaskDetailPanel 개선**: 태스크 상태 배지 표시
+- **TypeScript 타입 업데이트**: `TaskStatus` 타입 추가 (`pm.ts`, `supabase.ts`)
+- **DB 문서 업데이트**: `DATABASE.md`에 `task_status` enum 및 컬럼 문서화
+
 ### Bugfix: 새로고침 시 데이터 미로딩 (Supabase Auth 데드락)
 
 **증상**: 페이지 새로고침(F5) 시 프로젝트 목록, 대시보드 통계 등 모든 데이터가 로드되지 않음. 콘솔 에러 없이 빈 화면 표시.
@@ -213,7 +227,7 @@ _initialize() → navigator.locks 획득 → _recoverAndRefresh()
 | 시간 추적 UI | **완료** | TimeTrackingView + useTimeEntries 훅, Log Time 팝업, DataGrid + Summary |
 | 체크리스트 UI | **완료** | TaskDetailPopup + useChecklist 훅, 체크리스트 CRUD + 토글 |
 | 활동 로그 뷰 | **완료** | ActivityView + useActivityLog 훅, 날짜별 그룹핑 타임라인, 필터 |
-| 보드 뷰 (Kanban) | **완료** | BoardView + DevExtreme Sortable, 4칼럼 Kanban (To Do/In Progress/Review/Done), 드래그앤드롭, custom_fields.board_status 저장 |
+| 보드 뷰 (Kanban) | **완료** | BoardView + DevExtreme Sortable, 4칼럼 Kanban (To Do/In Progress/Review/Done), 드래그앤드롭, task_status 컬럼 저장 |
 | 캘린더 뷰 | **완료** | CalendarView + DevExtreme Scheduler, 월간/주간/어젠다 뷰, 아이템 타입별 색상, 읽기 전용 |
 
 ### 우선순위 낮음
