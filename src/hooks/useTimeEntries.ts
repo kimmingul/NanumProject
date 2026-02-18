@@ -60,7 +60,8 @@ export function useTimeEntries(
       if (fetchError) throw fetchError;
 
       // Fetch task names
-      const itemIds = [...new Set((data ?? []).map((e: { item_id: string }) => e.item_id).filter(Boolean))] as string[];
+      const rows = (data ?? []) as TimeEntry[];
+      const itemIds = [...new Set(rows.map((e) => e.item_id).filter(Boolean))] as string[];
       let taskMap = new Map<string, string>();
 
       if (itemIds.length > 0) {
@@ -77,7 +78,7 @@ export function useTimeEntries(
       }
 
       // Fetch user names
-      const userIds = [...new Set((data ?? []).map((e: { user_id: string }) => e.user_id).filter(Boolean))] as string[];
+      const userIds = [...new Set(rows.map((e) => e.user_id).filter(Boolean))] as string[];
       let profileMap = new Map<string, string>();
 
       if (userIds.length > 0) {

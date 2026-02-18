@@ -40,17 +40,18 @@ export function useProjectCrud() {
         .single();
 
       if (error) throw error;
+      const project = data as Project;
 
       // Auto-add creator as admin member
       await supabase.from('project_members').insert({
         tenant_id: profile.tenant_id,
-        project_id: data.id,
+        project_id: project.id,
         user_id: profile.user_id,
         permission: 'admin',
         status: 'accepted',
       });
 
-      return data as Project;
+      return project;
     },
     [profile],
   );
@@ -59,7 +60,7 @@ export function useProjectCrud() {
     async (projectId: string, input: UpdateProjectInput): Promise<Project> => {
       const { data, error } = await supabase
         .from('projects')
-        .update(dbUpdate(input))
+        .update(dbUpdate(input as unknown as Record<string, unknown>))
         .eq('id', projectId)
         .select()
         .single();

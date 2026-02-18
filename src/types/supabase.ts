@@ -30,6 +30,7 @@ export interface Database {
           settings?: unknown | null;
           is_active?: boolean;
         };
+        Relationships: [];
       };
       profiles: {
         Row: {
@@ -61,6 +62,7 @@ export interface Database {
           role?: string;
           metadata?: unknown | null;
         };
+        Relationships: [];
       };
       applications: {
         Row: {
@@ -93,6 +95,7 @@ export interface Database {
           allowed_origins?: string[];
           is_active?: boolean;
         };
+        Relationships: [];
       };
       audit_logs: {
         Row: {
@@ -116,6 +119,7 @@ export interface Database {
           metadata?: unknown | null;
         };
         Update: Record<string, never>;
+        Relationships: [];
       };
 
       // ========== PM Module ==========
@@ -170,6 +174,7 @@ export interface Database {
           is_active?: boolean;
           settings?: unknown;
         };
+        Relationships: [];
       };
       project_members: {
         Row: {
@@ -199,6 +204,7 @@ export interface Database {
           color?: string | null;
           is_active?: boolean;
         };
+        Relationships: [];
       };
       project_items: {
         Row: {
@@ -277,6 +283,7 @@ export interface Database {
           is_active?: boolean;
           tg_id?: number | null;
         };
+        Relationships: [];
       };
       task_assignees: {
         Row: {
@@ -308,6 +315,7 @@ export interface Database {
           raci_role?: string | null;
           is_active?: boolean;
         };
+        Relationships: [];
       };
       task_dependencies: {
         Row: {
@@ -332,6 +340,7 @@ export interface Database {
           dependency_type?: string;
           lag_days?: number;
         };
+        Relationships: [];
       };
       comments: {
         Row: {
@@ -366,6 +375,7 @@ export interface Database {
           is_active?: boolean;
           updated_by?: string | null;
         };
+        Relationships: [];
       };
       documents: {
         Row: {
@@ -394,6 +404,7 @@ export interface Database {
           current_version_id?: string | null;
           is_active?: boolean;
         };
+        Relationships: [];
       };
       document_versions: {
         Row: {
@@ -424,6 +435,7 @@ export interface Database {
         Update: {
           description?: string | null;
         };
+        Relationships: [];
       };
       time_entries: {
         Row: {
@@ -459,6 +471,7 @@ export interface Database {
           note?: string | null;
           is_active?: boolean;
         };
+        Relationships: [];
       };
       checklist_items: {
         Row: {
@@ -489,6 +502,7 @@ export interface Database {
           completed_at?: string | null;
           is_active?: boolean;
         };
+        Relationships: [];
       };
       activity_log: {
         Row: {
@@ -512,6 +526,7 @@ export interface Database {
           details?: unknown;
         };
         Update: Record<string, never>;
+        Relationships: [];
       };
     };
     Views: Record<string, never>;

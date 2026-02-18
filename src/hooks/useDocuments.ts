@@ -55,8 +55,9 @@ export function useDocuments(
       }
 
       // Fetch current versions for all documents
-      const versionIds = docs
-        .map((d: { current_version_id: string | null }) => d.current_version_id)
+      const docRows = docs as PMDocument[];
+      const versionIds = docRows
+        .map((d) => d.current_version_id)
         .filter(Boolean) as string[];
 
       let versionMap = new Map<string, DocumentVersion>();
@@ -68,14 +69,14 @@ export function useDocuments(
 
         if (versions) {
           versionMap = new Map(
-            versions.map((v: Record<string, unknown>) => [v.id as string, v as unknown as DocumentVersion]),
+            (versions as DocumentVersion[]).map((v) => [v.id, v]),
           );
         }
       }
 
       // Fetch uploader profiles
       const uploaderIds = [
-        ...new Set(docs.map((d: { created_by: string | null }) => d.created_by).filter(Boolean)),
+        ...new Set(docRows.map((d) => d.created_by).filter(Boolean)),
       ] as string[];
 
       let profileMap = new Map<string, string>();
@@ -125,7 +126,7 @@ export function useDocuments(
       if (uploadError) throw uploadError;
 
       // 2) Create document record
-      const { data: doc, error: docError } = await supabase
+      const { data: rawDoc, error: docError } = await supabase
         .from('documents')
         .insert({
           tenant_id: profile.tenant_id,
@@ -138,9 +139,10 @@ export function useDocuments(
         .single();
 
       if (docError) throw docError;
+      const doc = rawDoc as PMDocument;
 
       // 3) Create version record
-      const { data: version, error: verError } = await supabase
+      const { data: rawVersion, error: verError } = await supabase
         .from('document_versions')
         .insert({
           tenant_id: profile.tenant_id,
@@ -157,6 +159,7 @@ export function useDocuments(
         .single();
 
       if (verError) throw verError;
+      const version = rawVersion as DocumentVersion;
 
       // 4) Update document with current_version_id
       await supabase

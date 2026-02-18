@@ -47,7 +47,8 @@ export function useActivityLog(
       if (fetchError) throw fetchError;
 
       // Fetch actor profiles
-      const actorIds = [...new Set((data ?? []).map((l: { actor_id: string | null }) => l.actor_id).filter(Boolean))] as string[];
+      const rows = (data ?? []) as PMActivityLog[];
+      const actorIds = [...new Set(rows.map((l) => l.actor_id).filter(Boolean))] as string[];
       let profileMap = new Map<string, string>();
 
       if (actorIds.length > 0) {

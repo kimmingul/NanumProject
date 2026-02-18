@@ -36,9 +36,9 @@ export default function TimeTrackingView({ projectId }: TimeTrackingViewProps): 
 
   const profile = useAuthStore((s) => s.profile);
   const { entries, loading, error, addEntry, deleteEntry } = useTimeEntries(projectId, {
-    userId: userFilter,
-    dateFrom,
-    dateTo,
+    ...(userFilter ? { userId: userFilter } : {}),
+    ...(dateFrom ? { dateFrom } : {}),
+    ...(dateTo ? { dateTo } : {}),
   });
   const { items, resources } = useProjectItems(projectId);
 
@@ -61,7 +61,7 @@ export default function TimeTrackingView({ projectId }: TimeTrackingViewProps): 
         item_id: formData.item_id,
         start_time: formData.start_time,
         duration_minutes: formData.duration_minutes,
-        note: formData.note || undefined,
+        ...(formData.note ? { note: formData.note } : {}),
       });
       setLogPopupVisible(false);
       setFormData({
@@ -107,7 +107,7 @@ export default function TimeTrackingView({ projectId }: TimeTrackingViewProps): 
         <span className="time-filter-label">From:</span>
         <DateBox
           type="date"
-          value={dateFrom}
+          value={dateFrom ?? null}
           onValueChanged={(e) => setDateFrom(e.value ? new Date(e.value).toISOString().split('T')[0] : undefined)}
           width={150}
           stylingMode="outlined"
@@ -116,7 +116,7 @@ export default function TimeTrackingView({ projectId }: TimeTrackingViewProps): 
         <span className="time-filter-label">To:</span>
         <DateBox
           type="date"
-          value={dateTo}
+          value={dateTo ?? null}
           onValueChanged={(e) => setDateTo(e.value ? new Date(e.value).toISOString().split('T')[0] : undefined)}
           width={150}
           stylingMode="outlined"
@@ -203,8 +203,8 @@ export default function TimeTrackingView({ projectId }: TimeTrackingViewProps): 
             <TotalItem
               column="duration_minutes"
               summaryType="sum"
-              customizeText={(data: { value?: number }) =>
-                `Total: ${formatDuration(data.value ?? 0)}`
+              customizeText={(data: { value: string | number | Date; valueText: string }) =>
+                `Total: ${formatDuration(typeof data.value === 'number' ? data.value : 0)}`
               }
             />
           </Summary>

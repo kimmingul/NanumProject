@@ -42,9 +42,9 @@ export default function ActivityView({ projectId }: ActivityViewProps): ReactNod
   const [dateTo, setDateTo] = useState<string | undefined>();
 
   const { logs, loading, error } = useActivityLog(projectId, {
-    action: actionFilter || undefined,
-    dateFrom,
-    dateTo,
+    ...(actionFilter ? { action: actionFilter } : {}),
+    ...(dateFrom ? { dateFrom } : {}),
+    ...(dateTo ? { dateTo } : {}),
   });
 
   // Group logs by date
@@ -90,7 +90,7 @@ export default function ActivityView({ projectId }: ActivityViewProps): ReactNod
         <span className="activity-filter-label">From:</span>
         <DateBox
           type="date"
-          value={dateFrom}
+          value={dateFrom ?? null}
           onValueChanged={(e) => setDateFrom(e.value ? new Date(e.value).toISOString().split('T')[0] : undefined)}
           width={150}
           stylingMode="outlined"
@@ -99,7 +99,7 @@ export default function ActivityView({ projectId }: ActivityViewProps): ReactNod
         <span className="activity-filter-label">To:</span>
         <DateBox
           type="date"
-          value={dateTo}
+          value={dateTo ?? null}
           onValueChanged={(e) => setDateTo(e.value ? new Date(e.value).toISOString().split('T')[0] : undefined)}
           width={150}
           stylingMode="outlined"

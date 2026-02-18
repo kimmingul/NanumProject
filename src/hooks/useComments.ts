@@ -47,7 +47,8 @@ export function useComments(
       if (fetchError) throw fetchError;
 
       // Fetch author profiles
-      const userIds = [...new Set((data ?? []).map((c: { created_by: string | null }) => c.created_by).filter(Boolean))];
+      const rows = (data ?? []) as PMComment[];
+      const userIds = [...new Set(rows.map((c) => c.created_by).filter(Boolean))] as string[];
       let profileMap = new Map<string, { full_name: string | null; email: string }>();
 
       if (userIds.length > 0) {

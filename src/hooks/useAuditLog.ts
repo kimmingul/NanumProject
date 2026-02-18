@@ -53,10 +53,11 @@ export function useAuditLog(filters?: AuditLogFilters): UseAuditLogResult {
       if (fetchError) throw fetchError;
 
       // Fetch user profiles
+      const rows = (data ?? []) as AuditLog[];
       const userIds = [
         ...new Set(
-          (data ?? [])
-            .map((l: { user_id: string | null }) => l.user_id)
+          rows
+            .map((l) => l.user_id)
             .filter(Boolean),
         ),
       ] as string[];

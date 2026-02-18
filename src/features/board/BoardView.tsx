@@ -1,5 +1,6 @@
 import { type ReactNode, useCallback, useMemo } from 'react';
-import Sortable, { type DragEndEvent } from 'devextreme-react/sortable';
+import Sortable from 'devextreme-react/sortable';
+import type { DragEndEvent } from 'devextreme/ui/sortable';
 import { useProjectItems } from '@/hooks/useProjectItems';
 import { usePMStore } from '@/lib/pm-store';
 import { supabase } from '@/lib/supabase';

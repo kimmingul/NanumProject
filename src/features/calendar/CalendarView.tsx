@@ -1,5 +1,6 @@
 import { type ReactNode, useMemo } from 'react';
 import Scheduler, { View, Resource } from 'devextreme-react/scheduler';
+import type { AppointmentClickEvent } from 'devextreme/ui/scheduler';
 import { useProjectItems } from '@/hooks/useProjectItems';
 import { usePMStore } from '@/lib/pm-store';
 import type { ProjectItem } from '@/types';
@@ -60,9 +61,10 @@ export default function CalendarView({ projectId }: CalendarViewProps): ReactNod
       });
   }, [items]);
 
-  const handleAppointmentClick = (e: { appointmentData?: CalendarAppointment }) => {
-    if (e.appointmentData) {
-      setSelectedTaskId(e.appointmentData.id);
+  const handleAppointmentClick = (e: AppointmentClickEvent) => {
+    const apt = e.appointmentData as CalendarAppointment | undefined;
+    if (apt) {
+      setSelectedTaskId(apt.id);
     }
   };
 

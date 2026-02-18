@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/lib/auth-store';
-import type { ProjectMemberWithProfile, MemberPermission } from '@/types';
+import type { ProjectMember, ProjectMemberWithProfile, MemberPermission } from '@/types';
 
 interface UseProjectMembersResult {
   members: ProjectMemberWithProfile[];
@@ -34,7 +34,8 @@ export function useProjectMembers(projectId: string | undefined): UseProjectMemb
 
       if (fetchError) throw fetchError;
 
-      const userIds = (membersData ?? []).map((m: { user_id: string }) => m.user_id);
+      const memberRows = (membersData ?? []) as ProjectMember[];
+      const userIds = memberRows.map((m) => m.user_id);
       let profileMap = new Map<string, { full_name: string | null; email: string; avatar_url: string | null }>();
 
       if (userIds.length > 0) {
