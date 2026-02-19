@@ -3,11 +3,11 @@ import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { Button } from 'devextreme-react/button';
 import { useProjects } from '@/hooks';
 
-const dashboardLinks = [
+const mainNavLinks = [
   { path: '/dashboard', label: 'Overview', icon: 'dx-icon-home' },
-  { path: '/dashboard/users', label: 'Users', icon: 'dx-icon-group' },
-  { path: '/dashboard/audit', label: 'Audit Log', icon: 'dx-icon-fieldchooser' },
-  { path: '/dashboard/settings', label: 'Settings', icon: 'dx-icon-preferences' },
+  { path: '/users', label: 'Users', icon: 'dx-icon-group' },
+  { path: '/audit', label: 'Audit Log', icon: 'dx-icon-fieldchooser' },
+  { path: '/settings', label: 'Settings', icon: 'dx-icon-preferences' },
 ];
 
 const statusDotColors: Record<string, string> = {
@@ -17,15 +17,15 @@ const statusDotColors: Record<string, string> = {
   archived: '#94a3b8',
 };
 
-function DashboardNav(): ReactNode {
+function MainNav(): ReactNode {
   const navigate = useNavigate();
   const location = useLocation();
 
   return (
     <div className="left-panel-section">
-      <div className="left-panel-section-title">Dashboard</div>
+      <div className="left-panel-section-title">Navigation</div>
       <nav className="left-panel-nav">
-        {dashboardLinks.map((link) => (
+        {mainNavLinks.map((link) => (
           <Button
             key={link.path}
             icon={link.icon.replace('dx-icon-', '')}
@@ -79,11 +79,11 @@ function ProjectTree(): ReactNode {
 
 export function LeftPanel(): ReactNode {
   const location = useLocation();
-  const isDashboard = location.pathname.startsWith('/dashboard');
+  const isProjectDetail = /^\/projects\/[^/]+/.test(location.pathname);
 
   return (
     <aside className="ide-left-panel">
-      {isDashboard ? <DashboardNav /> : <ProjectTree />}
+      {isProjectDetail ? <ProjectTree /> : <MainNav />}
     </aside>
   );
 }

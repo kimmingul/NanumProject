@@ -143,8 +143,8 @@ export default function DashboardPage(): ReactNode {
             <h3>Quick Actions</h3>
             <div className="action-buttons">
               <Button icon="folder" text="View Projects" stylingMode="outlined" onClick={() => navigate('/projects')} />
-              <Button icon="group" text="Manage Users" stylingMode="outlined" onClick={() => navigate('/dashboard/users')} />
-              <Button icon="preferences" text="Settings" stylingMode="outlined" onClick={() => navigate('/dashboard/settings')} />
+              <Button icon="group" text="Manage Users" stylingMode="outlined" onClick={() => navigate('/users')} />
+              <Button icon="preferences" text="Settings" stylingMode="outlined" onClick={() => navigate('/settings')} />
             </div>
           </div>
         </div>

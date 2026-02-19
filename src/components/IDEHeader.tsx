@@ -8,8 +8,8 @@ import { usePMStore } from '@/lib/pm-store';
 const navItems = [
   { path: '/dashboard', icon: 'dx-icon-home', label: 'Dashboard' },
   { path: '/projects', icon: 'dx-icon-folder', label: 'Projects' },
-  { path: '/dashboard/users', icon: 'dx-icon-group', label: 'Users' },
-  { path: '/dashboard/audit', icon: 'dx-icon-fieldchooser', label: 'Audit' },
+  { path: '/users', icon: 'dx-icon-group', label: 'Users' },
+  { path: '/audit', icon: 'dx-icon-fieldchooser', label: 'Audit' },
 ];
 
 export function IDEHeader(): ReactNode {
@@ -27,8 +27,7 @@ export function IDEHeader(): ReactNode {
 
   const isActive = (path: string) => {
     if (path === '/projects') return location.pathname.startsWith('/projects');
-    if (path === '/dashboard') return location.pathname === '/dashboard' || location.pathname === '/dashboard/overview';
-    return location.pathname.startsWith(path);
+    return location.pathname === path;
   };
 
   return (
