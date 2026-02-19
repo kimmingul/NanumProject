@@ -35,7 +35,7 @@
 }
 
 .project-star {
-  color: #f59e0b;
+  color: var(--star-color);
 }
 
 .project-status-badge {
@@ -98,11 +98,343 @@
   color: var(--toolbar-btn-active-text);
 }
 
-/* Workspace content */
-.workspace-content {
+/* Toolbar divider between action buttons and view tabs */
+.workspace-toolbar-divider {
+  width: 1px;
+  height: 20px;
+  background: var(--toolbar-border);
+  margin: 0 4px;
+  flex-shrink: 0;
+}
+
+/* --- Colorful view tab icons --- */
+.dx-button.workspace-tab-btn.tab-gantt .dx-icon { color: #818cf8; }
+.dx-button.workspace-tab-btn.tab-grid .dx-icon { color: #22d3ee; }
+.dx-button.workspace-tab-btn.tab-board .dx-icon { color: #c084fc; }
+.dx-button.workspace-tab-btn.tab-calendar .dx-icon { color: #fb923c; }
+.dx-button.workspace-tab-btn.tab-comments .dx-icon { color: #4ade80; }
+.dx-button.workspace-tab-btn.tab-files .dx-icon { color: #fbbf24; }
+.dx-button.workspace-tab-btn.tab-time .dx-icon { color: #f472b6; }
+.dx-button.workspace-tab-btn.tab-activity .dx-icon { color: #34d399; }
+.dx-button.workspace-tab-btn.tab-settings .dx-icon { color: #94a3b8; }
+
+/* Active tab — brighter icon */
+.dx-button.workspace-tab-btn.active.tab-gantt .dx-icon { color: #a5b4fc; }
+.dx-button.workspace-tab-btn.active.tab-grid .dx-icon { color: #67e8f9; }
+.dx-button.workspace-tab-btn.active.tab-board .dx-icon { color: #d8b4fe; }
+.dx-button.workspace-tab-btn.active.tab-calendar .dx-icon { color: #fdba74; }
+.dx-button.workspace-tab-btn.active.tab-comments .dx-icon { color: #86efac; }
+.dx-button.workspace-tab-btn.active.tab-files .dx-icon { color: #fde047; }
+.dx-button.workspace-tab-btn.active.tab-time .dx-icon { color: #f9a8d4; }
+.dx-button.workspace-tab-btn.active.tab-activity .dx-icon { color: #6ee7b7; }
+.dx-button.workspace-tab-btn.active.tab-settings .dx-icon { color: #cbd5e1; }
+
+/* Workspace content wrapper (scroll arrow overlay) */
+.workspace-content-wrapper {
   flex: 1;
+  position: relative;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* Workspace content — scrollable area */
+.workspace-content {
+  height: 100%;
   overflow: auto;
   padding: 0;
+  scrollbar-width: none;           /* Firefox */
+}
+
+.workspace-content::-webkit-scrollbar {
+  display: none;                   /* Chrome/Safari */
+}
+
+/* Hide DevExtreme widget internal scrollbars */
+.workspace-content .dx-scrollable-scrollbar {
+  display: none !important;
+}
+
+/* Hide native scrollbars inside all DevExtreme widgets (Gantt, TreeList, DataGrid, Scheduler …) */
+.workspace-content .dx-scrollable-container {
+  scrollbar-width: none;               /* Firefox */
+}
+
+.workspace-content .dx-scrollable-container::-webkit-scrollbar {
+  display: none;                       /* Chrome/Safari */
+}
+
+/* ============================================= */
+/* DevExtreme dark theme overrides               */
+/* Applies to all DX widgets inside workspace    */
+/* ============================================= */
+
+/* --- DataGrid --- */
+.workspace-content .dx-datagrid {
+  background-color: var(--sidebar-bg);
+  color: var(--sidebar-text);
+  border: none;
+}
+
+.workspace-content .dx-datagrid-headers,
+.workspace-content .dx-datagrid .dx-datagrid-headers {
+  background-color: var(--sidebar-bg) !important;
+  border-bottom: 1px solid var(--sidebar-border);
+}
+
+.workspace-content .dx-datagrid-headers td {
+  background-color: var(--sidebar-bg) !important;
+  border-color: var(--sidebar-border);
+}
+
+.workspace-content .dx-datagrid-rowsview,
+.workspace-content .dx-datagrid .dx-datagrid-rowsview {
+  background-color: var(--sidebar-bg) !important;
+}
+
+.workspace-content .dx-datagrid-rowsview .dx-row > td,
+.workspace-content .dx-data-row > td {
+  background-color: var(--sidebar-bg);
+  border-color: var(--sidebar-border);
+  color: var(--sidebar-text);
+}
+
+.workspace-content .dx-data-row.dx-row-alt > td {
+  background-color: var(--grid-alt-row-bg);
+}
+
+.workspace-content .dx-data-row:hover > td,
+.workspace-content .dx-data-row.dx-state-hover > td {
+  background-color: var(--sidebar-hover-bg) !important;
+}
+
+.workspace-content .dx-datagrid-filter-row > td,
+.workspace-content .dx-datagrid-filter-row .dx-editor-cell {
+  background-color: var(--sidebar-bg) !important;
+  border-color: var(--sidebar-border) !important;
+}
+
+.workspace-content .dx-datagrid-filter-row .dx-texteditor,
+.workspace-content .dx-datagrid-filter-row .dx-texteditor-input {
+  background-color: transparent;
+  color: var(--sidebar-text);
+}
+
+.workspace-content .dx-datagrid-pager,
+.workspace-content .dx-pager {
+  background-color: var(--sidebar-bg) !important;
+  border-top: 1px solid var(--sidebar-border);
+  color: var(--sidebar-text);
+}
+
+.workspace-content .dx-datagrid-rowsview .dx-row-lines > td {
+  border-bottom-color: var(--sidebar-border);
+}
+
+.workspace-content .dx-datagrid-borders > .dx-datagrid-rowsview {
+  border: none;
+}
+
+.workspace-content .dx-datagrid-header-panel {
+  background-color: var(--sidebar-bg) !important;
+  border-bottom: 1px solid var(--sidebar-border);
+}
+
+/* --- Gantt --- */
+.workspace-content .dx-gantt {
+  background-color: var(--sidebar-bg);
+  border-color: var(--sidebar-border);
+}
+
+.workspace-content .dx-gantt .dx-treelist {
+  background-color: var(--sidebar-bg);
+}
+
+.workspace-content .dx-gantt .dx-treelist-headers,
+.workspace-content .dx-gantt .dx-treelist .dx-treelist-headers {
+  background-color: var(--sidebar-bg) !important;
+  border-color: var(--sidebar-border);
+}
+
+.workspace-content .dx-gantt .dx-treelist-headers td {
+  background-color: var(--sidebar-bg) !important;
+  border-color: var(--sidebar-border) !important;
+  color: var(--sidebar-title);
+}
+
+.workspace-content .dx-gantt .dx-treelist-rowsview,
+.workspace-content .dx-gantt .dx-treelist .dx-treelist-rowsview {
+  background-color: var(--sidebar-bg) !important;
+}
+
+.workspace-content .dx-gantt .dx-treelist-rowsview .dx-row > td {
+  background-color: var(--sidebar-bg);
+  border-color: var(--sidebar-border);
+  color: var(--sidebar-text);
+}
+
+.workspace-content .dx-gantt .dx-treelist-rowsview .dx-data-row:hover > td,
+.workspace-content .dx-gantt .dx-treelist-rowsview .dx-data-row.dx-state-hover > td {
+  background-color: var(--sidebar-hover-bg) !important;
+}
+
+.workspace-content .dx-gantt .dx-gantt-view {
+  background-color: var(--sidebar-bg) !important;
+}
+
+.workspace-content .dx-gantt .dx-gantt-tsa,
+.workspace-content .dx-gantt .dx-gantt-tsah {
+  background-color: var(--sidebar-bg) !important;
+  border-color: var(--sidebar-border) !important;
+}
+
+/* Gantt splitter & borders */
+.workspace-content .dx-gantt .dx-splitter {
+  border-color: var(--sidebar-border);
+}
+
+.workspace-content .dx-gantt .dx-gantt-borders {
+  border-color: var(--sidebar-border);
+}
+
+.workspace-content .dx-gantt .dx-gantt-tsac {
+  border-color: var(--sidebar-border) !important;
+}
+
+.workspace-content .dx-gantt .dx-gantt-vb,
+.workspace-content .dx-gantt .dx-gantt-hb {
+  background-color: var(--sidebar-border) !important;
+  border-color: var(--sidebar-border) !important;
+}
+
+/* Gantt timeline: group/alt row backgrounds */
+.workspace-content .dx-gantt .dx-gantt-collapsable-row,
+.workspace-content .dx-gantt .dx-gantt-altRow {
+  background-color: var(--sidebar-bg) !important;
+}
+
+/* Gantt splitter bar (vertical drag handle between treelist & timeline) */
+.workspace-content .dx-gantt .dx-splitter-bar {
+  background-color: var(--sidebar-border) !important;
+}
+
+/* --- Standalone TreeList (Grid view) --- */
+.workspace-content .dx-treelist {
+  background-color: var(--sidebar-bg);
+  color: var(--sidebar-text);
+  border: none;
+}
+
+.workspace-content .dx-treelist-headers,
+.workspace-content .dx-treelist .dx-treelist-headers {
+  background-color: var(--sidebar-bg) !important;
+  border-color: var(--sidebar-border) !important;
+}
+
+.workspace-content .dx-treelist-borders > .dx-treelist-headers {
+  border-color: var(--sidebar-border) !important;
+}
+
+.workspace-content .dx-treelist-headers td {
+  background-color: var(--sidebar-bg) !important;
+  border-color: var(--sidebar-border) !important;
+  color: var(--sidebar-title);
+}
+
+.workspace-content .dx-treelist-rowsview,
+.workspace-content .dx-treelist .dx-treelist-rowsview {
+  background-color: var(--sidebar-bg) !important;
+}
+
+.workspace-content .dx-treelist-rowsview .dx-row > td {
+  background-color: var(--sidebar-bg);
+  border-color: var(--sidebar-border);
+  color: var(--sidebar-text);
+}
+
+.workspace-content .dx-treelist-rowsview .dx-row-lines > td {
+  border-bottom-color: var(--sidebar-border);
+}
+
+.workspace-content .dx-treelist-rowsview .dx-data-row.dx-row-alt > td {
+  background-color: var(--grid-alt-row-bg);
+}
+
+.workspace-content .dx-treelist-rowsview .dx-data-row:hover > td,
+.workspace-content .dx-treelist-rowsview .dx-data-row.dx-state-hover > td {
+  background-color: var(--sidebar-hover-bg) !important;
+}
+
+.workspace-content .dx-treelist-filter-row > td,
+.workspace-content .dx-treelist-filter-row .dx-editor-cell {
+  background-color: var(--sidebar-bg) !important;
+  border-color: var(--sidebar-border) !important;
+}
+
+.workspace-content .dx-treelist-filter-row .dx-texteditor,
+.workspace-content .dx-treelist-filter-row .dx-texteditor-input {
+  background-color: transparent;
+  color: var(--sidebar-text);
+}
+
+.workspace-content .dx-treelist-header-panel {
+  background-color: var(--sidebar-bg) !important;
+  border-bottom: 1px solid var(--sidebar-border);
+}
+
+.workspace-content .dx-treelist-borders > .dx-treelist-rowsview {
+  border: none;
+}
+
+/* --- Scheduler (Calendar) --- */
+.workspace-content .dx-scheduler {
+  background-color: var(--sidebar-bg);
+  border-color: var(--sidebar-border);
+}
+
+.workspace-content .dx-scheduler-header,
+.workspace-content .dx-scheduler .dx-scheduler-header {
+  background-color: var(--sidebar-bg) !important;
+  border-color: var(--sidebar-border);
+}
+
+.workspace-content .dx-scheduler-header-panel,
+.workspace-content .dx-scheduler .dx-scheduler-header-panel {
+  background-color: var(--sidebar-bg) !important;
+  border-color: var(--sidebar-border) !important;
+}
+
+.workspace-content .dx-scheduler-header-panel-cell {
+  background-color: var(--sidebar-bg) !important;
+  border-color: var(--sidebar-border);
+  color: var(--sidebar-text);
+}
+
+.workspace-content .dx-scheduler-date-table-cell {
+  background-color: var(--sidebar-bg);
+  border-color: var(--sidebar-border);
+}
+
+.workspace-content .dx-scheduler-date-table-other-month.dx-scheduler-date-table-cell {
+  background-color: var(--scheduler-other-month-bg);
+}
+
+.workspace-content .dx-scheduler-work-space {
+  background-color: var(--sidebar-bg);
+  border-color: var(--sidebar-border);
+}
+
+.workspace-content .dx-scheduler-all-day-panel {
+  background-color: var(--sidebar-bg);
+}
+
+.workspace-content .dx-scheduler-time-panel-cell {
+  background-color: var(--sidebar-bg);
+  border-color: var(--sidebar-border);
+  color: var(--sidebar-text);
+}
+
+.workspace-content .dx-scheduler-navigator .dx-button {
+  background-color: transparent;
 }
 
 /* Loading state */
@@ -145,7 +477,7 @@
 
 .project-detail-error i {
   font-size: 3rem;
-  color: #f59e0b;
+  color: var(--warning-icon);
   margin-bottom: 1rem;
 }
 

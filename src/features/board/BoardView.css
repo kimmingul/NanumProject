@@ -30,6 +30,14 @@
   margin: 0;
 }
 
+/* Kanban columns wrapper (scroll arrow overlay) */
+.board-columns-wrapper {
+  position: relative;
+  overflow: hidden;
+  flex: 1;
+  min-height: 0;
+}
+
 /* Kanban columns container */
 .board-columns {
   display: flex;
@@ -37,7 +45,13 @@
   overflow-x: auto;
   padding-bottom: 1rem;
   min-height: 500px;
+  height: 100%;
   align-items: flex-start;
+  scrollbar-width: none;           /* Firefox */
+}
+
+.board-columns::-webkit-scrollbar {
+  display: none;                   /* Chrome/Safari */
 }
 
 /* Individual column */
@@ -81,7 +95,7 @@
 
 /* Column color themes */
 .board-column-todo .board-column-header {
-  border-bottom-color: #94a3b8;
+  border-bottom-color: var(--board-col-todo);
 }
 
 .board-column-todo .board-column-header h4 {
@@ -89,27 +103,27 @@
 }
 
 .board-column-in_progress .board-column-header {
-  border-bottom-color: #3b82f6;
+  border-bottom-color: var(--board-col-progress);
 }
 
 .board-column-in_progress .board-column-header h4 {
-  color: #3b82f6;
+  color: var(--board-col-progress);
 }
 
 .board-column-review .board-column-header {
-  border-bottom-color: #f59e0b;
+  border-bottom-color: var(--board-col-review);
 }
 
 .board-column-review .board-column-header h4 {
-  color: #f59e0b;
+  color: var(--board-col-review);
 }
 
 .board-column-done .board-column-header {
-  border-bottom-color: #22c55e;
+  border-bottom-color: var(--board-col-done);
 }
 
 .board-column-done .board-column-header h4 {
-  color: #22c55e;
+  color: var(--board-col-done);
 }
 
 /* Cards container inside column */
@@ -131,7 +145,7 @@
 }
 
 .board-card:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 2px 8px var(--card-hover-shadow);
   border-color: var(--border-color-strong);
 }
 
@@ -185,7 +199,7 @@
 .board-card-progress-fill {
   height: 100%;
   border-radius: 2px;
-  background: #3b82f6;
+  background: var(--progress-fill);
   transition: width 0.2s;
 }
 
@@ -202,7 +216,7 @@
 
 .board-column-cards .dx-sortable-placeholder {
   background: var(--badge-info-bg);
-  border: 2px dashed #3b82f6;
+  border: 2px dashed var(--board-col-progress);
   border-radius: 6px;
   min-height: 60px;
 }

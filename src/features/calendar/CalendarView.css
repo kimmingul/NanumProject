@@ -38,15 +38,15 @@
 
 /* Appointment type colors */
 .calendar-appointment-group {
-  background: #3b82f6 !important;
+  background: var(--type-group-color) !important;
 }
 
 .calendar-appointment-task {
-  background: #22c55e !important;
+  background: var(--type-task-color) !important;
 }
 
 .calendar-appointment-milestone {
-  background: #f59e0b !important;
+  background: var(--type-milestone-color) !important;
 }
 
 /* Tooltip styling */
@@ -112,5 +112,5 @@
 .calendar-tooltip-progress-fill {
   height: 100%;
   border-radius: 2px;
-  background: #3b82f6;
+  background: var(--progress-fill);
 }

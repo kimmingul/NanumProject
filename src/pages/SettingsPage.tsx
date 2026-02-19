@@ -2,10 +2,10 @@ import { type ReactNode } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuthStore } from '@/lib/auth-store';
 import {
-  ProfileSection,
   OrganizationSection,
   SecuritySection,
   AppearanceSection,
+  UsersSection,
 } from './settings';
 import './SettingsPage.css';
 
@@ -14,20 +14,21 @@ export default function SettingsPage(): ReactNode {
   const role = useAuthStore((s) => s.profile?.role);
   const isAdmin = role === 'admin';
 
-  const activeSection = section || 'profile';
+  const activeSection = section || 'organization';
 
   const renderSection = (): ReactNode => {
+    if (!isAdmin) return null;
     switch (activeSection) {
-      case 'profile':
-        return <ProfileSection />;
       case 'organization':
-        return isAdmin ? <OrganizationSection /> : null;
+        return <OrganizationSection />;
+      case 'users':
+        return <UsersSection />;
       case 'security':
-        return isAdmin ? <SecuritySection /> : null;
+        return <SecuritySection />;
       case 'appearance':
-        return isAdmin ? <AppearanceSection /> : null;
+        return <AppearanceSection />;
       default:
-        return <ProfileSection />;
+        return <OrganizationSection />;
     }
   };
 

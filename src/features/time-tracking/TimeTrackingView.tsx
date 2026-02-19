@@ -1,4 +1,4 @@
-import { type ReactNode, useCallback, useMemo, useState } from 'react';
+import { type ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { DataGrid, Column, Summary, TotalItem } from 'devextreme-react/data-grid';
 import { Button } from 'devextreme-react/button';
 import { Popup } from 'devextreme-react/popup';
@@ -11,8 +11,13 @@ import { useProjectItems } from '@/hooks/useProjectItems';
 import { useAuthStore } from '@/lib/auth-store';
 import './TimeTrackingView.css';
 
+export interface TimeActions {
+  logTime: () => void;
+}
+
 interface TimeTrackingViewProps {
   projectId: string;
+  actionsRef?: React.MutableRefObject<TimeActions | undefined>;
 }
 
 function formatDuration(minutes: number | null): string {
@@ -22,7 +27,7 @@ function formatDuration(minutes: number | null): string {
   return `${h}:${m.toString().padStart(2, '0')}`;
 }
 
-export default function TimeTrackingView({ projectId }: TimeTrackingViewProps): ReactNode {
+export default function TimeTrackingView({ projectId, actionsRef }: TimeTrackingViewProps): ReactNode {
   const [userFilter, setUserFilter] = useState<string | undefined>();
   const [dateFrom, setDateFrom] = useState<string | undefined>();
   const [dateTo, setDateTo] = useState<string | undefined>();
@@ -35,6 +40,19 @@ export default function TimeTrackingView({ projectId }: TimeTrackingViewProps): 
   });
 
   const profile = useAuthStore((s) => s.profile);
+
+  // Expose logTime action to parent via ref
+  useEffect(() => {
+    if (actionsRef) {
+      actionsRef.current = {
+        logTime: () => setLogPopupVisible(true),
+      };
+    }
+    return () => {
+      if (actionsRef) actionsRef.current = undefined;
+    };
+  }, [actionsRef]);
+
   const { entries, loading, error, addEntry, deleteEntry } = useTimeEntries(projectId, {
     ...(userFilter ? { userId: userFilter } : {}),
     ...(dateFrom ? { dateFrom } : {}),
@@ -87,13 +105,6 @@ export default function TimeTrackingView({ projectId }: TimeTrackingViewProps): 
   return (
     <div className="time-tracking-view">
       <div className="time-tracking-toolbar">
-        <Button
-          text="Log Time"
-          icon="clock"
-          type="default"
-          stylingMode="contained"
-          onClick={() => setLogPopupVisible(true)}
-        />
         <span className="time-filter-label">Member:</span>
         <SelectBox
           dataSource={memberOptions}

@@ -15,8 +15,8 @@ interface NavItem {
 const navItems: NavItem[] = [
   { path: '/dashboard', icon: 'home', label: 'Dashboard' },
   { path: '/projects', icon: 'folder', label: 'Projects' },
-  { path: '/users', icon: 'group', label: 'Users', adminOnly: true },
-  { path: '/audit', icon: 'fieldchooser', label: 'Audit', adminOnly: true },
+  { path: '/tasks', icon: 'todo', label: 'Tasks' },
+  { path: '/users', icon: 'group', label: 'Users' },
   { path: '/settings', icon: 'preferences', label: 'Settings', bottom: true },
 ];
 
@@ -28,6 +28,8 @@ export function NavRail(): ReactNode {
 
   const isActive = (path: string): boolean => {
     if (path === '/projects') return location.pathname.startsWith('/projects');
+    if (path === '/tasks') return location.pathname.startsWith('/tasks');
+    if (path === '/users') return location.pathname.startsWith('/users');
     if (path === '/settings') return location.pathname.startsWith('/settings');
     return location.pathname === path;
   };

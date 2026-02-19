@@ -92,11 +92,12 @@ export function IDEHeader(): ReactNode {
             <div className="ide-profile-menu-divider" />
             <button
               className="ide-profile-menu-item"
-              onClick={() => { setProfileMenuOpen(false); navigate('/settings/profile'); }}
+              onClick={() => { setProfileMenuOpen(false); navigate('/profile'); }}
             >
               <i className="dx-icon-user" />
               My Profile
             </button>
+            {profile?.role === 'admin' && (
             <button
               className="ide-profile-menu-item"
               onClick={() => { setProfileMenuOpen(false); navigate('/settings'); }}
@@ -104,6 +105,7 @@ export function IDEHeader(): ReactNode {
               <i className="dx-icon-preferences" />
               Settings
             </button>
+            )}
             <div className="ide-profile-menu-divider" />
             <button
               className="ide-profile-menu-item ide-profile-menu-danger"

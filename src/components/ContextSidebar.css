@@ -72,10 +72,82 @@
   border-right: 1px solid var(--sidebar-border);
 }
 
-.context-sidebar-body {
+/* Scrollable body wrapper with scroll indicators */
+.context-sidebar-body-wrapper {
   flex: 1;
+  position: relative;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.context-sidebar-body {
+  height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
+  scrollbar-width: none;          /* Firefox */
+}
+
+.context-sidebar-body::-webkit-scrollbar {
+  display: none;                  /* Chrome/Safari */
+}
+
+/* Gradient fade overlays */
+.sidebar-scroll-fade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 32px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.sidebar-scroll-fade-top {
+  top: 0;
+  background: linear-gradient(to bottom, var(--sidebar-bg) 0%, transparent 100%);
+}
+
+.sidebar-scroll-fade-bottom {
+  bottom: 0;
+  background: linear-gradient(to top, var(--sidebar-bg) 0%, transparent 100%);
+}
+
+/* Floating scroll arrow buttons */
+.sidebar-scroll-arrow {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  width: 28px;
+  height: 20px;
+  border: none;
+  border-radius: 10px;
+  background: var(--sidebar-hover-bg);
+  color: var(--sidebar-icon);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.7;
+  transition: opacity 0.2s, background 0.2s;
+  padding: 0;
+}
+
+.sidebar-scroll-arrow:hover {
+  opacity: 1;
+  background: var(--sidebar-active-bg);
+  color: var(--sidebar-active-text);
+}
+
+.sidebar-scroll-arrow i {
+  font-size: 14px;
+}
+
+.sidebar-scroll-arrow-top {
+  top: 4px;
+}
+
+.sidebar-scroll-arrow-bottom {
+  bottom: 4px;
 }
 
 /* Shared sidebar list styles */
@@ -131,7 +203,13 @@
   height: 8px;
   border-radius: 50%;
   flex-shrink: 0;
+  background-color: var(--status-dot-archived);
 }
+
+.sidebar-status-dot.status-dot-active { background-color: var(--status-dot-active); }
+.sidebar-status-dot.status-dot-on_hold { background-color: var(--status-dot-on-hold); }
+.sidebar-status-dot.status-dot-complete { background-color: var(--status-dot-complete); }
+.sidebar-status-dot.status-dot-archived { background-color: var(--status-dot-archived); }
 
 /* User sidebar variant */
 .sidebar-list-item.user-item {
@@ -150,6 +228,14 @@
   font-weight: 600;
   font-size: 11px;
   flex-shrink: 0;
+  overflow: hidden;
+}
+
+.sidebar-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
 }
 
 .sidebar-user-info {
@@ -169,7 +255,13 @@
 .sidebar-user-role {
   font-size: 11px;
   text-transform: capitalize;
+  color: var(--role-viewer-color);
 }
+
+.sidebar-user-role.role-color-admin { color: var(--role-admin-color); }
+.sidebar-user-role.role-color-manager { color: var(--role-manager-color); }
+.sidebar-user-role.role-color-member { color: var(--role-member-color); }
+.sidebar-user-role.role-color-viewer { color: var(--role-viewer-color); }
 
 /* Loading / Empty */
 .sidebar-loading,

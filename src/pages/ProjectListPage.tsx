@@ -7,9 +7,6 @@ import {
   Pager,
   FilterRow,
   HeaderFilter,
-  SearchPanel,
-  Toolbar,
-  Item,
 } from 'devextreme-react/data-grid';
 import { Button } from 'devextreme-react/button';
 import { Popup } from 'devextreme-react/popup';
@@ -53,7 +50,7 @@ const emptyForm: ProjectFormData = {
 
 export default function ProjectListPage(): ReactNode {
   const navigate = useNavigate();
-  const { projects, loading, error, refetch } = useProjects({ status: 'active' });
+  const { projects, loading, error, refetch } = useProjects({ status: 'all' });
   const { createProject } = useProjectCrud();
   const [showPopup, setShowPopup] = useState(false);
   const [formData, setFormData] = useState<ProjectFormData>(emptyForm);
@@ -82,20 +79,15 @@ export default function ProjectListPage(): ReactNode {
 
   return (
       <div className="project-list-page">
-        <div className="page-header">
-          <div className="page-header-row">
-            <div>
-              <h2>Projects</h2>
-              <p>Manage your project portfolio</p>
-            </div>
-            <Button
-              text="New Project"
-              icon="plus"
-              type="default"
-              stylingMode="contained"
-              onClick={() => setShowPopup(true)}
-            />
-          </div>
+        <div className="project-list-header">
+          <span className="project-list-header-title">PROJECTS</span>
+          <Button
+            icon="plus"
+            text="New"
+            stylingMode="text"
+            className="project-list-header-btn"
+            onClick={() => setShowPopup(true)}
+          />
         </div>
 
         {error && (
@@ -109,7 +101,8 @@ export default function ProjectListPage(): ReactNode {
           <DataGrid
             dataSource={projects}
             keyExpr="id"
-            showBorders={true}
+            height="100%"
+            showBorders={false}
             showRowLines={true}
             showColumnLines={false}
             rowAlternationEnabled={true}
@@ -117,25 +110,18 @@ export default function ProjectListPage(): ReactNode {
             columnAutoWidth={true}
             onRowClick={(e) => {
               if (e.data?.id) {
-                navigate(`/projects/${e.data.id}`);
+                navigate(`/tasks/${e.data.id}`);
               }
             }}
             noDataText={loading ? 'Loading projects...' : 'No projects found. Click "New Project" to get started.'}
           >
             <FilterRow visible={true} />
             <HeaderFilter visible={true} />
-            <SearchPanel visible={true} width={240} placeholder="Search projects..." />
-
-            <Toolbar>
-              <Item name="searchPanel" />
-            </Toolbar>
 
             <Column
               dataField="name"
               caption="Project Name"
               minWidth={300}
-              sortOrder="asc"
-              sortIndex={0}
               cellRender={(data: { value: string; data: { is_starred: boolean } }) => (
                 <div className="project-name-cell">
                   {data.data.is_starred && (
@@ -150,6 +136,7 @@ export default function ProjectListPage(): ReactNode {
               dataField="status"
               caption="Status"
               width={120}
+              defaultFilterValue="active"
               cellRender={(data: { value: string }) => (
                 <span className={`project-status-badge status-${data.value}`}>
                   {statusLabels[data.value] || data.value}
@@ -162,6 +149,8 @@ export default function ProjectListPage(): ReactNode {
               caption="Start"
               dataType="date"
               width={120}
+              sortOrder="desc"
+              sortIndex={0}
             />
 
             <Column

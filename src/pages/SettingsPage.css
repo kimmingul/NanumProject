@@ -20,7 +20,7 @@
 }
 
 .settings-content {
-  max-width: 700px;
+  max-width: 100%;
 }
 
 /* Section card */
@@ -200,8 +200,8 @@
 }
 
 .theme-option.active {
-  border-color: #667eea;
-  background: rgba(102, 126, 234, 0.08);
+  border-color: var(--accent-color);
+  background: var(--accent-bg-subtle);
 }
 
 .theme-option-icon {

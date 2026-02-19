@@ -2,13 +2,6 @@ import { type ReactNode } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useProjects } from '@/hooks';
 
-const statusDotColors: Record<string, string> = {
-  active: '#22c55e',
-  on_hold: '#f59e0b',
-  complete: '#3b82f6',
-  archived: '#94a3b8',
-};
-
 export function ProjectSidebarList(): ReactNode {
   const navigate = useNavigate();
   const { projectId } = useParams();
@@ -28,15 +21,14 @@ export function ProjectSidebarList(): ReactNode {
         <div
           key={p.id}
           className={`sidebar-list-item ${p.id === projectId ? 'active' : ''}`}
-          onClick={() => navigate(`/projects/${p.id}`)}
+          onClick={() => navigate(`/tasks/${p.id}`)}
           role="button"
           tabIndex={0}
           title={p.name}
-          onKeyDown={(e) => e.key === 'Enter' && navigate(`/projects/${p.id}`)}
+          onKeyDown={(e) => e.key === 'Enter' && navigate(`/tasks/${p.id}`)}
         >
           <span
-            className="sidebar-status-dot"
-            style={{ backgroundColor: statusDotColors[p.status] || '#94a3b8' }}
+            className={`sidebar-status-dot status-dot-${p.status}`}
           />
           <span className="sidebar-item-name">{p.name}</span>
         </div>

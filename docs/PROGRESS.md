@@ -324,6 +324,157 @@
   - Task Name 컬럼 `cellRender`: 타입 아이콘 (folder/detailslayout/event) + 댓글 뱃지
   - 컬럼 폭: 280px → 320px
 
+### Phase 19: Tasks 독립 라우트 분리
+
+- **목적**: 프로젝트 작업 뷰(Gantt/Board/Calendar 등)에 NavRail에서 즉시 접근 가능하도록 개선
+- **NavRail 변경**: `Dashboard | Projects | Tasks | Users | Settings` (Audit 항목 NavRail에서 제거, 라우트는 유지)
+- **새 페이지** (`TasksWorkspacePage.tsx`):
+  - `/tasks` — empty state ("Select a project") 또는 lastProjectId로 자동 리다이렉트
+  - `/tasks/:projectId` — 프로젝트 워크스페이스 (Gantt 기본)
+  - `/tasks/:projectId/:tab` — 탭 전환 (Gantt/Tasks/Board/Calendar/Comments/Files/Time/Activity/Settings)
+  - `localStorage`에 `nanum-last-project-id` 저장/복원
+- **라우트 변경** (`routes/index.tsx`):
+  - `/projects/:projectId(/:tab)` → `/tasks/:projectId(/:tab)` 리다이렉트 (`ProjectRedirect` 래퍼)
+  - `ProjectDetailPage` import 제거 (더 이상 직접 사용하지 않음)
+- **ContextSidebar 확장**: `/tasks` 경로에 사이드바 표시 (title: "TASKS", component: ProjectSidebarList)
+- **ProjectSidebarList 변경**: 클릭 시 `/tasks/:projectId`로 이동 (기존 `/projects/:projectId`)
+- **ProjectListPage 변경**: DataGrid `onRowClick` → `/tasks/:projectId`로 이동
+
+### Phase 20: 마이그레이션 데이터 복구
+
+- **종합 감사 (Audit)**: 원본 TeamGantt 데이터 vs Supabase DB 비교 분석
+- **문제 발견**:
+  - CRITICAL: 그룹 매핑 실패 (1,656/1,782 DB 존재, id-map에 0개) → 모든 task의 parent_id = null
+  - CRITICAL: task_dependencies에 project_id 누락 → 89개 전체 insert 실패
+  - MEDIUM: task의 updated_at/updated_by 미임포트 (165건)
+  - INFO: checklist 데이터 (1,806건) 미추출 (TeamGantt API에서 빈 응답)
+- **수정 스크립트** (`migration/src/repair-all.ts`):
+  - Phase 1: 기존 그룹 1,656개 DB에서 발견 → id-map 재구축, 누락 126개 중 123개 삽입 (3개 빈 이름으로 skip)
+  - Phase 2: 그룹 parent_id 123건 + 태스크 parent_id 15,268건 일괄 수정
+  - Phase 3: dependency 89건 재삽입 (project_id 컬럼이 실제 DB에 존재하지 않아 제외)
+  - Phase 4: updated_at 165건 수정
+- **결과**: id-map에 group 1,779개 매핑 추가, 간트차트에서 그룹 트리 계층 정상 표시
+
+### Phase 21: DevExtreme 커스텀 다크 테마
+
+- **문제**: DevExtreme Fluent Blue Dark 테마의 neutral gray 색상(#292929, #616161 등)이 앱의 Tailwind Slate 배경과 섞여 갈색(brown-ish)으로 보이는 시각적 부조화
+- **해결**: Python 스크립트(`scripts/patch-dark-theme.py`)로 stock dark CSS의 모든 neutral gray를 Tailwind Slate 계열로 일괄 교체
+- **색상 교체**: 56개 매핑, 총 803건 교체 (hex + rgb + rgba)
+- **보더 두께**: `border: 2px` → `1px` (58건)
+- **폰트 경로**: `icons/` → `devextreme/dist/css/icons/` (Vite resolve용)
+- **결과 파일**: `src/styles/dx.fluent.nanum-dark.css` (782KB, gzip: 101KB)
+- **theme-store.ts**: dark CSS import를 커스텀 테마로 변경
+- **문서**: `docs/CUSTOM-THEME.md` — 매핑 테이블, 스크립트 상세, 업그레이드 절차, 2층 테마 구조 설명
+
+### Phase 22: Users 연락처 뷰 + Settings 사용자 관리 분리
+
+- **Users 페이지 (`/users/:userId`)**: DataGrid 관리 화면 → ProfileCard 기반 연락처 디렉토리로 전환
+  - 3장의 카드: Basic Info (아바타/이름/부서/직책/Bio), Contacts (전화/이메일), Address (국가/도시/주소)
+  - 좌측 사이드바에서 사용자 선택 → 메인 영역에 프로필 표시 (Outlook 연락처 스타일)
+  - 자기 자신은 Edit/Save 가능, 다른 사용자는 읽기 전용
+  - NavRail `adminOnly` 제거 → 모든 사용자 접근 가능
+- **Settings > User Management (`/settings/users`)**: 기존 UsersPage의 DataGrid + CRUD 코드를 이동
+  - Admin 전용 (SettingsSidebarList의 `adminOnly: true`)
+  - Add User, Edit User 팝업, 역할 변경, 비활성화/재활성화 기능
+- **DB 마이그레이션** (`010_profile_extended_fields.sql`):
+  - `profiles` 테이블에 9개 컬럼 추가: phone, department, position, address, city, state, country, zip_code, bio
+  - `get_user_profile()` 함수 재생성 (새 컬럼 포함)
+- **파일 변경**:
+  - 신규: `settings/UsersSection.tsx`, `settings/UsersSection.css`
+  - 재작성: `UsersPage.tsx`, `UsersPage.css`
+  - 수정: `NavRail.tsx`, `UserSidebarList.tsx`, `ContextSidebar.css`, `routes/index.tsx`, `SettingsPage.tsx`, `SettingsSidebarList.tsx`, `settings/index.ts`
+
+### Phase 23: My Profile 독립 + Settings 구조 개선 + Gantt 강화
+
+- **My Profile 독립 페이지** (`/profile`):
+  - Settings에서 분리 → 독립 라우트 `/profile`
+  - 4개 ProfileCard: Basic Info (아바타/이름/부서/직책/Bio), Contacts (전화/이메일), Address (국가/도시/주/주소/우편번호), Change Password
+  - Edit/Save/Cancel 토글, 아바타 업로드/제거
+  - IDEHeader 프로필 드롭다운에서 "My Profile" → `/profile` 이동
+- **Settings 구조 변경**:
+  - "My Profile" 섹션 제거, admin 전용으로 변경
+  - 사이드바 순서: Organization → User Management → Security → Appearance
+  - 전체 섹션 `max-width: 100%` (기존 700px → 전체 폭)
+  - IDEHeader에서 Settings 항목 admin만 표시
+- **Users 페이지 읽기 전용화**: 모든 편집 UI 제거 (Edit/Save/Cancel 버튼, 폼 상태)
+- **Settings > User Management 확장**: Edit 팝업에 9개 확장 필드 추가 (Department, Position, Phone, Bio, Country, City, State, Zip Code, Address)
+- **Gantt 차트 강화**:
+  - `taskListWidth` 400 → 700, End/% 컬럼 항상 표시
+  - **Assigned 컬럼 추가**: 담당자 이니셜 배지 표시 (assignments + resources 데이터 조인)
+- **파일 변경**:
+  - 신규: `MyProfilePage.tsx`, `MyProfilePage.css`
+  - 수정: `routes/index.tsx`, `IDEHeader.tsx`, `SettingsSidebarList.tsx`, `SettingsPage.tsx`, `SettingsPage.css`, `settings/index.ts`, `UsersPage.tsx`, `settings/UsersSection.tsx`, `GanttView.tsx`, `GanttView.css`
+
+### Phase 24: Gantt 인터랙션 개선 — 커스텀 팝업 + RightPanel 제거
+
+- **목적**: Gantt에서 싱글 클릭 → RightPanel 슬라이드, 더블 클릭 → DevExtreme 기본 팝업(제목/날짜/진행률만)이라는 두 개의 상세 뷰가 공존하여 UX 혼란 → 커스텀 팝업 전용 방식으로 통일
+- **인터랙션 모델**:
+  | 제스처 | 동작 |
+  |--------|------|
+  | 싱글 클릭 | 행 하이라이트 (selectedTaskId 설정, 패널/팝업 안 열림) |
+  | 더블 클릭 | DevExtreme 기본 팝업 차단 → 커스텀 팝업 오픈 |
+  | 우클릭 → Task Details... | 커스텀 팝업 오픈 (onCustomCommand) |
+  | 간트 바 드래그 | 날짜/진행률 변경 (기존 유지) |
+- **pm-store 디커플링**: `setSelectedTaskId`가 더 이상 `rightPanelOpen`을 자동 설정하지 않음
+- **RightPanel 닫기 수정**: 닫기 버튼이 `setRightPanelOpen(false)` 호출 (기존: `setSelectedTaskId(null)`)
+- **TaskDetailPopup 컴포넌트** (`src/features/tasks/TaskDetailPopup.tsx`):
+  - DevExtreme `<Popup>` (720px, maxHeight 85vh, 드래그 가능)
+  - 4탭 구조: Info (편집 폼) / Relations / Comments / Checklist
+  - Info 탭: 읽기 모드 (기존 InfoTab) + Edit 버튼 → 편집 모드 (TextBox/DateBox/NumberBox/SelectBox/TextArea)
+  - Save → Supabase update → Gantt refetch
+- **GanttView 변경**:
+  - `onTaskDblClick`: 기본 팝업 차단(`e.cancel=true`) + 커스텀 팝업 오픈
+  - `onTaskEditDialogShowing`: 항상 차단(`e.cancel=true`)
+  - `onCustomCommand`: "openTaskDetails" 커스텀 커맨드 → 팝업 오픈 (predefined "taskDetails" 대신 커스텀 이름 사용)
+  - `<ContextMenu>`: addTask / taskDetails / deleteTask 항목
+- **파일 변경**:
+  - 신규: `TaskDetailPopup.tsx`
+  - 수정: `pm-store.ts`, `RightPanel.tsx`, `GanttView.tsx`, `TaskDetailPopup.css`
+
+### Phase 25: 다크 모드 완전 지원 — 하드코딩 색상 → CSS 변수
+
+- **목적**: 136+ 하드코딩된 색상값을 CSS 변수로 전환하여 light/dark 테마 완벽 동작
+- **theme-variables.css** — 35+ 신규 CSS 변수 추가 (light `:root` + dark `[data-theme="dark"]`):
+  - Links: `--link-color`, `--link-hover-color`
+  - Accent: `--accent-color`, `--accent-shadow`, `--accent-bg-subtle`
+  - Semantic: `--star-color`, `--warning-icon`, `--progress-fill`, `--card-hover-shadow`
+  - Item types: `--type-group-color`, `--type-task-color`, `--type-milestone-color`
+  - Board columns: `--board-col-todo/progress/review/done`
+  - Dashboard stat icons: `--stat-projects-bg/icon`, `--stat-tasks-bg/icon`, `--stat-completed-bg/icon`, `--stat-members-bg/icon`
+  - Card icons: `--icon-contacts-bg/color`, `--icon-address-bg/color`
+  - Roles: `--role-admin/manager/member/viewer-color`
+  - Status dots: `--status-dot-active/on-hold/complete/archived`
+  - Scheduler: `--scheduler-other-month-bg`
+- **CSS 파일 14개 수정**: index.css, DashboardPage.css, ProjectListPage.css, ProjectDetailPage.css, SettingsPage.css, UsersPage.css, MyProfilePage.css, BoardView.css, CalendarView.css, GanttView.css, TasksView.css, TaskDetailPopup.css, ContextSidebar.css
+- **TSX 파일 3개 수정**: DashboardPage.tsx (inline stat-icon → CSS class), ProjectSidebarList.tsx (statusDotColors → CSS class), UserSidebarList.tsx (roleBadgeColors → CSS class)
+- **의도적 유지**: Auth 페이지 gradient, theme-preview 아이콘, Gantt avatar gradient
+
+### Phase 26: Dashboard 재설계 — 종합 Command Center
+
+- **목적**: 기존 단순 통계 카드 + Quick Actions → 종합 대시보드 (8개 섹션)
+- **레이아웃** (4-Row Grid):
+  - Row 0: Greeting bar ("Good morning, 김민걸" + 한국어 날짜)
+  - Row 1: KPI 4-column grid (Overdue Tasks (danger highlight), In Progress, Due This Week, Completion Rate (mini progress bar))
+  - Row 2: 2fr + 1fr (My Tasks | Overdue Items)
+  - Row 3: 5fr + 4fr + 3fr (Project Status doughnut | Task Distribution bar | Upcoming Deadlines timeline)
+  - Row 4: Full-width Recent Activity feed
+- **신규 훅** (`hooks/useDashboardData.ts`):
+  - 4개 병렬 쿼리 그룹 (KPI / Lists / Charts / Activity)
+  - Progressive loading (섹션별 독립 loading state)
+  - 프로젝트명 batch lookup, 담당자 프로필 enrichment
+- **신규 컴포넌트** (8개, `features/dashboard/`):
+  - `DashboardGreeting.tsx` — 시간대별 인사 + 한국어 날짜
+  - `DashboardKPIRow.tsx` — 4 KPI 카드 (overdue 시 red border, "N assigned to me" subtext)
+  - `DashboardMyTasks.tsx` — 내 태스크 목록 (status strip, project pill, relative due date)
+  - `DashboardAtRisk.tsx` — 기한 초과 아이템 (red dot, "Nd" overdue)
+  - `DashboardProjectStatus.tsx` — DevExtreme PieChart (doughnut, center total overlay)
+  - `DashboardTaskDistribution.tsx` — DevExtreme Chart (horizontal bar, status color-mapped)
+  - `DashboardUpcoming.tsx` — 날짜 그룹 타임라인 (14일, task/milestone dot)
+  - `DashboardActivity.tsx` — 활동 피드 (avatar, action verb, relative time)
+- **DashboardPage.tsx** — Layout shell (8 sub-components + useDashboardData hook)
+- **DashboardPage.css** — 전체 스타일 (cards, KPI, lists, charts, skeleton, responsive breakpoints)
+- **반응형**: 1100px (3col→2col), 860px (2col→1col, KPI 2×2), 540px (KPI 1col)
+
 ### Bugfix: 새로고침 시 데이터 미로딩 (Supabase Auth 데드락)
 
 **증상**: 페이지 새로고침(F5) 시 프로젝트 목록, 대시보드 통계 등 모든 데이터가 로드되지 않음. 콘솔 에러 없이 빈 화면 표시.
@@ -420,4 +571,5 @@ cd migration
 npm run import          # 전체 임포트
 npm run import:clean    # 클린 임포트 (기존 데이터 삭제 후)
 npm run import:resume   # 이어서 임포트
+npm run repair          # 마이그레이션 복구 (그룹/parent_id/dependencies/timestamps)
 ```

@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouterProvider, Outlet, Navigate } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Outlet, Navigate, useParams } from 'react-router-dom';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { IDELayout } from '@/components/IDELayout';
 import HomePage from '@/pages/HomePage';
@@ -10,7 +10,14 @@ import SettingsPage from '@/pages/SettingsPage';
 import UsersPage from '@/pages/UsersPage';
 import AuditLogPage from '@/pages/AuditLogPage';
 import ProjectListPage from '@/pages/ProjectListPage';
-import ProjectDetailPage from '@/pages/ProjectDetailPage';
+import TasksWorkspacePage from '@/pages/TasksWorkspacePage';
+import MyProfilePage from '@/pages/MyProfilePage';
+
+/** Redirect /projects/:projectId(/:tab) → /tasks/:projectId(/:tab) */
+function ProjectRedirect() {
+  const { projectId, tab } = useParams();
+  return <Navigate to={`/tasks/${projectId}${tab ? `/${tab}` : ''}`} replace />;
+}
 
 const router = createBrowserRouter([
   {
@@ -40,12 +47,18 @@ const router = createBrowserRouter([
     children: [
       { path: '/dashboard', element: <DashboardPage /> },
       { path: '/projects', element: <ProjectListPage /> },
+      { path: '/tasks', element: <TasksWorkspacePage /> },
+      { path: '/tasks/:projectId', element: <TasksWorkspacePage /> },
+      { path: '/tasks/:projectId/:tab', element: <TasksWorkspacePage /> },
+      { path: '/profile', element: <MyProfilePage /> },
       { path: '/users', element: <UsersPage /> },
+      { path: '/users/:userId', element: <UsersPage /> },
       { path: '/audit', element: <AuditLogPage /> },
       { path: '/settings', element: <SettingsPage /> },
       { path: '/settings/:section', element: <SettingsPage /> },
-      { path: '/projects/:projectId', element: <ProjectDetailPage /> },
-      { path: '/projects/:projectId/:tab', element: <ProjectDetailPage /> },
+      // Legacy: /projects/:projectId → /tasks/:projectId
+      { path: '/projects/:projectId', element: <ProjectRedirect /> },
+      { path: '/projects/:projectId/:tab', element: <ProjectRedirect /> },
       // Legacy redirects
       { path: '/dashboard/users', element: <Navigate to="/users" replace /> },
       { path: '/dashboard/audit', element: <Navigate to="/audit" replace /> },

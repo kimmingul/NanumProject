@@ -30,15 +30,25 @@ NanumProject/
 │   │   ├── LoginPage.tsx      #   로그인
 │   │   ├── SignUpPage.tsx     #   회원가입
 │   │   ├── ResetPasswordPage.tsx # 비밀번호 재설정
-│   │   ├── DashboardPage.tsx  #   대시보드 (통계 카드)
+│   │   ├── DashboardPage.tsx  #   대시보드 (KPI + 차트 + 태스크 + 활동)
 │   │   ├── UsersPage.tsx      #   사용자 관리 (DataGrid + Edit/Add User Popup)
 │   │   ├── AuditLogPage.tsx   #   감사 로그 뷰어
 │   │   ├── ProjectListPage.tsx #  프로젝트 목록 (DataGrid + CRUD)
 │   │   └── ProjectDetailPage.tsx # 프로젝트 상세 (탭 기반)
-│   ├── features/              # 기능 모듈 (프로젝트 상세 탭)
+│   ├── features/              # 기능 모듈
+│   │   ├── dashboard/                 # 대시보드 섹션 컴포넌트
+│   │   │   ├── DashboardGreeting.tsx  #   인사 + 날짜
+│   │   │   ├── DashboardKPIRow.tsx    #   KPI 4-card row
+│   │   │   ├── DashboardMyTasks.tsx   #   내 태스크 목록
+│   │   │   ├── DashboardAtRisk.tsx    #   기한 초과 아이템
+│   │   │   ├── DashboardProjectStatus.tsx  # 프로젝트 상태 PieChart
+│   │   │   ├── DashboardTaskDistribution.tsx # 태스크 분포 BarChart
+│   │   │   ├── DashboardUpcoming.tsx  #   Upcoming Deadlines 타임라인
+│   │   │   └── DashboardActivity.tsx  #   최근 활동 피드
 │   │   ├── gantt/GanttView.tsx        # DevExtreme Gantt 차트
 │   │   ├── tasks/TasksView.tsx        # TreeList 기반 태스크 목록
 │   │   ├── tasks/TaskDetailPanel.tsx  # 태스크 상세 인라인 패널 (RightPanel용)
+│   │   ├── tasks/TaskDetailPopup.tsx  # 태스크 상세 팝업 (Gantt용)
 │   │   ├── board/BoardView.tsx        # Kanban 보드 (Sortable)
 │   │   ├── calendar/CalendarView.tsx  # Scheduler 캘린더 뷰
 │   │   ├── comments/CommentsView.tsx  # 코멘트 뷰
@@ -59,7 +69,8 @@ NanumProject/
 │   │   ├── useActivityLog.ts  #   활동 로그 조회
 │   │   ├── useAuditLog.ts     #   감사 로그 조회
 │   │   ├── useTimeEntries.ts  #   시간 기록 CRUD
-│   │   └── useChecklist.ts    #   체크리스트 CRUD + 토글
+│   │   ├── useChecklist.ts    #   체크리스트 CRUD + 토글
+│   │   └── useDashboardData.ts #  대시보드 KPI/차트/리스트/활동 데이터
 │   ├── lib/                   # 코어 라이브러리
 │   │   ├── supabase.ts        #   Supabase 클라이언트 (typed)
 │   │   ├── auth-store.ts      #   Zustand 인증 스토어 (persistent)
@@ -245,7 +256,54 @@ Vite 프로덕션 번들러가 `devextreme/core/config` import를 비동기 prel
 
 > `src/config/devextreme.ts`의 `config({licenseKey})` 호출은 fallback으로 유지하되, 실제 라이선스 적용은 `index.html`에서 이루어진다.
 
-## 10. Vercel 배포
+## 10. TeamGantt → Supabase 마이그레이션
+
+### 10.1 임포트 파이프라인
+
+`migration/` 디렉토리에 별도 npm 패키지로 구현. 7단계 순차 실행:
+
+```
+Users → Projects+Members → Groups(2-pass) → Tasks+Assignees → Dependencies → Comments → TimeEntries
+```
+
+- **추출**: TeamGantt API (Cognito 인증) → `migration/output/` JSON 저장
+- **임포트**: JSON → Supabase (IdMapper로 TeamGantt ID ↔ Supabase UUID 매핑)
+- **ID 매핑**: `migration/output/id-map.json` — 양방향 매핑 영속화, `project_items.tg_id` 컬럼이 DB 앵커
+
+### 10.2 데이터 규모
+
+| 항목 | 수량 |
+|------|------|
+| Projects | 368 |
+| Users | 38 |
+| Groups | 1,779 |
+| Tasks | 15,272 |
+| Dependencies | 89 |
+| Comments | 43,873 |
+| Documents | 550 |
+
+### 10.3 마이그레이션 복구
+
+초기 임포트 후 그룹 계층이 소실되는 문제가 발견되어 종합 복구를 수행했습니다.
+
+**발견된 문제와 수정**:
+
+| 문제 | 심각도 | 원인 | 수정 |
+|------|--------|------|------|
+| 그룹 매핑 실패 → 모든 task parent_id = null | CRITICAL | group-importer가 DB 삽입 성공하나 id-map.json에 UUID 미저장 | DB에서 tg_id 기준 매핑 재구축 + 누락 그룹 삽입 |
+| task_dependencies 전체 insert 실패 | CRITICAL | dependency-importer에서 project_id 누락 + 실제 DB에 project_id 컬럼 없음 | project_id 없이 재삽입 |
+| updated_at 미임포트 (165건) | MEDIUM | task-importer가 created_at만 저장 | 원본에서 updated_at 복원 |
+| checklist 데이터 유실 (1,806건) | INFO | TeamGantt API에서 빈 응답 | 복구 불가 |
+
+**복구 스크립트**: `migration/src/repair-all.ts` (멱등성 보장, 여러 번 실행 가능)
+
+```bash
+cd migration && npm run repair
+```
+
+> 상세 문서: `migration/REPAIR-GUIDE.md`
+
+## 11. Vercel 배포
 
 - **URL**: https://nanum-project-nu.vercel.app/
 - **Production branch**: `master`

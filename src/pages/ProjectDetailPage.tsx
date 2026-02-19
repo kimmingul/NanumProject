@@ -22,7 +22,7 @@ const statusLabels: Record<string, string> = {
 
 const projectTabs = [
   { id: 'gantt', icon: 'chart', label: 'Gantt Chart' },
-  { id: 'tasks', icon: 'detailslayout', label: 'Tasks' },
+  { id: 'grid', icon: 'detailslayout', label: 'Grid' },
   { id: 'board', icon: 'contentlayout', label: 'Board' },
   { id: 'calendar', icon: 'event', label: 'Calendar' },
   { id: 'comments', icon: 'comment', label: 'Comments' },
@@ -81,7 +81,7 @@ export default function ProjectDetailPage(): ReactNode {
               icon={t.icon}
               stylingMode="text"
               hint={t.label}
-              className={`workspace-tab-btn ${t.id === activeTab ? 'active' : ''}`}
+              className={`workspace-tab-btn tab-${t.id} ${t.id === activeTab ? 'active' : ''}`}
               onClick={() => handleTabClick(t.id)}
             />
           ))}
@@ -90,7 +90,7 @@ export default function ProjectDetailPage(): ReactNode {
 
       <div className="workspace-content">
         {activeTab === 'gantt' && projectId && <GanttView projectId={projectId} />}
-        {activeTab === 'tasks' && projectId && <TasksView projectId={projectId} />}
+        {activeTab === 'grid' && projectId && <TasksView projectId={projectId} />}
         {activeTab === 'board' && projectId && <BoardView projectId={projectId} />}
         {activeTab === 'calendar' && projectId && <CalendarView projectId={projectId} />}
         {activeTab === 'comments' && projectId && <CommentsView projectId={projectId} />}

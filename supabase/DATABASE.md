@@ -15,8 +15,9 @@ Supabase (PostgreSQL) 기반 멀티테넌트 프로젝트 관리 서비스.
 | `007_create_tenant_user.sql` | handle_new_user 수정 + create_tenant_user RPC |
 | `008_fix_missing_functions.sql` | deactivate_user, reactivate_user, revoke_user_sessions 함수 생성 |
 | `009_item_links.sql` | item_links 테이블, link_type enum, hierarchy trigger, comment count RPC |
+| `010_profile_extended_fields.sql` | profiles 확장 컬럼 (phone, department, position, address 등) + get_user_profile 재생성 |
 
-> 실행 순서: 001 → 002 → 003 → 004 → 005 → 006 → 007 → 008 → 009
+> 실행 순서: 001 → 002 → 003 → 004 → 005 → 006 → 007 → 008 → 009 → 010
 
 ---
 
@@ -234,3 +235,34 @@ tenants, applications, projects, project_members, project_items
 ### avatars RLS
 - **읽기**: 공개 (public bucket)
 - **업로드/수정/삭제**: 같은 tenant 사용자만 (folder = tenant_id 체크)
+
+---
+
+## 알려진 스키마 불일치
+
+### task_dependencies.project_id
+
+| 항목 | 값 |
+|------|---|
+| SQL 정의 (`002_pm.sql`) | `project_id UUID NOT NULL REFERENCES projects(id)` |
+| 실제 배포 DB | `project_id` 컬럼 **없음** |
+| RLS 영향 | `project_id` 참조하는 정책이 적용 안 됨 |
+
+`002_pm.sql`에는 `project_id` 컬럼이 정의되어 있으나, 실제 Supabase DB에는 해당 컬럼이 존재하지 않습니다.
+현재는 `service_role` key로 마이그레이션 데이터를 관리하므로 문제 없으나, 향후 RLS 기반 접근 제어가 필요하면 아래 SQL로 컬럼을 추가해야 합니다.
+
+```sql
+-- Supabase SQL Editor에서 실행
+ALTER TABLE public.task_dependencies
+  ADD COLUMN project_id UUID REFERENCES public.projects(id) ON DELETE CASCADE;
+
+UPDATE public.task_dependencies td
+SET project_id = pi.project_id
+FROM public.project_items pi
+WHERE td.predecessor_id = pi.id;
+
+ALTER TABLE public.task_dependencies
+  ALTER COLUMN project_id SET NOT NULL;
+```
+
+> 상세 내용: `migration/REPAIR-GUIDE.md` §4.1 참조

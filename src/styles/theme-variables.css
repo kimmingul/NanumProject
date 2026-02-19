@@ -123,6 +123,63 @@
 
   /* ---- Avatar ---- */
   --avatar-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+  /* ---- Links ---- */
+  --link-color: #667eea;
+  --link-hover-color: #7c8cf0;
+
+  /* ---- Accent ---- */
+  --accent-color: #667eea;
+  --accent-shadow: rgba(102, 126, 234, 0.15);
+  --accent-bg-subtle: rgba(102, 126, 234, 0.08);
+
+  /* ---- Semantic Icons ---- */
+  --star-color: #f59e0b;
+  --warning-icon: #f59e0b;
+  --progress-fill: #4caf50;
+  --card-hover-shadow: rgba(0, 0, 0, 0.12);
+
+  /* ---- Item Type Colors ---- */
+  --type-group-color: #3b82f6;
+  --type-task-color: #22c55e;
+  --type-milestone-color: #f59e0b;
+
+  /* ---- Board Column Colors ---- */
+  --board-col-todo: #94a3b8;
+  --board-col-progress: #3b82f6;
+  --board-col-review: #f59e0b;
+  --board-col-done: #22c55e;
+
+  /* ---- Dashboard Stat Icons ---- */
+  --stat-projects-bg: #e3f2fd;
+  --stat-projects-icon: #1976d2;
+  --stat-tasks-bg: #f3e5f5;
+  --stat-tasks-icon: #7b1fa2;
+  --stat-completed-bg: #e8f5e9;
+  --stat-completed-icon: #388e3c;
+  --stat-members-bg: #fff3e0;
+  --stat-members-icon: #f57c00;
+
+  /* ---- Card Icon Circles ---- */
+  --icon-contacts-bg: rgba(239, 68, 68, 0.1);
+  --icon-contacts-color: #ef4444;
+  --icon-address-bg: rgba(59, 130, 246, 0.1);
+  --icon-address-color: #3b82f6;
+
+  /* ---- Sidebar Role Colors ---- */
+  --role-admin-color: #dc2626;
+  --role-manager-color: #2563eb;
+  --role-member-color: #16a34a;
+  --role-viewer-color: #94a3b8;
+
+  /* ---- Status Dot Colors ---- */
+  --status-dot-active: #22c55e;
+  --status-dot-on-hold: #f59e0b;
+  --status-dot-complete: #3b82f6;
+  --status-dot-archived: #94a3b8;
+
+  /* ---- Scheduler ---- */
+  --scheduler-other-month-bg: rgba(0, 0, 0, 0.08);
 }
 
 
@@ -248,6 +305,63 @@
   /* ---- Spinner ---- */
   --spinner-border: #334155;
   --spinner-active: #818cf8;
+
+  /* ---- Links ---- */
+  --link-color: #818cf8;
+  --link-hover-color: #a5b4fc;
+
+  /* ---- Accent ---- */
+  --accent-color: #818cf8;
+  --accent-shadow: rgba(129, 140, 248, 0.2);
+  --accent-bg-subtle: rgba(129, 140, 248, 0.12);
+
+  /* ---- Semantic Icons ---- */
+  --star-color: #fbbf24;
+  --warning-icon: #fbbf24;
+  --progress-fill: #4ade80;
+  --card-hover-shadow: rgba(0, 0, 0, 0.3);
+
+  /* ---- Item Type Colors ---- */
+  --type-group-color: #60a5fa;
+  --type-task-color: #4ade80;
+  --type-milestone-color: #fbbf24;
+
+  /* ---- Board Column Colors ---- */
+  --board-col-todo: #94a3b8;
+  --board-col-progress: #60a5fa;
+  --board-col-review: #fbbf24;
+  --board-col-done: #4ade80;
+
+  /* ---- Dashboard Stat Icons ---- */
+  --stat-projects-bg: rgba(25, 118, 210, 0.15);
+  --stat-projects-icon: #60a5fa;
+  --stat-tasks-bg: rgba(123, 31, 162, 0.15);
+  --stat-tasks-icon: #c084fc;
+  --stat-completed-bg: rgba(56, 142, 60, 0.15);
+  --stat-completed-icon: #4ade80;
+  --stat-members-bg: rgba(245, 124, 0, 0.15);
+  --stat-members-icon: #fb923c;
+
+  /* ---- Card Icon Circles ---- */
+  --icon-contacts-bg: rgba(239, 68, 68, 0.15);
+  --icon-contacts-color: #f87171;
+  --icon-address-bg: rgba(59, 130, 246, 0.15);
+  --icon-address-color: #60a5fa;
+
+  /* ---- Sidebar Role Colors ---- */
+  --role-admin-color: #f87171;
+  --role-manager-color: #60a5fa;
+  --role-member-color: #4ade80;
+  --role-viewer-color: #94a3b8;
+
+  /* ---- Status Dot Colors ---- */
+  --status-dot-active: #4ade80;
+  --status-dot-on-hold: #fbbf24;
+  --status-dot-complete: #60a5fa;
+  --status-dot-archived: #94a3b8;
+
+  /* ---- Scheduler ---- */
+  --scheduler-other-month-bg: rgba(255, 255, 255, 0.04);
 }
 
 /* ================================================= */

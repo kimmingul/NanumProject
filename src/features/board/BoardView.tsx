@@ -1,14 +1,21 @@
-import { type ReactNode, useCallback, useMemo } from 'react';
+import { type ReactNode, useCallback, useEffect, useMemo, useRef } from 'react';
 import Sortable from 'devextreme-react/sortable';
 import type { DragEndEvent } from 'devextreme/ui/sortable';
+import { ScrollArrowOverlay } from '@/components/ScrollArrowOverlay';
 import { useProjectItems } from '@/hooks/useProjectItems';
+import { useAuthStore } from '@/lib/auth-store';
 import { usePMStore } from '@/lib/pm-store';
 import { supabase } from '@/lib/supabase';
 import type { ProjectItem, TaskStatus } from '@/types';
 import './BoardView.css';
 
+export interface BoardActions {
+  addTask: () => void;
+}
+
 interface BoardViewProps {
   projectId: string;
+  actionsRef?: React.MutableRefObject<BoardActions | undefined>;
 }
 
 interface BoardColumn {
@@ -23,10 +30,40 @@ const COLUMNS: BoardColumn[] = [
   { id: 'done', label: 'Done' },
 ];
 
-export default function BoardView({ projectId }: BoardViewProps): ReactNode {
+export default function BoardView({ projectId, actionsRef }: BoardViewProps): ReactNode {
   const { items, resources, assignments, loading, error, refetch } =
     useProjectItems(projectId);
+  const profile = useAuthStore((s) => s.profile);
   const setSelectedTaskId = usePMStore((s) => s.setSelectedTaskId);
+  const boardColumnsRef = useRef<HTMLDivElement>(null);
+
+  // Add task to "To Do" column
+  const handleAddTask = useCallback(async () => {
+    if (!profile?.tenant_id) return;
+    try {
+      await supabase.from('project_items').insert({
+        tenant_id: profile.tenant_id,
+        project_id: projectId,
+        item_type: 'task',
+        name: 'New Task',
+        task_status: 'todo',
+        created_by: profile.user_id,
+      });
+      await refetch();
+    } catch (err) {
+      console.error('Failed to add task:', err);
+    }
+  }, [projectId, profile, refetch]);
+
+  // Expose actions to parent via ref
+  useEffect(() => {
+    if (actionsRef) {
+      actionsRef.current = { addTask: handleAddTask };
+    }
+    return () => {
+      if (actionsRef) actionsRef.current = undefined;
+    };
+  }, [actionsRef, handleAddTask]);
 
   // Only tasks (no groups / milestones)
   const tasks = useMemo(() => items.filter((i) => i.item_type === 'task'), [items]);
@@ -121,8 +158,10 @@ export default function BoardView({ projectId }: BoardViewProps): ReactNode {
 
   return (
     <div className="board-view">
-      <div className="board-columns">
-        {COLUMNS.map((col) => {
+      <div className="board-columns-wrapper">
+        <ScrollArrowOverlay scrollRef={boardColumnsRef} direction="horizontal" />
+        <div className="board-columns" ref={boardColumnsRef}>
+          {COLUMNS.map((col) => {
           const colTasks = grouped[col.id];
           return (
             <div key={col.id} className={`board-column board-column-${col.id}`}>
@@ -178,6 +217,7 @@ export default function BoardView({ projectId }: BoardViewProps): ReactNode {
             </div>
           );
         })}
+        </div>
       </div>
     </div>
   );

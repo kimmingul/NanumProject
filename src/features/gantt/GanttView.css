@@ -62,29 +62,72 @@
   overflow: hidden;
 }
 
+/* --- Type-specific icon colors --- */
 .gantt-type-icon {
   font-size: 14px;
-  color: var(--text-tertiary);
   flex-shrink: 0;
 }
 
+.gantt-item-group .gantt-type-icon { color: var(--type-group-color); }
+.gantt-item-task .gantt-type-icon { color: var(--type-task-color); }
+.gantt-item-milestone .gantt-type-icon { color: var(--type-milestone-color); }
+
+/* --- Type-specific text styles --- */
 .gantt-task-title {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+.gantt-item-group .gantt-task-title {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.gantt-item-task .gantt-task-title {
+  font-weight: 500;
+}
+
+.gantt-item-milestone .gantt-task-title {
+  font-weight: 500;
+  font-size: 0.92em;
+  color: var(--text-secondary);
+}
+
+/* Assignees cell */
+.gantt-assignees-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.gantt-assignee-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--avatar-gradient, linear-gradient(135deg, #667eea, #764ba2));
+  color: white;
+  font-size: 9px;
+  font-weight: 600;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
 .gantt-comment-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
-  border-radius: 9px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
   background: var(--badge-info-bg, #e3f2fd);
   color: var(--badge-info-text, #1565c0);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
   flex-shrink: 0;
   line-height: 1;

@@ -10,8 +10,8 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { key: 'profile', label: 'My Profile', icon: 'dx-icon-user', adminOnly: false },
   { key: 'organization', label: 'Organization', icon: 'dx-icon-home', adminOnly: true },
+  { key: 'users', label: 'User Management', icon: 'dx-icon-group', adminOnly: true },
   { key: 'security', label: 'Security', icon: 'dx-icon-lock', adminOnly: true },
   { key: 'appearance', label: 'Appearance', icon: 'dx-icon-palette', adminOnly: true },
 ];
@@ -22,7 +22,7 @@ export function SettingsSidebarList(): ReactNode {
   const role = useAuthStore((s) => s.profile?.role);
   const isAdmin = role === 'admin';
 
-  const activeSection = section || 'profile';
+  const activeSection = section || 'organization';
   const visibleItems = navItems.filter((item) => !item.adminOnly || isAdmin);
 
   return (

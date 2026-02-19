@@ -1,0 +1,105 @@
+/* ============================== */
+/* Scroll Arrow Overlay — shared  */
+/* ============================== */
+
+/* --- Gradient fades --- */
+.scroll-overlay-fade {
+  position: absolute;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Vertical fades */
+.scroll-overlay-v-fade-start {
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 32px;
+  background: linear-gradient(to bottom, var(--panel-bg, var(--sidebar-bg)) 0%, transparent 100%);
+}
+
+.scroll-overlay-v-fade-end {
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 32px;
+  background: linear-gradient(to top, var(--panel-bg, var(--sidebar-bg)) 0%, transparent 100%);
+}
+
+/* Horizontal fades */
+.scroll-overlay-h-fade-start {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 32px;
+  background: linear-gradient(to right, var(--panel-bg, var(--sidebar-bg)) 0%, transparent 100%);
+}
+
+.scroll-overlay-h-fade-end {
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 32px;
+  background: linear-gradient(to left, var(--panel-bg, var(--sidebar-bg)) 0%, transparent 100%);
+}
+
+/* --- Arrow buttons --- */
+.scroll-overlay-arrow {
+  position: absolute;
+  z-index: 3;
+  border: none;
+  border-radius: 10px;
+  background: var(--sidebar-hover-bg, rgba(128, 128, 128, 0.15));
+  color: var(--sidebar-icon, var(--text-secondary));
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.7;
+  transition: opacity 0.2s, background 0.2s;
+  padding: 0;
+}
+
+.scroll-overlay-arrow:hover {
+  opacity: 1;
+  background: var(--sidebar-active-bg, rgba(128, 128, 128, 0.25));
+  color: var(--sidebar-active-text, var(--text-primary));
+}
+
+.scroll-overlay-arrow i {
+  font-size: 14px;
+}
+
+/* Vertical arrow positions */
+.scroll-overlay-v-arrow-start {
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 28px;
+  height: 20px;
+}
+
+.scroll-overlay-v-arrow-end {
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 28px;
+  height: 20px;
+}
+
+/* Horizontal arrow positions */
+.scroll-overlay-h-arrow-start {
+  left: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 28px;
+}
+
+.scroll-overlay-h-arrow-end {
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 28px;
+}

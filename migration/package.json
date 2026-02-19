@@ -14,7 +14,8 @@
     "import:tasks": "tsx src/importers/index.ts --only=tasks",
     "import:comments": "tsx src/importers/index.ts --only=comments",
     "import:time": "tsx src/importers/index.ts --only=time",
-    "import:resume": "tsx src/importers/index.ts --resume"
+    "import:resume": "tsx src/importers/index.ts --resume",
+    "repair": "tsx src/repair-all.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.2",

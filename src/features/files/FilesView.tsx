@@ -1,4 +1,4 @@
-import { type ReactNode, useCallback, useRef, useState } from 'react';
+import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { DataGrid } from 'devextreme-react/data-grid';
 import { Column } from 'devextreme-react/data-grid';
 import { Button } from 'devextreme-react/button';
@@ -8,8 +8,13 @@ import { useAuthStore } from '@/lib/auth-store';
 import type { DocumentVersion } from '@/types';
 import './FilesView.css';
 
+export interface FileActions {
+  upload: () => void;
+}
+
 interface FilesViewProps {
   projectId: string;
+  actionsRef?: React.MutableRefObject<FileActions | undefined>;
 }
 
 function formatFileSize(bytes: number | null): string {
@@ -24,12 +29,24 @@ function formatFileSize(bytes: number | null): string {
   return `${size.toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
 }
 
-export default function FilesView({ projectId }: FilesViewProps): ReactNode {
+export default function FilesView({ projectId, actionsRef }: FilesViewProps): ReactNode {
   const { documents, loading, error, uploadFile, deleteDocument, getVersions, downloadFile } =
     useDocuments(projectId);
   const profile = useAuthStore((s) => s.profile);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [uploading, setUploading] = useState(false);
+
+  // Expose upload action to parent via ref
+  useEffect(() => {
+    if (actionsRef) {
+      actionsRef.current = {
+        upload: () => fileInputRef.current?.click(),
+      };
+    }
+    return () => {
+      if (actionsRef) actionsRef.current = undefined;
+    };
+  }, [actionsRef]);
+
   const [versionPopup, setVersionPopup] = useState<{
     visible: boolean;
     documentId: string;
@@ -37,16 +54,11 @@ export default function FilesView({ projectId }: FilesViewProps): ReactNode {
     versions: DocumentVersion[];
   }>({ visible: false, documentId: '', fileName: '', versions: [] });
 
-  const handleUploadClick = () => {
-    fileInputRef.current?.click();
-  };
-
   const handleFileChange = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
       const files = e.target.files;
       if (!files || files.length === 0) return;
 
-      setUploading(true);
       try {
         for (let i = 0; i < files.length; i++) {
           await uploadFile(files[i]);
@@ -54,7 +66,6 @@ export default function FilesView({ projectId }: FilesViewProps): ReactNode {
       } catch (err) {
         console.error('Failed to upload file:', err);
       } finally {
-        setUploading(false);
         if (fileInputRef.current) {
           fileInputRef.current.value = '';
         }
@@ -103,24 +114,14 @@ export default function FilesView({ projectId }: FilesViewProps): ReactNode {
 
   return (
     <div className="files-view">
-      {/* Upload section */}
-      <div className="files-toolbar">
-        <Button
-          text={uploading ? 'Uploading...' : 'Upload File'}
-          icon="upload"
-          type="default"
-          stylingMode="contained"
-          disabled={uploading}
-          onClick={handleUploadClick}
-        />
-        <input
-          ref={fileInputRef}
-          type="file"
-          multiple
-          style={{ display: 'none' }}
-          onChange={handleFileChange}
-        />
-      </div>
+      {/* Hidden file input for upload */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        style={{ display: 'none' }}
+        onChange={handleFileChange}
+      />
 
       {error && (
         <div className="files-error">

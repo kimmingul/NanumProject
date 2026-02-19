@@ -1,154 +1,41 @@
-import { type ReactNode, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from 'devextreme-react/button';
-import { useAuthStore } from '@/lib/auth-store';
-import { supabase } from '@/lib/supabase';
+import { type ReactNode } from 'react';
+import { useDashboardData } from '@/hooks/useDashboardData';
+import DashboardGreeting from '@/features/dashboard/DashboardGreeting';
+import DashboardKPIRow from '@/features/dashboard/DashboardKPIRow';
+import DashboardMyTasks from '@/features/dashboard/DashboardMyTasks';
+import DashboardAtRisk from '@/features/dashboard/DashboardAtRisk';
+import DashboardProjectStatus from '@/features/dashboard/DashboardProjectStatus';
+import DashboardTaskDistribution from '@/features/dashboard/DashboardTaskDistribution';
+import DashboardUpcoming from '@/features/dashboard/DashboardUpcoming';
+import DashboardActivity from '@/features/dashboard/DashboardActivity';
 import './DashboardPage.css';
 
-interface DashboardStats {
-  activeProjects: number;
-  totalTasks: number;
-  completedTasks: number;
-  teamMembers: number;
-}
-
 export default function DashboardPage(): ReactNode {
-  const navigate = useNavigate();
-  const profile = useAuthStore((s) => s.profile);
-  const [stats, setStats] = useState<DashboardStats>({
-    activeProjects: 0,
-    totalTasks: 0,
-    completedTasks: 0,
-    teamMembers: 0,
-  });
-  const [statsLoading, setStatsLoading] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadStats() {
-      if (!profile?.tenant_id) {
-        setStatsLoading(false);
-        return;
-      }
-
-      setStatsLoading(true);
-
-      try {
-        const [projectsRes, tasksRes, completedRes, membersRes] = await Promise.all([
-          supabase
-            .from('projects')
-            .select('*', { count: 'exact', head: true })
-            .eq('is_active', true)
-            .eq('status', 'active'),
-          supabase
-            .from('project_items')
-            .select('*', { count: 'exact', head: true })
-            .eq('is_active', true)
-            .in('item_type', ['task', 'milestone']),
-          supabase
-            .from('project_items')
-            .select('*', { count: 'exact', head: true })
-            .eq('is_active', true)
-            .in('item_type', ['task', 'milestone'])
-            .eq('percent_complete', 100),
-          supabase
-            .from('project_members')
-            .select('user_id')
-            .eq('is_active', true),
-        ]);
-
-        if (cancelled) return;
-
-        const uniqueMembers = membersRes.data
-          ? new Set(membersRes.data.map((m: { user_id: string }) => m.user_id)).size
-          : 0;
-
-        setStats({
-          activeProjects: projectsRes.count ?? 0,
-          totalTasks: tasksRes.count ?? 0,
-          completedTasks: completedRes.count ?? 0,
-          teamMembers: uniqueMembers,
-        });
-      } catch (err) {
-        console.error('Failed to load dashboard stats:', err);
-      } finally {
-        if (!cancelled) setStatsLoading(false);
-      }
-    }
-
-    loadStats();
-    return () => { cancelled = true; };
-  }, [profile?.tenant_id]);
-
-  const completionRate = stats.totalTasks > 0
-    ? Math.round((stats.completedTasks / stats.totalTasks) * 100)
-    : 0;
+  const data = useDashboardData();
 
   return (
     <div className="dashboard-page">
-      <div className="dashboard-content">
-        <div className="overview-section">
-          <h2>Welcome back, {profile?.full_name}!</h2>
+      {/* Row 0 — Greeting */}
+      <DashboardGreeting />
 
-          <div className="stats-grid">
-            <div
-              className="stat-card stat-card-clickable"
-              onClick={() => navigate('/projects')}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => e.key === 'Enter' && navigate('/projects')}
-            >
-              <div className="stat-icon" style={{ backgroundColor: '#e3f2fd' }}>
-                <i className="dx-icon-folder" style={{ color: '#1976d2' }}></i>
-              </div>
-              <div className="stat-content">
-                <div className="stat-value">{statsLoading ? '...' : stats.activeProjects}</div>
-                <div className="stat-label">Active Projects</div>
-              </div>
-            </div>
+      {/* Row 1 — KPI Cards */}
+      <DashboardKPIRow kpi={data.kpi} loading={data.loading.kpi} />
 
-            <div className="stat-card">
-              <div className="stat-icon" style={{ backgroundColor: '#f3e5f5' }}>
-                <i className="dx-icon-detailslayout" style={{ color: '#7b1fa2' }}></i>
-              </div>
-              <div className="stat-content">
-                <div className="stat-value">{statsLoading ? '...' : stats.totalTasks.toLocaleString()}</div>
-                <div className="stat-label">Total Tasks</div>
-              </div>
-            </div>
-
-            <div className="stat-card">
-              <div className="stat-icon" style={{ backgroundColor: '#e8f5e9' }}>
-                <i className="dx-icon-check" style={{ color: '#388e3c' }}></i>
-              </div>
-              <div className="stat-content">
-                <div className="stat-value">{statsLoading ? '...' : `${completionRate}%`}</div>
-                <div className="stat-label">Completion Rate</div>
-              </div>
-            </div>
-
-            <div className="stat-card">
-              <div className="stat-icon" style={{ backgroundColor: '#fff3e0' }}>
-                <i className="dx-icon-group" style={{ color: '#f57c00' }}></i>
-              </div>
-              <div className="stat-content">
-                <div className="stat-value">{statsLoading ? '...' : stats.teamMembers}</div>
-                <div className="stat-label">Team Members</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="quick-actions">
-            <h3>Quick Actions</h3>
-            <div className="action-buttons">
-              <Button icon="folder" text="View Projects" stylingMode="outlined" onClick={() => navigate('/projects')} />
-              <Button icon="group" text="Manage Users" stylingMode="outlined" onClick={() => navigate('/users')} />
-              <Button icon="preferences" text="Settings" stylingMode="outlined" onClick={() => navigate('/settings')} />
-            </div>
-          </div>
-        </div>
+      {/* Row 2 — My Tasks (2fr) + Overdue Items (1fr) */}
+      <div className="dashboard-row dashboard-row-2">
+        <DashboardMyTasks tasks={data.myTasks} loading={data.loading.lists} />
+        <DashboardAtRisk items={data.overdueItems} loading={data.loading.lists} />
       </div>
+
+      {/* Row 3 — Project Status + Task Distribution + Upcoming */}
+      <div className="dashboard-row dashboard-row-3">
+        <DashboardProjectStatus data={data.projectStatusCounts} loading={data.loading.charts} />
+        <DashboardTaskDistribution data={data.taskStatusCounts} loading={data.loading.charts} />
+        <DashboardUpcoming items={data.upcomingItems} loading={data.loading.lists} />
+      </div>
+
+      {/* Row 4 — Activity Feed */}
+      <DashboardActivity activities={data.activities} loading={data.loading.activity} />
     </div>
   );
 }

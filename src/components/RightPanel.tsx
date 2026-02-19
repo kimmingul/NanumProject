@@ -8,7 +8,7 @@ import TaskDetailPanel from '@/features/tasks/TaskDetailPanel';
 export function RightPanel(): ReactNode {
   const { projectId } = useParams();
   const selectedTaskId = usePMStore((s) => s.selectedTaskId);
-  const setSelectedTaskId = usePMStore((s) => s.setSelectedTaskId);
+  const setRightPanelOpen = usePMStore((s) => s.setRightPanelOpen);
   const { items, dependencies } = useProjectItems(projectId);
 
   const selectedItemName = useMemo(() => {
@@ -28,7 +28,7 @@ export function RightPanel(): ReactNode {
           stylingMode="text"
           hint="Close panel"
           className="right-panel-close"
-          onClick={() => setSelectedTaskId(null)}
+          onClick={() => setRightPanelOpen(false)}
         />
       </div>
       <div className="right-panel-body">

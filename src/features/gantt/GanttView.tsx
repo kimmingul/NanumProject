@@ -1,4 +1,4 @@
-import { type ReactNode, useCallback, useMemo } from 'react';
+import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Gantt, {
   Tasks,
   Dependencies,
@@ -6,20 +6,28 @@ import Gantt, {
   ResourceAssignments,
   Column,
   Editing,
-  Toolbar,
-  Item,
   Validation,
+  ContextMenu,
+  ContextMenuItem,
 } from 'devextreme-react/gantt';
+import type { GanttRef } from 'devextreme-react/gantt';
 import 'devexpress-gantt/dist/dx-gantt.css';
 import { supabase, dbUpdate } from '@/lib/supabase';
 import { useAuthStore } from '@/lib/auth-store';
 import { usePMStore } from '@/lib/pm-store';
 import { useProjectItems } from '@/hooks/useProjectItems';
+import TaskDetailPopup from '@/features/tasks/TaskDetailPopup';
 import type { DependencyType } from '@/types';
 import './GanttView.css';
 
+export interface GanttActions {
+  addTask: () => void;
+  deleteTask: () => void;
+}
+
 interface GanttViewProps {
   projectId: string;
+  actionsRef?: React.MutableRefObject<GanttActions | undefined>;
 }
 
 // Map DB dependency_type to DevExtreme numeric type
@@ -43,11 +51,41 @@ const typeIconMap: Record<string, string> = {
   milestone: 'event',
 };
 
-export default function GanttView({ projectId }: GanttViewProps): ReactNode {
+export default function GanttView({ projectId, actionsRef }: GanttViewProps): ReactNode {
   const { items, dependencies, resources, assignments, commentCounts, loading, error, refetch } =
     useProjectItems(projectId);
   const profile = useAuthStore((s) => s.profile);
   const setSelectedTaskId = usePMStore((s) => s.setSelectedTaskId);
+  const selectedTaskId = usePMStore((s) => s.selectedTaskId);
+  const ganttRef = useRef<GanttRef>(null);
+
+  // Popup state
+  const [popupVisible, setPopupVisible] = useState(false);
+  const [popupItemId, setPopupItemId] = useState<string | null>(null);
+
+  // Expose add/delete actions to parent via ref
+  useEffect(() => {
+    if (actionsRef) {
+      actionsRef.current = {
+        addTask: () => {
+          ganttRef.current?.instance().insertTask({
+            title: 'New Task',
+            start: new Date(),
+            end: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            progress: 0,
+          });
+        },
+        deleteTask: () => {
+          if (selectedTaskId) {
+            ganttRef.current?.instance().deleteTask(selectedTaskId);
+          }
+        },
+      };
+    }
+    return () => {
+      if (actionsRef) actionsRef.current = undefined;
+    };
+  }, [actionsRef, selectedTaskId]);
 
   // Build a lookup map from item id → item_type
   const itemTypeMap = useMemo(() => {
@@ -58,12 +96,46 @@ export default function GanttView({ projectId }: GanttViewProps): ReactNode {
     return map;
   }, [items]);
 
+  // Single click — row highlight only (no panel/popup)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleTaskClick = useCallback((e: any) => {
     if (e.key) {
       setSelectedTaskId(e.key);
     }
   }, [setSelectedTaskId]);
+
+  // Double click — block default popup, open custom popup
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleTaskDblClick = useCallback((e: any) => {
+    e.cancel = true;
+    if (e.key) {
+      setPopupItemId(e.key);
+      setPopupVisible(true);
+    }
+  }, []);
+
+  // Block DevExtreme's built-in edit dialog
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleTaskEditDialogShowing = useCallback((e: any) => {
+    e.cancel = true;
+  }, []);
+
+  // Context menu custom command: "Task Details..."
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleCustomCommand = useCallback((e: any) => {
+    if (e.name === 'openTaskDetails') {
+      const taskId = selectedTaskId;
+      if (taskId) {
+        setPopupItemId(taskId);
+        setPopupVisible(true);
+      }
+    }
+  }, [selectedTaskId]);
+
+  const handlePopupClose = useCallback(() => {
+    setPopupVisible(false);
+    setPopupItemId(null);
+  }, []);
 
   // Custom cell render for Task Name column
   const taskNameCellRender = useCallback(
@@ -76,7 +148,7 @@ export default function GanttView({ projectId }: GanttViewProps): ReactNode {
       const count = taskId ? commentCounts.get(taskId) || 0 : 0;
 
       return (
-        <span className="gantt-task-name-cell">
+        <span className={`gantt-task-name-cell gantt-item-${itemType || 'task'}`}>
           <i className={`dx-icon-${iconName} gantt-type-icon`} />
           <span className="gantt-task-title">{title}</span>
           {count > 0 && (
@@ -90,19 +162,64 @@ export default function GanttView({ projectId }: GanttViewProps): ReactNode {
     [itemTypeMap, commentCounts],
   );
 
-  // Transform project_items → Gantt tasks format
+  // Custom cell render for Assignees column
+  const assigneesCellRender = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (cellData: any) => {
+      const value = cellData.value || '';
+      if (!value) return <span className="gantt-assignees-cell" />;
+      const names: string[] = value.split(', ');
+      return (
+        <span className="gantt-assignees-cell">
+          {names.map((name: string, i: number) => (
+            <span key={i} className="gantt-assignee-badge" title={name}>
+              {name.charAt(0).toUpperCase()}
+            </span>
+          ))}
+        </span>
+      );
+    },
+    [],
+  );
+
+  // Build resource lookup: userId → name
+  const resourceMap = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const r of resources) {
+      map.set(r.id, r.text);
+    }
+    return map;
+  }, [resources]);
+
+  // Build assignment lookup: itemId → userId[]
+  const assignmentsByItem = useMemo(() => {
+    const map = new Map<string, string[]>();
+    for (const a of assignments) {
+      const list = map.get(a.item_id) || [];
+      list.push(a.user_id);
+      map.set(a.item_id, list);
+    }
+    return map;
+  }, [assignments]);
+
+  // Transform project_items → Gantt tasks format (with assignees)
   const ganttTasks = useMemo(
     () =>
-      items.map((item) => ({
-        id: item.id,
-        parentId: item.parent_id || '',
-        title: item.name,
-        start: item.start_date ? new Date(item.start_date) : null,
-        end: item.end_date ? new Date(item.end_date) : null,
-        progress: item.percent_complete ?? 0,
-        color: item.color || undefined,
-      })),
-    [items],
+      items.map((item) => {
+        const userIds = assignmentsByItem.get(item.id) || [];
+        const names = userIds.map((uid) => resourceMap.get(uid) || '').filter(Boolean);
+        return {
+          id: item.id,
+          parentId: item.parent_id || '',
+          title: item.name,
+          start: item.start_date ? new Date(item.start_date) : null,
+          end: item.end_date ? new Date(item.end_date) : null,
+          progress: item.percent_complete ?? 0,
+          color: item.color || undefined,
+          assignees: names.join(', '),
+        };
+      }),
+    [items, assignmentsByItem, resourceMap],
   );
 
   // Transform task_dependencies → Gantt dependencies format
@@ -286,13 +403,17 @@ export default function GanttView({ projectId }: GanttViewProps): ReactNode {
   return (
     <div className="gantt-view">
       <Gantt
-        taskListWidth={400}
+        ref={ganttRef}
+        taskListWidth={700}
         scaleType="weeks"
         height="calc(100vh - 90px)"
         rootValue=""
         showResources={true}
         showDependencies={true}
         onTaskClick={handleTaskClick}
+        onTaskDblClick={handleTaskDblClick}
+        onTaskEditDialogShowing={handleTaskEditDialogShowing}
+        onCustomCommand={handleCustomCommand}
         onTaskInserted={handleTaskInserted}
         onTaskUpdated={handleTaskUpdated}
         onTaskDeleted={handleTaskDeleted}
@@ -326,26 +447,11 @@ export default function GanttView({ projectId }: GanttViewProps): ReactNode {
           resourceIdExpr="resourceId"
         />
 
-        <Column dataField="title" caption="Task Name" width={320} cellRender={taskNameCellRender} />
+        <Column dataField="title" caption="Task Name" width={280} cellRender={taskNameCellRender} />
         <Column dataField="start" caption="Start" width={90} />
         <Column dataField="end" caption="End" width={90} />
         <Column dataField="progress" caption="%" width={50} />
-
-        <Toolbar>
-          <Item name="undo" />
-          <Item name="redo" />
-          <Item name="separator" />
-          <Item name="collapseAll" />
-          <Item name="expandAll" />
-          <Item name="separator" />
-          <Item name="addTask" />
-          <Item name="deleteTask" />
-          <Item name="separator" />
-          <Item name="zoomIn" />
-          <Item name="zoomOut" />
-          <Item name="separator" />
-          <Item name="fullScreen" />
-        </Toolbar>
+        <Column dataField="assignees" caption="Assigned" width={120} cellRender={assigneesCellRender} />
 
         <Validation autoUpdateParentTasks={true} />
 
@@ -359,7 +465,23 @@ export default function GanttView({ projectId }: GanttViewProps): ReactNode {
           allowResourceAdding={true}
           allowResourceDeleting={true}
         />
+
+        <ContextMenu>
+          <ContextMenuItem name="addTask" />
+          <ContextMenuItem name="openTaskDetails" text="Task Details..." />
+          <ContextMenuItem name="deleteTask" />
+        </ContextMenu>
       </Gantt>
+
+      <TaskDetailPopup
+        visible={popupVisible}
+        itemId={popupItemId}
+        projectId={projectId}
+        items={items}
+        dependencies={dependencies}
+        onClose={handlePopupClose}
+        onTaskUpdated={refetch}
+      />
     </div>
   );
 }

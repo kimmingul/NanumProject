@@ -1,20 +1,19 @@
-import { type ReactNode, useMemo } from 'react';
+import { type ReactNode, useEffect, useMemo, useRef } from 'react';
 import TreeList, {
   Column,
   Editing,
   FilterRow,
   HeaderFilter,
-  SearchPanel,
   Selection,
-  Toolbar,
-  Item,
 } from 'devextreme-react/tree-list';
+import type { TreeListRef } from 'devextreme-react/tree-list';
 import { useProjectItems } from '@/hooks/useProjectItems';
 import { usePMStore } from '@/lib/pm-store';
 import './TasksView.css';
 
 interface TasksViewProps {
   projectId: string;
+  addRowRef?: React.MutableRefObject<(() => void) | undefined>;
 }
 
 const itemTypeIcons: Record<string, string> = {
@@ -30,9 +29,22 @@ const statusLabels: Record<string, string> = {
   done: 'Done',
 };
 
-export default function TasksView({ projectId }: TasksViewProps): ReactNode {
+export default function TasksView({ projectId, addRowRef }: TasksViewProps): ReactNode {
   const { items, resources, assignments, loading, error } = useProjectItems(projectId);
   const setSelectedTaskId = usePMStore((s) => s.setSelectedTaskId);
+  const treeListRef = useRef<TreeListRef>(null);
+
+  // Expose addRow to parent via ref
+  useEffect(() => {
+    if (addRowRef) {
+      addRowRef.current = () => {
+        treeListRef.current?.instance().addRow();
+      };
+    }
+    return () => {
+      if (addRowRef) addRowRef.current = undefined;
+    };
+  }, [addRowRef]);
 
   // Build a map of user_id → name for display
   const resourceMap = useMemo(() => {
@@ -95,6 +107,7 @@ export default function TasksView({ projectId }: TasksViewProps): ReactNode {
   return (
     <div className="tasks-view">
       <TreeList
+        ref={treeListRef}
         dataSource={enrichedItems}
         keyExpr="id"
         parentIdExpr="parent_id"
@@ -111,12 +124,7 @@ export default function TasksView({ projectId }: TasksViewProps): ReactNode {
       >
         <FilterRow visible={true} />
         <HeaderFilter visible={true} />
-        <SearchPanel visible={true} width={240} placeholder="Search tasks..." />
         <Selection mode="single" />
-
-        <Toolbar>
-          <Item name="searchPanel" />
-        </Toolbar>
 
         <Column
           dataField="name"

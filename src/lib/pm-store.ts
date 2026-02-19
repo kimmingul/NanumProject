@@ -61,7 +61,7 @@ export const usePMStore = create<PMStore>()((set) => ({
   setRightPanelOpen: (rightPanelOpen) => set({ rightPanelOpen }),
   setLeftPanelWidth: (leftPanelWidth) => set({ leftPanelWidth }),
   setRightPanelWidth: (rightPanelWidth) => set({ rightPanelWidth }),
-  setSelectedTaskId: (id) => set({ selectedTaskId: id, rightPanelOpen: id !== null }),
+  setSelectedTaskId: (id) => set({ selectedTaskId: id }),
   setRightPanelTab: (rightPanelTab) => set({ rightPanelTab }),
   toggleLeftPanel: () => set((s) => ({ leftPanelOpen: !s.leftPanelOpen })),
   toggleRightPanel: () => set((s) => ({ rightPanelOpen: !s.rightPanelOpen })),

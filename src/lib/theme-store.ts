@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import darkThemeUrl from 'devextreme/dist/css/dx.fluent.blue.dark.compact.css?url';
+import darkThemeUrl from '../styles/dx.fluent.nanum-dark.css?url';
 
 type ThemeMode = 'light' | 'dark' | 'system';
 type EffectiveTheme = 'light' | 'dark';
