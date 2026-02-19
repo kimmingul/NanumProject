@@ -6,6 +6,7 @@ import LoginPage from '@/pages/LoginPage';
 import SignUpPage from '@/pages/SignUpPage';
 import ResetPasswordPage from '@/pages/ResetPasswordPage';
 import DashboardPage from '@/pages/DashboardPage';
+import SettingsPage from '@/pages/SettingsPage';
 import UsersPage from '@/pages/UsersPage';
 import AuditLogPage from '@/pages/AuditLogPage';
 import ProjectListPage from '@/pages/ProjectListPage';
@@ -41,7 +42,7 @@ const router = createBrowserRouter([
       { path: '/projects', element: <ProjectListPage /> },
       { path: '/users', element: <UsersPage /> },
       { path: '/audit', element: <AuditLogPage /> },
-      { path: '/settings', element: <DashboardPage /> },
+      { path: '/settings', element: <SettingsPage /> },
       { path: '/projects/:projectId', element: <ProjectDetailPage /> },
       { path: '/projects/:projectId/:tab', element: <ProjectDetailPage /> },
       // Legacy redirects

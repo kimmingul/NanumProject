@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from 'devextreme-react/button';
 import { useAuthStore } from '@/lib/auth-store';
@@ -18,12 +18,26 @@ export function IDEHeader(): ReactNode {
   const profile = useAuthStore((s) => s.profile);
   const reset = useAuthStore((s) => s.reset);
   const toggleLeftPanel = usePMStore((s) => s.toggleLeftPanel);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const profileMenuRef = useRef<HTMLDivElement>(null);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     reset();
     navigate('/login');
   };
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    if (!profileMenuOpen) return;
+    const handleClick = (e: MouseEvent) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(e.target as Node)) {
+        setProfileMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [profileMenuOpen]);
 
   const isActive = (path: string) => {
     if (path === '/projects') return location.pathname.startsWith('/projects');
@@ -65,8 +79,14 @@ export function IDEHeader(): ReactNode {
         </button>
       </div>
 
-      <div className="ide-header-right">
-        <div className="ide-user-info">
+      <div className="ide-header-right" ref={profileMenuRef}>
+        <div
+          className="ide-user-info"
+          role="button"
+          tabIndex={0}
+          onClick={() => setProfileMenuOpen((v) => !v)}
+          onKeyDown={(e) => e.key === 'Enter' && setProfileMenuOpen((v) => !v)}
+        >
           <div className="ide-user-avatar">
             {profile?.avatar_url ? (
               <img src={profile.avatar_url} alt="" className="ide-user-avatar-img" />
@@ -75,14 +95,40 @@ export function IDEHeader(): ReactNode {
             )}
           </div>
           <span className="ide-user-name">{profile?.full_name || 'User'}</span>
+          <i className={`dx-icon-spindown ide-user-caret ${profileMenuOpen ? 'open' : ''}`} />
         </div>
-        <Button
-          icon="runner"
-          stylingMode="text"
-          hint="Sign Out"
-          className="ide-header-btn ide-signout-btn"
-          onClick={handleSignOut}
-        />
+
+        {profileMenuOpen && (
+          <div className="ide-profile-menu">
+            <div className="ide-profile-menu-header">
+              <div className="ide-profile-menu-email">{profile?.email}</div>
+              <div className="ide-profile-menu-role">{profile?.role}</div>
+            </div>
+            <div className="ide-profile-menu-divider" />
+            <button
+              className="ide-profile-menu-item"
+              onClick={() => { setProfileMenuOpen(false); navigate('/settings'); }}
+            >
+              <i className="dx-icon-user" />
+              My Profile
+            </button>
+            <button
+              className="ide-profile-menu-item"
+              onClick={() => { setProfileMenuOpen(false); navigate('/settings'); }}
+            >
+              <i className="dx-icon-preferences" />
+              Settings
+            </button>
+            <div className="ide-profile-menu-divider" />
+            <button
+              className="ide-profile-menu-item ide-profile-menu-danger"
+              onClick={() => { setProfileMenuOpen(false); handleSignOut(); }}
+            >
+              <i className="dx-icon-runner" />
+              Sign Out
+            </button>
+          </div>
+        )}
       </div>
     </header>
   );
