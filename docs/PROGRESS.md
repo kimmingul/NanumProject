@@ -261,6 +261,43 @@
 - **`.claude/skills/`** 생성 (8개): browser-test, deploy, db-migrate, ui-design, architecture, react, review, debug
 - **`.claude/settings.local.json`** 정리: Windows/PowerShell 중복 제거, MCP 도구 자동 허용 정리
 
+### Phase 16: Settings 페이지 + 프로필 드롭다운
+
+- **Settings 페이지** (`SettingsPage.tsx`):
+  - 2칼럼 레이아웃: 왼쪽 sidebar nav + 오른쪽 content 영역 (max 700px)
+  - `useState<string>`으로 active section 관리 (URL sub-routing 불필요)
+  - Admin: 4개 섹션 모두 표시, non-admin: My Profile만 표시
+- **ProfileSection** (`settings/ProfileSection.tsx`):
+  - 아바타 업로드/제거 (기존 `useUserManagement` 훅 재사용)
+  - Email (읽기전용), Full Name 수정
+  - 비밀번호 변경 (New + Confirm, 기존 `useAuth().updatePassword` 재사용)
+- **OrganizationSection** (`settings/OrganizationSection.tsx`, admin only):
+  - 테넌트 이름 수정
+  - 도메인 수정 (regex 검증)
+- **SecuritySection** (`settings/SecuritySection.tsx`, admin only):
+  - 비밀번호 규칙: 최소 길이(6~32), 대/소문자, 숫자, 특수문자 필수 여부 (CheckBox)
+  - 세션 타임아웃 (분, NumberBox)
+- **AppearanceSection** (`settings/AppearanceSection.tsx`, admin only):
+  - Primary / Secondary Color (DevExtreme ColorBox)
+  - 그라데이션 미리보기
+- **useTenantSettings 훅** (`hooks/useTenantSettings.ts`):
+  - `tenants` 테이블 single row 조회/수정
+  - `updateTenant({ name, domain })` — 기본 정보 수정
+  - `updateTenantSettings(partial)` — `settings` JSONB deep merge 후 UPDATE
+  - SQL 마이그레이션 불필요 (기존 RLS 정책 활용)
+- **프로필 드롭다운 메뉴** (`IDEHeader.tsx`):
+  - 우상단 프로필 영역 클릭 → 드롭다운 (email, role, My Profile, Settings, Sign Out)
+  - 기존 독립 Sign Out 버튼을 드롭다운 안으로 통합
+  - 외부 클릭 시 자동 닫힘
+- **라우트 변경**: `/settings` → `SettingsPage` (기존 `DashboardPage` placeholder 교체)
+
+### Phase 17: 프로젝트 브랜딩 통일
+
+- "NanumAuth" → "Nanum Project"로 전면 변경 (5개 파일)
+  - `config/index.ts`, `LoginPage.tsx`, `SignUpPage.tsx`, `MainLayout.tsx`, `HomePage.tsx`
+- `HomePage.tsx` subtitle/description을 임상시험 PM 맥락으로 변경
+- `auth-store.ts`의 localStorage 키 (`nanumauth-auth`)는 기존 세션 호환성 유지를 위해 유지
+
 ### Bugfix: 새로고침 시 데이터 미로딩 (Supabase Auth 데드락)
 
 **증상**: 페이지 새로고침(F5) 시 프로젝트 목록, 대시보드 통계 등 모든 데이터가 로드되지 않음. 콘솔 에러 없이 빈 화면 표시.
@@ -323,7 +360,7 @@ _initialize() → navigator.locks 획득 → _recoverAndRefresh()
 | ~~Audit 로그 뷰어~~ | **완료** — AuditLogPage + useAuditLog 훅, DataGrid (날짜/사용자/액션/리소스/메타데이터), 프로필 조인, 필터/검색/내보내기 |
 | MFA 구현 | TOTP, SMS 인증 |
 | 실시간 업데이트 | Supabase Realtime 구독 |
-| 테넌트 설정 | 브랜딩, 보안 정책 |
+| ~~테넌트 설정~~ | **완료** — Settings 페이지: Organization(이름/도메인), Security(비밀번호 규칙/세션 타임아웃), Appearance(브랜딩 컬러) |
 | 알림 시스템 | 멘션, 할당 알림 |
 | ~~Supabase 타입 생성~~ | **완료** — `db` any-cast 제거, `Database` 타입 동기화, `dbUpdate()` 헬퍼, `gen:types` 스크립트 추가 |
 
