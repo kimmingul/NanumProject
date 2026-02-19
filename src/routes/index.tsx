@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouterProvider, Outlet } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Outlet, Navigate } from 'react-router-dom';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { IDELayout } from '@/components/IDELayout';
 import HomePage from '@/pages/HomePage';
@@ -44,6 +44,11 @@ const router = createBrowserRouter([
       { path: '/settings', element: <DashboardPage /> },
       { path: '/projects/:projectId', element: <ProjectDetailPage /> },
       { path: '/projects/:projectId/:tab', element: <ProjectDetailPage /> },
+      // Legacy redirects
+      { path: '/dashboard/users', element: <Navigate to="/users" replace /> },
+      { path: '/dashboard/audit', element: <Navigate to="/audit" replace /> },
+      { path: '/dashboard/settings', element: <Navigate to="/settings" replace /> },
+      { path: '/dashboard/overview', element: <Navigate to="/dashboard" replace /> },
     ],
   },
 ]);
