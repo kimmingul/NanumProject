@@ -16,6 +16,7 @@ interface UseProjectItemsResult {
   dependencies: TaskDependency[];
   resources: ProjectMemberResource[];
   assignments: TaskAssignee[];
+  commentCounts: Map<string, number>;
   loading: boolean;
   error: string | null;
   refetch: () => Promise<void>;
@@ -26,6 +27,7 @@ export function useProjectItems(projectId: string | undefined): UseProjectItemsR
   const [dependencies, setDependencies] = useState<TaskDependency[]>([]);
   const [resources, setResources] = useState<ProjectMemberResource[]>([]);
   const [assignments, setAssignments] = useState<TaskAssignee[]>([]);
+  const [commentCounts, setCommentCounts] = useState<Map<string, number>>(new Map());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -76,7 +78,20 @@ export function useProjectItems(projectId: string | undefined): UseProjectItemsR
         setDependencies([]);
       }
 
-      // 3) Fetch member profiles for resource names
+      // 3) Fetch comment counts via RPC
+      const { data: countData } = await (supabase.rpc as unknown as (fn: string, params: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }>)(
+        'get_item_comment_counts',
+        { p_project_id: projectId },
+      );
+      if (countData && Array.isArray(countData)) {
+        const map = new Map<string, number>();
+        for (const row of countData as { item_id: string; comment_count: number }[]) {
+          map.set(row.item_id, Number(row.comment_count));
+        }
+        setCommentCounts(map);
+      }
+
+      // 4) Fetch member profiles for resource names
       if (membersRes.data && membersRes.data.length > 0) {
         const userIds = [...new Set(membersRes.data.map((m: { user_id: string }) => m.user_id))];
         const { data: profiles } = await supabase
@@ -106,5 +121,5 @@ export function useProjectItems(projectId: string | undefined): UseProjectItemsR
     fetchData();
   }, [fetchData]);
 
-  return { items, dependencies, resources, assignments, loading, error, refetch: fetchData };
+  return { items, dependencies, resources, assignments, commentCounts, loading, error, refetch: fetchData };
 }

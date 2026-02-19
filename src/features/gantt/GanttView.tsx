@@ -37,11 +37,26 @@ const numToDepType: Record<number, DependencyType> = {
   3: 'sf',
 };
 
+const typeIconMap: Record<string, string> = {
+  group: 'folder',
+  task: 'detailslayout',
+  milestone: 'event',
+};
+
 export default function GanttView({ projectId }: GanttViewProps): ReactNode {
-  const { items, dependencies, resources, assignments, loading, error, refetch } =
+  const { items, dependencies, resources, assignments, commentCounts, loading, error, refetch } =
     useProjectItems(projectId);
   const profile = useAuthStore((s) => s.profile);
   const setSelectedTaskId = usePMStore((s) => s.setSelectedTaskId);
+
+  // Build a lookup map from item id → item_type
+  const itemTypeMap = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const item of items) {
+      map.set(item.id, item.item_type);
+    }
+    return map;
+  }, [items]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleTaskClick = useCallback((e: any) => {
@@ -49,6 +64,31 @@ export default function GanttView({ projectId }: GanttViewProps): ReactNode {
       setSelectedTaskId(e.key);
     }
   }, [setSelectedTaskId]);
+
+  // Custom cell render for Task Name column
+  const taskNameCellRender = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (cellData: any) => {
+      const taskId = cellData.data?.id;
+      const title = cellData.value || '';
+      const itemType = taskId ? itemTypeMap.get(taskId) : 'task';
+      const iconName = typeIconMap[itemType || 'task'] || 'detailslayout';
+      const count = taskId ? commentCounts.get(taskId) || 0 : 0;
+
+      return (
+        <span className="gantt-task-name-cell">
+          <i className={`dx-icon-${iconName} gantt-type-icon`} />
+          <span className="gantt-task-title">{title}</span>
+          {count > 0 && (
+            <span className="gantt-comment-badge" title={`${count} comment${count > 1 ? 's' : ''}`}>
+              {count}
+            </span>
+          )}
+        </span>
+      );
+    },
+    [itemTypeMap, commentCounts],
+  );
 
   // Transform project_items → Gantt tasks format
   const ganttTasks = useMemo(
@@ -286,7 +326,7 @@ export default function GanttView({ projectId }: GanttViewProps): ReactNode {
           resourceIdExpr="resourceId"
         />
 
-        <Column dataField="title" caption="Task Name" width={280} />
+        <Column dataField="title" caption="Task Name" width={320} cellRender={taskNameCellRender} />
         <Column dataField="start" caption="Start" width={90} />
         <Column dataField="end" caption="End" width={90} />
         <Column dataField="progress" caption="%" width={50} />

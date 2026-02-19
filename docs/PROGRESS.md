@@ -298,6 +298,32 @@
 - `HomePage.tsx` subtitle/description을 임상시험 PM 맥락으로 변경
 - `auth-store.ts`의 localStorage 키 (`nanumauth-auth`)는 기존 세션 호환성 유지를 위해 유지
 
+### Phase 18: Relations Panel + Item Links
+
+- **DB 마이그레이션** (`009_item_links.sql`):
+  - `link_type` enum 생성 (`blocks`, `related_to`, `duplicates`)
+  - `item_links` 테이블 (source_id/target_id → project_items FK, UNIQUE 제약, self-link 방지)
+  - RLS: task_dependencies와 동일 패턴 (프로젝트 멤버 read, edit 이상 write)
+  - `validate_milestone_hierarchy` 트리거: milestone에 자식 추가 방지, 자식 있는 item → milestone 변환 방지
+  - `get_item_comment_counts(p_project_id)` RPC: 프로젝트 전체 item별 댓글 수 배치 조회
+- **TypeScript 타입** (`types/pm.ts`):
+  - `LinkType`, `ItemLink`, `ItemLinkWithNames` 타입 추가
+- **새 훅**:
+  - `useItemLinks.ts`: item_links CRUD (양방향 조회, 이름 enrichment)
+  - `useItemRelations.ts`: 관계 집계 (parent, children, predecessors, successors, semantic links)
+- **useProjectItems 확장**: `commentCounts` Map 반환 (`get_item_comment_counts` RPC 호출)
+- **RightPanel 탭 기반 리팩토링** (`TaskDetailPanel.tsx`):
+  - DevExtreme `TabPanel` 4탭 구조: Info / Relations / Comments / Checklist
+  - `InfoTab.tsx`: 타입 뱃지, 상태, 날짜, 진행률, 설명
+  - `RelationsTab.tsx`: parent/children/predecessors/successors/links 표시, 클릭 내비게이션, Add Link UI (SelectBox × 2 + Button)
+  - `CommentsTab.tsx`: CommentsView 래퍼 (targetType='item')
+  - `ChecklistTab.tsx`: 기존 체크리스트 코드 추출
+- **pm-store 확장**: `rightPanelTab` 상태 + `setRightPanelTab` 액션 (탭 선택 유지)
+- **RightPanel 동적 헤더**: 선택된 item 이름 표시
+- **Gantt 시각 강화** (`GanttView.tsx`):
+  - Task Name 컬럼 `cellRender`: 타입 아이콘 (folder/detailslayout/event) + 댓글 뱃지
+  - 컬럼 폭: 280px → 320px
+
 ### Bugfix: 새로고침 시 데이터 미로딩 (Supabase Auth 데드락)
 
 **증상**: 페이지 새로고침(F5) 시 프로젝트 목록, 대시보드 통계 등 모든 데이터가 로드되지 않음. 콘솔 에러 없이 빈 화면 표시.

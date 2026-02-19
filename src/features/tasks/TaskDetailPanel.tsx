@@ -1,23 +1,31 @@
-import { type ReactNode, useCallback, useEffect, useState } from 'react';
-import { CheckBox } from 'devextreme-react/check-box';
-import { TextBox } from 'devextreme-react/text-box';
-import { Button } from 'devextreme-react/button';
+import { type ReactNode, useEffect, useState } from 'react';
+import { TabPanel, Item } from 'devextreme-react/tab-panel';
 import { supabase } from '@/lib/supabase';
-import { useChecklist } from '@/hooks/useChecklist';
-import type { ProjectItem } from '@/types';
-import './TaskDetailPopup.css';
+import { usePMStore } from '@/lib/pm-store';
+import { useItemLinks } from '@/hooks/useItemLinks';
+import { useItemRelations } from '@/hooks/useItemRelations';
+import type { ProjectItem, TaskDependency } from '@/types';
+import InfoTab from './tabs/InfoTab';
+import RelationsTab from './tabs/RelationsTab';
+import CommentsTab from './tabs/CommentsTab';
+import ChecklistTab from './tabs/ChecklistTab';
+import './TaskDetailPanel.css';
 
 interface TaskDetailPanelProps {
   projectId: string;
   itemId: string;
+  items: ProjectItem[];
+  dependencies: TaskDependency[];
 }
 
-export default function TaskDetailPanel({ projectId, itemId }: TaskDetailPanelProps): ReactNode {
+export default function TaskDetailPanel({ projectId, itemId, items, dependencies }: TaskDetailPanelProps): ReactNode {
   const [task, setTask] = useState<ProjectItem | null>(null);
   const [taskLoading, setTaskLoading] = useState(false);
-  const [newItemText, setNewItemText] = useState('');
-  const { items: checklistItems, loading: checklistLoading, addItem, deleteItem, toggleItem } =
-    useChecklist(itemId);
+  const rightPanelTab = usePMStore((s) => s.rightPanelTab);
+  const setRightPanelTab = usePMStore((s) => s.setRightPanelTab);
+
+  const { links: itemLinks, addLink, deleteLink } = useItemLinks(projectId, itemId);
+  const relations = useItemRelations(itemId, items, dependencies, itemLinks);
 
   useEffect(() => {
     let cancelled = false;
@@ -44,26 +52,6 @@ export default function TaskDetailPanel({ projectId, itemId }: TaskDetailPanelPr
     return () => { cancelled = true; };
   }, [itemId, projectId]);
 
-  const handleAddChecklistItem = useCallback(async () => {
-    if (!newItemText.trim()) return;
-    try {
-      await addItem(newItemText.trim());
-      setNewItemText('');
-    } catch (err) {
-      console.error('Failed to add checklist item:', err);
-    }
-  }, [newItemText, addItem]);
-
-  const handleKeyDown = (e: { event?: { key: string } }) => {
-    if (e.event?.key === 'Enter') {
-      handleAddChecklistItem();
-    }
-  };
-
-  const completedCount = checklistItems.filter((i) => i.is_completed).length;
-  const totalCount = checklistItems.length;
-  const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
-
   if (taskLoading) {
     return <div className="checklist-loading">Loading task details...</div>;
   }
@@ -74,103 +62,36 @@ export default function TaskDetailPanel({ projectId, itemId }: TaskDetailPanelPr
 
   return (
     <div className="task-detail-content">
-      <div className="task-info-section">
-        <div className="task-info-row">
-          <div className="task-info-item">
-            <i className="dx-icon-info" />
-            <span className={`item-type-badge type-${task.item_type}`}>
-              {task.item_type}
-            </span>
-          </div>
-          {task.item_type === 'task' && (
-            <div className="task-info-item">
-              <span className={`task-status-badge status-${task.task_status}`}>
-                {task.task_status === 'in_progress' ? 'In Progress' : task.task_status === 'todo' ? 'To Do' : task.task_status === 'review' ? 'Review' : 'Done'}
-              </span>
-            </div>
-          )}
-          {task.start_date && (
-            <div className="task-info-item">
-              <i className="dx-icon-event" />
-              <span>{task.start_date}</span>
-            </div>
-          )}
-          {task.end_date && (
-            <div className="task-info-item">
-              <span>~ {task.end_date}</span>
-            </div>
-          )}
-        </div>
-        <div className="task-detail-progress">
-          <div className="task-detail-progress-bar">
-            <div
-              className="task-detail-progress-fill"
-              style={{ width: `${task.percent_complete}%` }}
-            />
-          </div>
-          <span className="task-detail-progress-text">{task.percent_complete}%</span>
-        </div>
-      </div>
-
-      <div className="checklist-section">
-        <div className="checklist-header">
-          <h4>Checklist</h4>
-          <span className="checklist-progress-text">
-            {completedCount} of {totalCount} completed
-          </span>
-        </div>
-
-        {totalCount > 0 && (
-          <div className="checklist-progress-bar">
-            <div
-              className="checklist-progress-fill"
-              style={{ width: `${progressPercent}%` }}
-            />
-          </div>
-        )}
-
-        {checklistLoading ? (
-          <div className="checklist-loading">Loading checklist...</div>
-        ) : (
-          <div className="checklist-items">
-            {checklistItems.map((item) => (
-              <div key={item.id} className="checklist-item">
-                <CheckBox
-                  value={item.is_completed}
-                  onValueChanged={() => toggleItem(item)}
-                />
-                <span className={`checklist-item-text ${item.is_completed ? 'completed' : ''}`}>
-                  {item.name}
-                </span>
-                <Button
-                  icon="trash"
-                  stylingMode="text"
-                  hint="Delete"
-                  className="checklist-delete-btn"
-                  onClick={() => deleteItem(item.id)}
-                />
-              </div>
-            ))}
-          </div>
-        )}
-
-        <div className="checklist-add-row">
-          <TextBox
-            value={newItemText}
-            onValueChanged={(e) => setNewItemText(e.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Add a checklist item..."
-            stylingMode="outlined"
+      <TabPanel
+        selectedIndex={rightPanelTab}
+        onSelectedIndexChange={setRightPanelTab}
+        swipeEnabled={false}
+        animationEnabled={false}
+        className="task-detail-tabs"
+      >
+        <Item title="Info" icon="info">
+          <InfoTab task={task} />
+        </Item>
+        <Item title="Relations" icon="hierarchy">
+          <RelationsTab
+            itemId={itemId}
+            parent={relations.parent}
+            children={relations.children}
+            predecessors={relations.predecessors}
+            successors={relations.successors}
+            links={relations.links}
+            allItems={items}
+            onAddLink={addLink}
+            onDeleteLink={deleteLink}
           />
-          <Button
-            icon="add"
-            stylingMode="outlined"
-            onClick={handleAddChecklistItem}
-            disabled={!newItemText.trim()}
-            hint="Add item"
-          />
-        </div>
-      </div>
+        </Item>
+        <Item title="Comments" icon="comment">
+          <CommentsTab projectId={projectId} itemId={itemId} />
+        </Item>
+        <Item title="Checklist" icon="checklist">
+          <ChecklistTab itemId={itemId} />
+        </Item>
+      </TabPanel>
     </div>
   );
 }

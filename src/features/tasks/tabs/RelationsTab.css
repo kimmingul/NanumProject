@@ -1,0 +1,117 @@
+.tab-relations {
+  padding: 4px 0;
+}
+
+.relation-group {
+  margin-bottom: 16px;
+}
+
+.relation-group-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.relation-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.relation-row:hover {
+  background: var(--hover-bg);
+}
+
+.relation-row i {
+  font-size: 14px;
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+}
+
+.relation-name {
+  flex: 1;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.relation-name.clickable {
+  cursor: pointer;
+}
+
+.relation-name.clickable:hover {
+  text-decoration: underline;
+}
+
+.relation-badge {
+  font-size: 0.7rem;
+  padding: 1px 6px;
+  border-radius: 3px;
+  background: var(--badge-neutral-bg);
+  color: var(--badge-neutral-text);
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.relation-badge.dep {
+  background: var(--badge-info-bg);
+  color: var(--badge-info-text);
+}
+
+.relation-empty {
+  font-size: 0.8rem;
+  color: var(--text-tertiary);
+  padding: 4px 8px;
+  font-style: italic;
+}
+
+/* Link type icons */
+.link-type-icon {
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+/* Delete button for links */
+.dx-button.relation-delete-btn {
+  min-width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  opacity: 0;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+}
+
+.dx-button.relation-delete-btn .dx-button-content {
+  padding: 2px 4px;
+}
+
+.relation-row:hover .dx-button.relation-delete-btn {
+  opacity: 1;
+}
+
+.dx-button.relation-delete-btn:hover .dx-icon,
+.dx-button.relation-delete-btn.dx-state-hover .dx-icon {
+  color: var(--alert-error-text);
+}
+
+/* Add link row */
+.add-link-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.add-link-row .dx-selectbox {
+  flex: 1;
+}

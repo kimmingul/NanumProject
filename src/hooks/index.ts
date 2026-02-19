@@ -11,3 +11,5 @@ export { useAuditLog } from './useAuditLog';
 export { useTimeEntries } from './useTimeEntries';
 export { useChecklist } from './useChecklist';
 export { useUserManagement } from './useUserManagement';
+export { useItemLinks } from './useItemLinks';
+export { useItemRelations } from './useItemRelations';

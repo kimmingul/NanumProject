@@ -15,6 +15,7 @@ export type CommentTarget = 'project' | 'item';
 export type TimeEntryType = 'punched' | 'manual';
 export type TaskStatus = 'todo' | 'in_progress' | 'review' | 'done';
 export type ViewType = 'gantt' | 'board' | 'list' | 'calendar';
+export type LinkType = 'blocks' | 'related_to' | 'duplicates';
 
 // ========================================
 // Core entity interfaces
@@ -209,6 +210,23 @@ export interface PMActivityLog {
   actor_id: string | null;
   details: Record<string, unknown>;
   created_at: string;
+}
+
+export interface ItemLink {
+  id: string;
+  tenant_id: string;
+  project_id: string;
+  source_id: string;
+  target_id: string;
+  link_type: LinkType;
+  description: string | null;
+  created_by: string | null;
+  created_at: string;
+}
+
+export interface ItemLinkWithNames extends ItemLink {
+  source_name: string;
+  target_name: string;
 }
 
 // ========================================

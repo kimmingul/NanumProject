@@ -1,0 +1,52 @@
+.task-detail-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* TabPanel styling */
+.task-detail-tabs {
+  height: 100%;
+}
+
+.task-detail-tabs .dx-tabpanel-tabs {
+  margin-bottom: 0;
+}
+
+.task-detail-tabs .dx-tab {
+  padding: 6px 8px;
+  font-size: 0.8rem;
+}
+
+.task-detail-tabs .dx-tab .dx-tab-text {
+  font-size: 0.8rem;
+}
+
+.task-detail-tabs .dx-multiview-wrapper {
+  padding: 12px 0;
+}
+
+/* Tab content containers */
+.tab-info,
+.tab-relations,
+.tab-comments,
+.tab-checklist {
+  padding: 0 4px;
+}
+
+.tab-comments .comments-view {
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+}
+
+.tab-comments .comment-input-section {
+  margin-bottom: 12px;
+}
+
+.tab-comments .comment-input-row {
+  gap: 8px;
+}
+
+.tab-comments .dx-textarea {
+  height: 60px !important;
+}

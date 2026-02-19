@@ -17,6 +17,7 @@ interface PMStore {
   leftPanelWidth: number;
   rightPanelWidth: number;
   selectedTaskId: string | null;
+  rightPanelTab: number;
 
   // Actions
   setProjects: (projects: Project[]) => void;
@@ -29,6 +30,7 @@ interface PMStore {
   setLeftPanelWidth: (width: number) => void;
   setRightPanelWidth: (width: number) => void;
   setSelectedTaskId: (id: string | null) => void;
+  setRightPanelTab: (tab: number) => void;
   toggleLeftPanel: () => void;
   toggleRightPanel: () => void;
   reset: () => void;
@@ -45,6 +47,7 @@ const initialState = {
   leftPanelWidth: 220,
   rightPanelWidth: 320,
   selectedTaskId: null as string | null,
+  rightPanelTab: 0,
 };
 
 export const usePMStore = create<PMStore>()((set) => ({
@@ -59,6 +62,7 @@ export const usePMStore = create<PMStore>()((set) => ({
   setLeftPanelWidth: (leftPanelWidth) => set({ leftPanelWidth }),
   setRightPanelWidth: (rightPanelWidth) => set({ rightPanelWidth }),
   setSelectedTaskId: (id) => set({ selectedTaskId: id, rightPanelOpen: id !== null }),
+  setRightPanelTab: (rightPanelTab) => set({ rightPanelTab }),
   toggleLeftPanel: () => set((s) => ({ leftPanelOpen: !s.leftPanelOpen })),
   toggleRightPanel: () => set((s) => ({ rightPanelOpen: !s.rightPanelOpen })),
   reset: () => set(initialState),

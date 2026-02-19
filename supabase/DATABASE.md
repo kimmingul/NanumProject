@@ -14,8 +14,9 @@ Supabase (PostgreSQL) 기반 멀티테넌트 프로젝트 관리 서비스.
 | `006_update_roles.sql` | Role 체계 변경: admin/manager/member/viewer |
 | `007_create_tenant_user.sql` | handle_new_user 수정 + create_tenant_user RPC |
 | `008_fix_missing_functions.sql` | deactivate_user, reactivate_user, revoke_user_sessions 함수 생성 |
+| `009_item_links.sql` | item_links 테이블, link_type enum, hierarchy trigger, comment count RPC |
 
-> 실행 순서: 001 → 002 → 003 → 004 → 005 → 006 → 007 → 008
+> 실행 순서: 001 → 002 → 003 → 004 → 005 → 006 → 007 → 008 → 009
 
 ---
 
@@ -31,7 +32,7 @@ audit_logs         감사 로그 (immutable)
 sessions           활성 세션 관리
 ```
 
-### PM 모듈 (11개)
+### PM 모듈 (12개)
 
 ```
 projects           프로젝트 메타데이터
@@ -39,6 +40,7 @@ project_members    프로젝트-사용자 매핑 (권한 관리)
 project_items      ★ 통합 아이템 (그룹/태스크/마일스톤)
 task_assignees     아이템-담당자 할당
 task_dependencies  아이템 간 의존성 (Gantt 화살표)
+item_links         아이템 간 의미적 링크 (blocks/related_to/duplicates)
 comments           코멘트 (다형성: project/item 대상)
 documents          문서 메타데이터
 document_versions  문서 버전 히스토리
@@ -93,6 +95,7 @@ projects ←──── tenant_id ───────────────
    │       │
    │       ├── task_assignees ──→ auth.users
    │       ├── task_dependencies (predecessor_id, successor_id)
+   │       ├── item_links (source_id, target_id, link_type)
    │       ├── time_entries ──→ auth.users
    │       └── checklist_items
    │
@@ -130,6 +133,7 @@ projects ←──── tenant_id ───────────────
 | `comment_target` | project, item | 다형성 대상 |
 | `time_entry_type` | punched, manual | 시간 기록 방식 |
 | `view_type` | gantt, board, list, calendar | 기본 뷰 |
+| `link_type` | blocks, related_to, duplicates | 아이템 의미적 링크 |
 
 ---
 
@@ -159,6 +163,7 @@ projects ←──── tenant_id ───────────────
 | project_items | 멤버 **또는 테넌트 admin** | edit 이상 또는 테넌트 admin |
 | task_assignees | 멤버 **또는 테넌트 admin** | edit 이상 또는 테넌트 admin |
 | task_dependencies | 멤버 | edit 이상 |
+| item_links | 멤버 또는 admin | edit 이상 또는 admin |
 | comments | 멤버 | 작성자 (삭제: 작성자 또는 admin) |
 | documents | 멤버 | 업로더 또는 admin |
 | document_versions | 멤버 (documents JOIN) | 멤버 |
@@ -188,6 +193,9 @@ projects, project_members, project_items, task_assignees, comments, documents, t
 ### 감사 로그 자동 생성
 tenants, applications, projects, project_members, project_items
 
+### Hierarchy 검증
+- `validate_milestone_hierarchy` → milestone에 자식 추가 방지, 자식 있는 item → milestone 변환 방지
+
 ### Auth 전용
 - `on_auth_user_created` → 프로필 자동 생성
 - `on_auth_user_login` → last_login_at 갱신
@@ -212,6 +220,7 @@ tenants, applications, projects, project_members, project_items
 | `get_active_sessions_count(UUID)` | 활성 세션 수 | authenticated |
 | `rotate_application_secret(UUID)` | 앱 시크릿 갱신 | admin/developer |
 | `create_tenant_user(TEXT, TEXT, TEXT)` | 테넌트 내 사용자 생성 (auth.users + identities + profiles) | admin |
+| `get_item_comment_counts(UUID)` | 프로젝트 전체 item별 댓글 수 배치 조회 | authenticated |
 
 ---
 
