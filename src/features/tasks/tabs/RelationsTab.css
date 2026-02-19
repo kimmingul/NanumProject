@@ -3,23 +3,31 @@
 }
 
 .relation-group {
-  margin-bottom: 16px;
+  margin-bottom: 4px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.relation-group:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
 }
 
 .relation-group-label {
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   font-weight: 600;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
+  padding: 4px 8px 2px;
 }
 
 .relation-row {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 8px;
+  padding: 5px 8px;
   border-radius: 6px;
   cursor: pointer;
   transition: background 0.15s;
@@ -31,7 +39,7 @@
 
 .relation-row i {
   font-size: 14px;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   flex-shrink: 0;
 }
 
@@ -53,13 +61,14 @@
 }
 
 .relation-badge {
-  font-size: 0.7rem;
-  padding: 1px 6px;
-  border-radius: 3px;
+  font-size: 0.65rem;
+  padding: 2px 6px;
+  border-radius: 4px;
   background: var(--badge-neutral-bg);
   color: var(--badge-neutral-text);
-  font-weight: 500;
+  font-weight: 600;
   flex-shrink: 0;
+  letter-spacing: 0.3px;
 }
 
 .relation-badge.dep {
@@ -107,9 +116,11 @@
 /* Add link row */
 .add-link-row {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   align-items: center;
-  margin-top: 8px;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px dashed var(--border-color);
 }
 
 .add-link-row .dx-selectbox {
