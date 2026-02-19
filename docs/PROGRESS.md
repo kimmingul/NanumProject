@@ -234,6 +234,33 @@
   - `001_auth.sql`에 정의되어 있었으나 실제 DB에 실행되지 않았음
   - `008_fix_missing_functions.sql` 마이그레이션으로 해결
 
+### Phase 14: URL 라우팅 구조 개선
+
+- **문제**: Users, Audit, Settings 등 독립 기능이 `/dashboard/*` 하위에 묶여 있어 비체계적
+- **변경**: 플랫 구조로 전환
+  | 이전 URL | 새 URL |
+  |----------|--------|
+  | `/dashboard/users` | `/users` |
+  | `/dashboard/audit` | `/audit` |
+  | `/dashboard/settings` | `/settings` |
+  | `/dashboard/overview` | 삭제 (`/dashboard`와 중복) |
+  | `/dashboard/applications` | 삭제 (미사용 placeholder) |
+- **레거시 리다이렉트**: `<Navigate replace />` 로 이전 URL 접속 시 새 URL로 자동 이동 (404 방지)
+- **LeftPanel 로직 변경**: `pathname.startsWith('/dashboard')` → `isProjectDetail` 정규식 판별
+  - 프로젝트 상세 페이지(`/projects/:id`)일 때만 ProjectTree 표시, 그 외 MainNav 표시
+- **IDEHeader**: `isActive` 로직 단순화 (경로 exact match)
+- **수정 파일**: `routes/index.tsx`, `LeftPanel.tsx`, `IDEHeader.tsx`, `DashboardPage.tsx`
+
+### Phase 15: Claude Code 설정 최적화
+
+- **`.claude/CLAUDE.md`** 생성: 프로젝트 가이드 (기술 스택, 구조, 코드 컨벤션, Supabase 주의사항)
+- **`.claude/rules/`** 생성 (3개):
+  - `supabase.md` — SQL 마이그레이션, RPC 파라미터 컨벤션, RLS, auth 데드락 방지
+  - `devextreme.md` — Button/DataGrid/Popup 패턴, CSS override, MCP 활용
+  - `react-hooks.md` — 훅 파일 구조, Supabase fetching/RPC 패턴
+- **`.claude/skills/`** 생성 (8개): browser-test, deploy, db-migrate, ui-design, architecture, react, review, debug
+- **`.claude/settings.local.json`** 정리: Windows/PowerShell 중복 제거, MCP 도구 자동 허용 정리
+
 ### Bugfix: 새로고침 시 데이터 미로딩 (Supabase Auth 데드락)
 
 **증상**: 페이지 새로고침(F5) 시 프로젝트 목록, 대시보드 통계 등 모든 데이터가 로드되지 않음. 콘솔 에러 없이 빈 화면 표시.
