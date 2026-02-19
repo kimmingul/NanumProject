@@ -10,7 +10,7 @@ export function MainLayout({ children }: MainLayoutProps): ReactNode {
     <div className="main-layout">
       <header className="header">
         <div className="container">
-          <h1>NanumAuth</h1>
+          <h1>Nanum Project</h1>
         </div>
       </header>
       <main className="main-content">
@@ -18,7 +18,7 @@ export function MainLayout({ children }: MainLayoutProps): ReactNode {
       </main>
       <footer className="footer">
         <div className="container">
-          <p>&copy; 2024 NanumAuth. All rights reserved.</p>
+          <p>&copy; 2024 Nanum Project. All rights reserved.</p>
         </div>
       </footer>
     </div>

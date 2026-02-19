@@ -4,7 +4,7 @@ export const config = {
     anonKey: import.meta.env.VITE_SUPABASE_ANON_KEY || '',
   },
   app: {
-    name: 'NanumAuth',
+    name: 'Nanum Project',
     version: '0.0.0',
   },
 } as const;

@@ -10,11 +10,11 @@ export default function HomePage(): ReactNode {
     <div className="home-page">
       <div className="hero-section">
         <div className="hero-content">
-          <h1>Welcome to NanumAuth</h1>
-          <p className="subtitle">Enterprise-grade Identity as a Service</p>
+          <h1>Welcome to Nanum Project</h1>
+          <p className="subtitle">Clinical Trial Project Management</p>
           <p className="description">
-            Secure authentication and authorization for your applications.
-            Multi-tenant, RBAC, MFA, and comprehensive audit logging built-in.
+            Comprehensive project management for clinical trials.
+            Gantt charts, task boards, team collaboration, and audit logging built-in.
           </p>
           
           <div className="cta-buttons">
