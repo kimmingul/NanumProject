@@ -37,8 +37,8 @@ export function useUserManagement() {
       // Role change via RPC (admin-only, enforced server-side)
       if (data.role !== undefined) {
         await rpc('update_user_role', {
-          target_user_id: userId,
-          new_role: data.role,
+          p_user_id: userId,
+          p_new_role: data.role,
         });
       }
     },
@@ -101,11 +101,11 @@ export function useUserManagement() {
   );
 
   const deactivateUser = useCallback(async (userId: string) => {
-    await rpc('deactivate_user', { target_user_id: userId });
+    await rpc('deactivate_user', { p_user_id: userId });
   }, []);
 
   const reactivateUser = useCallback(async (userId: string) => {
-    await rpc('reactivate_user', { target_user_id: userId });
+    await rpc('reactivate_user', { p_user_id: userId });
   }, []);
 
   const sendPasswordReset = useCallback(async (email: string) => {

@@ -225,6 +225,15 @@
   - Admin만 Add User 버튼 표시
   - 에러 처리 (중복 이메일 등)
 
+### Phase 13: Status 변경 버그 수정
+
+- **원인 1**: `useUserManagement.ts`의 RPC 호출에서 파라미터 이름 불일치
+  - TypeScript: `target_user_id`, `new_role` → SQL: `p_user_id`, `p_new_role`
+  - `deactivate_user`, `reactivate_user`, `update_user_role` 3개 함수 모두 수정
+- **원인 2**: `deactivate_user`, `reactivate_user`, `revoke_user_sessions` 함수가 DB에 미생성
+  - `001_auth.sql`에 정의되어 있었으나 실제 DB에 실행되지 않았음
+  - `008_fix_missing_functions.sql` 마이그레이션으로 해결
+
 ### Bugfix: 새로고침 시 데이터 미로딩 (Supabase Auth 데드락)
 
 **증상**: 페이지 새로고침(F5) 시 프로젝트 목록, 대시보드 통계 등 모든 데이터가 로드되지 않음. 콘솔 에러 없이 빈 화면 표시.

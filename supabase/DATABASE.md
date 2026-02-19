@@ -13,8 +13,9 @@ Supabase (PostgreSQL) 기반 멀티테넌트 프로젝트 관리 서비스.
 | `005_avatars_bucket.sql` | avatars Storage 버킷 (public) + RLS 정책 |
 | `006_update_roles.sql` | Role 체계 변경: admin/manager/member/viewer |
 | `007_create_tenant_user.sql` | handle_new_user 수정 + create_tenant_user RPC |
+| `008_fix_missing_functions.sql` | deactivate_user, reactivate_user, revoke_user_sessions 함수 생성 |
 
-> 실행 순서: 001 → 002 → 003 → 004 → 005 → 006 → 007
+> 실행 순서: 001 → 002 → 003 → 004 → 005 → 006 → 007 → 008
 
 ---
 
