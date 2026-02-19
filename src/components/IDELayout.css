@@ -92,9 +92,14 @@
   background: var(--header-search-bg);
   color: var(--header-search-text);
   font-size: 13px;
-  cursor: not-allowed;
-  max-width: 280px;
+  cursor: pointer;
+  max-width: 560px;
   width: 100%;
+}
+
+.ide-search-trigger:hover {
+  border-color: var(--border-color-strong);
+  background: var(--hover-bg);
 }
 
 .ide-search-trigger i {

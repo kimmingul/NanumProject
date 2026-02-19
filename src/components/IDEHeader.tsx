@@ -1,8 +1,9 @@
-import { type ReactNode, useEffect, useRef, useState } from 'react';
+import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/lib/auth-store';
 import { useThemeStore } from '@/lib/theme-store';
 import { supabase } from '@/lib/supabase';
+import { GlobalSearch } from './GlobalSearch';
 
 export function IDEHeader(): ReactNode {
   const navigate = useNavigate();
@@ -11,6 +12,7 @@ export function IDEHeader(): ReactNode {
   const theme = useThemeStore((s) => s.theme);
   const setTheme = useThemeStore((s) => s.setTheme);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
 
   const toggleTheme = () => {
@@ -35,6 +37,19 @@ export function IDEHeader(): ReactNode {
     return () => document.removeEventListener('mousedown', handleClick);
   }, [profileMenuOpen]);
 
+  // Cmd+K / Ctrl+K global shortcut
+  const openSearch = useCallback(() => setSearchOpen(true), []);
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setSearchOpen(true);
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   return (
     <header className="ide-header">
       <div className="ide-header-left">
@@ -50,7 +65,7 @@ export function IDEHeader(): ReactNode {
       </div>
 
       <div className="ide-header-center">
-        <button className="ide-search-trigger" disabled>
+        <button className="ide-search-trigger" onClick={openSearch}>
           <i className="dx-icon-search" />
           <span>Search...</span>
           <kbd>&#8984;K</kbd>
@@ -117,6 +132,7 @@ export function IDEHeader(): ReactNode {
           </div>
         )}
       </div>
+      <GlobalSearch open={searchOpen} onClose={() => setSearchOpen(false)} />
     </header>
   );
 }

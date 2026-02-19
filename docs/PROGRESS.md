@@ -475,6 +475,27 @@
 - **DashboardPage.css** — 전체 스타일 (cards, KPI, lists, charts, skeleton, responsive breakpoints)
 - **반응형**: 1100px (3col→2col), 860px (2col→1col, KPI 2×2), 540px (KPI 1col)
 
+### Phase 27: Cmd+K 글로벌 검색
+
+- **목적**: IDEHeader 중앙 Search 버튼 활성화 → VS Code / Linear 스타일 Cmd+K spotlight 검색
+- **검색 대상**: 프로젝트(`projects`), 태스크(`project_items`), 사용자(`profiles`) — 각 카테고리 최대 5개
+- **검색 필드**: projects: name/description, items: name, users: full_name/email
+- **신규 파일**:
+  - `src/hooks/useGlobalSearch.ts` — 검색 훅 (300ms 디바운스, 3개 병렬 Supabase 쿼리, stale response 방지, tenant_id guard)
+  - `src/components/GlobalSearch.tsx` — 오버레이 컴포넌트 (`createPortal`, 키보드 내비게이션, 결과 클릭/Enter → 라우트 이동)
+  - `src/components/GlobalSearch.css` — 스타일 (backdrop, dialog, input, result groups, footer hints, 애니메이션)
+- **수정 파일**:
+  - `src/components/IDEHeader.tsx` — `disabled` 제거, `Cmd+K`/`Ctrl+K` 전역 단축키, GlobalSearch 연결
+  - `src/components/IDELayout.css` — 검색 트리거 폭 280px → 560px, cursor: pointer, hover 효과
+  - `src/styles/theme-variables.css` — 12개 `--search-*` CSS 변수 추가 (light + dark)
+- **키보드 인터랙션**: `Cmd+K` 열기, `↑↓` 결과 이동 (순환), `Enter` 선택 이동, `Escape` 닫기
+- **결과 내비게이션**:
+  - Project → `/tasks/:projectId`
+  - Item → `/tasks/:projectId` + RightPanel 오픈 (selectedTaskId 설정)
+  - User → `/users/:userId`
+- **UI**: min(560px, 90vw) 너비, 12px radius, 카테고리별 아이콘 색상, footer kbd 힌트
+- **다크/라이트 모드**: CSS 변수 기반 완전 지원
+
 ### Bugfix: 새로고침 시 데이터 미로딩 (Supabase Auth 데드락)
 
 **증상**: 페이지 새로고침(F5) 시 프로젝트 목록, 대시보드 통계 등 모든 데이터가 로드되지 않음. 콘솔 에러 없이 빈 화면 표시.

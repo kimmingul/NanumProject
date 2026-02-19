@@ -24,6 +24,7 @@ NanumProject/
 │   │   ├── LeftPanel.tsx      #   좌측 패널 (대시보드 네비 / 프로젝트 트리)
 │   │   ├── RightPanel.tsx     #   우측 패널 (태스크 상세 인라인)
 │   │   ├── ResizeHandle.tsx   #   4px 드래그 핸들 (패널 리사이즈)
+│   │   ├── GlobalSearch.tsx   #   Cmd+K 글로벌 검색 오버레이 (createPortal)
 │   │   └── ProtectedRoute.tsx #   인증 가드 + 리다이렉트
 │   ├── pages/                 # 페이지 컴포넌트
 │   │   ├── HomePage.tsx       #   랜딩 페이지
@@ -70,7 +71,8 @@ NanumProject/
 │   │   ├── useAuditLog.ts     #   감사 로그 조회
 │   │   ├── useTimeEntries.ts  #   시간 기록 CRUD
 │   │   ├── useChecklist.ts    #   체크리스트 CRUD + 토글
-│   │   └── useDashboardData.ts #  대시보드 KPI/차트/리스트/활동 데이터
+│   │   ├── useDashboardData.ts #  대시보드 KPI/차트/리스트/활동 데이터
+│   │   └── useGlobalSearch.ts #  Cmd+K 글로벌 검색 (projects/items/users)
 │   ├── lib/                   # 코어 라이브러리
 │   │   ├── supabase.ts        #   Supabase 클라이언트 (typed)
 │   │   ├── auth-store.ts      #   Zustand 인증 스토어 (persistent)
@@ -153,12 +155,16 @@ projects ──┬── project_members ──→ auth.users
 | `/login` | 로그인 | - |
 | `/signup` | 회원가입 | - |
 | `/reset-password` | 비밀번호 재설정 | - |
-| `/dashboard` | 대시보드 (통계) | 필요 |
-| `/dashboard/users` | 사용자 관리 | 필요 |
-| `/dashboard/audit` | 감사 로그 뷰어 | 필요 |
+| `/dashboard` | 대시보드 (KPI + 차트 + 태스크 + 활동) | 필요 |
 | `/projects` | 프로젝트 목록 | 필요 |
-| `/projects/:id` | 프로젝트 상세 (기본: gantt) | 필요 |
-| `/projects/:id/:tab` | 프로젝트 상세 탭 (gantt/tasks/board/calendar/comments/files/time/activity/settings) | 필요 |
+| `/tasks` | 태스크 워크스페이스 (프로젝트 선택) | 필요 |
+| `/tasks/:projectId` | 프로젝트 워크스페이스 (기본: gantt) | 필요 |
+| `/tasks/:projectId/:tab` | 탭 전환 (gantt/tasks/board/calendar/comments/files/time/activity/settings) | 필요 |
+| `/users` | 사용자 연락처 디렉토리 | 필요 |
+| `/users/:userId` | 사용자 프로필 상세 | 필요 |
+| `/profile` | 내 프로필 | 필요 |
+| `/settings` | 설정 (admin only) | 필요 |
+| `/audit` | 감사 로그 뷰어 | 필요 |
 
 모든 인증 필요 라우트는 `ProtectedRoute > IDELayout > Outlet` 중첩 구조.
 

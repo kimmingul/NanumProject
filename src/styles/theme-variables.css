@@ -180,6 +180,22 @@
 
   /* ---- Scheduler ---- */
   --scheduler-other-month-bg: rgba(0, 0, 0, 0.08);
+
+  /* ---- Global Search ---- */
+  --search-overlay-bg: rgba(0, 0, 0, 0.5);
+  --search-dialog-bg: #ffffff;
+  --search-dialog-shadow: 0 16px 70px rgba(0, 0, 0, 0.2);
+  --search-input-text: #1e293b;
+  --search-input-placeholder: #94a3b8;
+  --search-group-label: #94a3b8;
+  --search-item-hover-bg: #f1f5f9;
+  --search-item-active-bg: rgba(102, 126, 234, 0.08);
+  --search-item-name: #1e293b;
+  --search-item-secondary: #64748b;
+  --search-footer-bg: #f8fafc;
+  --search-kbd-bg: rgba(0, 0, 0, 0.06);
+  --search-kbd-border: rgba(0, 0, 0, 0.1);
+  --search-kbd-text: #64748b;
 }
 
 
@@ -362,6 +378,22 @@
 
   /* ---- Scheduler ---- */
   --scheduler-other-month-bg: rgba(255, 255, 255, 0.04);
+
+  /* ---- Global Search ---- */
+  --search-overlay-bg: rgba(0, 0, 0, 0.7);
+  --search-dialog-bg: #1e293b;
+  --search-dialog-shadow: 0 16px 70px rgba(0, 0, 0, 0.5);
+  --search-input-text: #f1f5f9;
+  --search-input-placeholder: #64748b;
+  --search-group-label: #64748b;
+  --search-item-hover-bg: #334155;
+  --search-item-active-bg: rgba(129, 140, 248, 0.12);
+  --search-item-name: #f1f5f9;
+  --search-item-secondary: #94a3b8;
+  --search-footer-bg: rgba(0, 0, 0, 0.2);
+  --search-kbd-bg: rgba(255, 255, 255, 0.08);
+  --search-kbd-border: rgba(255, 255, 255, 0.15);
+  --search-kbd-text: #94a3b8;
 }
 
 /* ================================================= */
