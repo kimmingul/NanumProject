@@ -33,7 +33,7 @@ export function useProjects(options: UseProjectsOptions = {}) {
         .from('projects')
         .select('*')
         .eq('is_active', true)
-        .order('updated_at', { ascending: false });
+        .order('name', { ascending: true });
 
       if (status !== 'all') {
         query = query.eq('status', status);

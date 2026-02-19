@@ -7,7 +7,7 @@
 .task-info-section {
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .task-info-row {
@@ -22,11 +22,11 @@
   align-items: center;
   gap: 6px;
   font-size: 0.85rem;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .task-info-item i {
-  color: #9ca3af;
+  color: var(--text-tertiary);
 }
 
 .task-info-item .item-type-badge {
@@ -39,18 +39,18 @@
 }
 
 .task-info-item .type-group {
-  background: #e3f2fd;
-  color: #1565c0;
+  background: var(--badge-info-bg);
+  color: var(--badge-info-text);
 }
 
 .task-info-item .type-task {
-  background: #e8f5e9;
-  color: #2e7d32;
+  background: var(--badge-success-bg);
+  color: var(--badge-success-text);
 }
 
 .task-info-item .type-milestone {
-  background: #fff3e0;
-  color: #e65100;
+  background: var(--badge-warning-bg);
+  color: var(--badge-warning-text);
 }
 
 /* Task status badge */
@@ -63,23 +63,23 @@
 }
 
 .status-todo {
-  background: #f3f4f6;
-  color: #6b7280;
+  background: var(--badge-neutral-bg);
+  color: var(--badge-neutral-text);
 }
 
 .status-in_progress {
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: var(--badge-info-bg);
+  color: var(--badge-info-text);
 }
 
 .status-review {
-  background: #fef3c7;
-  color: #b45309;
+  background: var(--badge-warning-bg);
+  color: var(--badge-warning-text);
 }
 
 .status-done {
-  background: #d1fae5;
-  color: #047857;
+  background: var(--badge-success-bg);
+  color: var(--badge-success-text);
 }
 
 /* Task progress bar */
@@ -93,7 +93,7 @@
 .task-detail-progress-bar {
   flex: 1;
   height: 8px;
-  background: #e5e7eb;
+  background: var(--border-color);
   border-radius: 4px;
   overflow: hidden;
 }
@@ -108,7 +108,7 @@
 .task-detail-progress-text {
   font-size: 0.85rem;
   font-weight: 600;
-  color: #374151;
+  color: var(--form-label);
   min-width: 40px;
   text-align: right;
 }
@@ -128,17 +128,17 @@
 .checklist-header h4 {
   margin: 0;
   font-size: 0.95rem;
-  color: #1e293b;
+  color: var(--text-primary);
 }
 
 .checklist-progress-text {
   font-size: 0.8rem;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .checklist-progress-bar {
   height: 6px;
-  background: #e5e7eb;
+  background: var(--border-color);
   border-radius: 3px;
   overflow: hidden;
   margin-bottom: 16px;
@@ -169,19 +169,19 @@
 }
 
 .checklist-item:hover {
-  background: #f9fafb;
+  background: var(--hover-bg);
 }
 
 .checklist-item-text {
   flex: 1;
   font-size: 0.9rem;
-  color: #374151;
+  color: var(--form-label);
   min-width: 0;
 }
 
 .checklist-item-text.completed {
   text-decoration: line-through;
-  color: #9ca3af;
+  color: var(--text-tertiary);
 }
 
 /* DevExtreme Button reset for checklist delete */
@@ -199,7 +199,7 @@
 }
 
 .dx-button.checklist-delete-btn .dx-icon {
-  color: #d1d5db;
+  color: var(--border-color-strong);
 }
 
 .checklist-item:hover .dx-button.checklist-delete-btn {
@@ -208,12 +208,12 @@
 
 .dx-button.checklist-delete-btn:hover .dx-icon,
 .dx-button.checklist-delete-btn.dx-state-hover .dx-icon {
-  color: #dc2626;
+  color: var(--alert-error-text);
 }
 
 .dx-button.checklist-delete-btn:hover,
 .dx-button.checklist-delete-btn.dx-state-hover {
-  background: #fef2f2;
+  background: var(--alert-error-bg);
 }
 
 /* Add checklist item */
@@ -233,6 +233,6 @@
   align-items: center;
   justify-content: center;
   padding: 2rem;
-  color: #9ca3af;
+  color: var(--text-tertiary);
   font-size: 0.85rem;
 }

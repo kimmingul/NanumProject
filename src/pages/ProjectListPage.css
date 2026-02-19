@@ -17,13 +17,13 @@
   margin: 0 0 0.25rem 0;
   font-size: 1.75rem;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text-primary);
 }
 
 .project-list-page .page-header p {
   margin: 0;
   font-size: 0.9rem;
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 .error-banner {
@@ -31,19 +31,19 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1rem;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  background: var(--alert-error-bg);
+  border: 1px solid var(--alert-error-border);
   border-radius: 8px;
-  color: #dc2626;
+  color: var(--alert-error-text);
   margin-bottom: 1rem;
   font-size: 0.9rem;
 }
 
 .project-grid-container {
-  background: white;
+  background: var(--card-bg);
   border-radius: 8px;
   padding: 1rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--card-shadow);
 }
 
 .project-name-cell {
@@ -68,23 +68,23 @@
 }
 
 .status-active {
-  background: #d1fae5;
-  color: #059669;
+  background: var(--badge-success-bg);
+  color: var(--badge-success-text);
 }
 
 .status-on_hold {
-  background: #fef3c7;
-  color: #d97706;
+  background: var(--badge-warning-bg);
+  color: var(--badge-warning-text);
 }
 
 .status-complete {
-  background: #dbeafe;
-  color: #2563eb;
+  background: var(--badge-info-bg);
+  color: var(--badge-info-text);
 }
 
 .status-archived {
-  background: #f1f5f9;
-  color: #64748b;
+  background: var(--badge-neutral-bg);
+  color: var(--badge-neutral-text);
 }
 
 /* DataGrid row click cursor */
@@ -105,7 +105,7 @@
   display: block;
   font-size: 0.85rem;
   font-weight: 600;
-  color: #374151;
+  color: var(--form-label);
   margin-bottom: 0.375rem;
 }
 
@@ -124,5 +124,5 @@
   gap: 0.75rem;
   margin-top: 1.5rem;
   padding-top: 1rem;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border-color);
 }

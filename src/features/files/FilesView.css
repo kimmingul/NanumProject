@@ -8,14 +8,14 @@
   align-items: center;
   justify-content: center;
   min-height: 200px;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .files-loading .loading-spinner {
   width: 32px;
   height: 32px;
-  border: 3px solid #e0e0e0;
-  border-top-color: #0078d4;
+  border: 3px solid var(--spinner-border);
+  border-top-color: var(--spinner-active);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
   margin-bottom: 12px;
@@ -39,10 +39,10 @@
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  background: var(--alert-error-bg);
+  border: 1px solid var(--alert-error-border);
   border-radius: 6px;
-  color: #dc2626;
+  color: var(--alert-error-text);
   font-size: 0.85rem;
   margin-bottom: 1rem;
 }
@@ -53,7 +53,7 @@
   flex-direction: column;
   align-items: center;
   padding: 3rem 0;
-  color: #9ca3af;
+  color: var(--text-tertiary);
 }
 
 .files-empty i {
@@ -63,7 +63,7 @@
 
 .files-empty h3 {
   margin: 0 0 8px;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 /* File name cell */
@@ -75,7 +75,7 @@
 
 .file-name-cell i {
   font-size: 18px;
-  color: #6b7280;
+  color: var(--text-secondary);
   flex-shrink: 0;
 }
 
@@ -89,7 +89,7 @@
 .dx-button.version-link {
   min-width: auto;
   height: auto;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
   padding: 2px 8px;
   border-radius: 10px;
   background: none;
@@ -102,13 +102,13 @@
 
 .dx-button.version-link .dx-button-text {
   font-size: 0.8rem;
-  color: #0078d4;
+  color: var(--spinner-active);
 }
 
 .dx-button.version-link:hover,
 .dx-button.version-link.dx-state-hover {
-  background: #eff6ff;
-  border-color: #0078d4;
+  background: var(--alert-info-bg);
+  border-color: var(--spinner-active);
 }
 
 /* File actions */
@@ -124,7 +124,7 @@
 
 .version-empty {
   text-align: center;
-  color: #9ca3af;
+  color: var(--text-tertiary);
   padding: 2rem 0;
 }
 
@@ -139,9 +139,9 @@
   align-items: center;
   gap: 12px;
   padding: 10px 12px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
-  background: #fafafa;
+  background: var(--bg-secondary);
 }
 
 .version-info {
@@ -153,7 +153,7 @@
 }
 
 .version-number {
-  background: #0078d4;
+  background: var(--spinner-active);
   color: white;
   padding: 2px 8px;
   border-radius: 10px;
@@ -164,7 +164,7 @@
 
 .version-filename {
   font-size: 0.9rem;
-  color: #1e293b;
+  color: var(--text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -172,7 +172,7 @@
 
 .version-size {
   font-size: 0.8rem;
-  color: #9ca3af;
+  color: var(--text-tertiary);
   flex-shrink: 0;
 }
 
@@ -181,11 +181,11 @@
   flex-direction: column;
   gap: 2px;
   font-size: 0.8rem;
-  color: #6b7280;
+  color: var(--text-secondary);
   flex-shrink: 0;
 }
 
 .version-description {
   font-style: italic;
-  color: #9ca3af;
+  color: var(--text-tertiary);
 }

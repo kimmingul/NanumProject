@@ -43,6 +43,7 @@ const router = createBrowserRouter([
       { path: '/users', element: <UsersPage /> },
       { path: '/audit', element: <AuditLogPage /> },
       { path: '/settings', element: <SettingsPage /> },
+      { path: '/settings/:section', element: <SettingsPage /> },
       { path: '/projects/:projectId', element: <ProjectDetailPage /> },
       { path: '/projects/:projectId/:tab', element: <ProjectDetailPage /> },
       // Legacy redirects

@@ -9,21 +9,21 @@
 .audit-log-page .page-header h1 {
   margin: 0 0 0.5rem 0;
   font-size: 1.75rem;
-  color: #1e293b;
+  color: var(--text-primary);
   font-weight: 700;
 }
 
 .audit-log-page .page-header p {
   margin: 0;
-  color: #64748b;
+  color: var(--text-secondary);
   font-size: 0.95rem;
 }
 
 .audit-log-grid-container {
-  background: white;
+  background: var(--card-bg);
   border-radius: 8px;
   padding: 1.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--card-shadow);
 }
 
 /* Action badges */
@@ -37,18 +37,18 @@
 }
 
 .action-badge.action-created {
-  background: #d1fae5;
-  color: #059669;
+  background: var(--badge-success-bg);
+  color: var(--badge-success-text);
 }
 
 .action-badge.action-updated {
-  background: #dbeafe;
-  color: #2563eb;
+  background: var(--badge-info-bg);
+  color: var(--badge-info-text);
 }
 
 .action-badge.action-deleted {
-  background: #fee2e2;
-  color: #dc2626;
+  background: var(--badge-danger-bg);
+  color: var(--badge-danger-text);
 }
 
 /* Resource type badge */
@@ -58,14 +58,14 @@
   border-radius: 12px;
   font-size: 0.8rem;
   font-weight: 600;
-  background: #f1f5f9;
-  color: #475569;
+  background: var(--badge-neutral-bg);
+  color: var(--badge-neutral-text);
 }
 
 /* Metadata cell */
 .metadata-cell {
   font-size: 0.8rem;
-  color: #64748b;
+  color: var(--text-secondary);
   max-width: 300px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -81,24 +81,24 @@
   align-items: center;
   justify-content: center;
   padding: 3rem;
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 .audit-log-page .error-container {
-  color: #dc2626;
+  color: var(--alert-error-text);
 }
 
 /* DevExtreme overrides */
 .audit-log-grid-container .dx-datagrid {
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--grid-border);
   border-radius: 8px;
 }
 
 .audit-log-grid-container .dx-datagrid-headers {
-  background: #f8fafc;
+  background: var(--grid-header-bg);
   font-weight: 600;
 }
 
 .audit-log-grid-container .dx-datagrid-rowsview .dx-row-alt {
-  background: #f8fafc;
+  background: var(--grid-alt-row-bg);
 }

@@ -1,0 +1,66 @@
+/* ====================== */
+/* NavRail (48px fixed)    */
+/* ====================== */
+
+.nav-rail {
+  width: 48px;
+  min-width: 48px;
+  display: flex;
+  flex-direction: column;
+  background: var(--nav-rail-bg);
+  border-right: 1px solid var(--nav-rail-border);
+  flex-shrink: 0;
+}
+
+.nav-rail-top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 0;
+}
+
+.nav-rail-bottom {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 0;
+}
+
+/* DevExtreme Button reset for NavRail */
+.dx-button.nav-rail-btn {
+  min-width: 40px;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--nav-rail-icon);
+  padding: 0;
+  transition: background 0.15s, color 0.15s;
+}
+
+.dx-button.nav-rail-btn .dx-button-content {
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dx-button.nav-rail-btn .dx-icon {
+  font-size: 18px;
+  color: inherit;
+}
+
+.dx-button.nav-rail-btn:hover,
+.dx-button.nav-rail-btn.dx-state-hover {
+  background: var(--nav-rail-hover-bg);
+  color: var(--nav-rail-icon-hover);
+}
+
+.dx-button.nav-rail-btn.active {
+  background: var(--nav-rail-active-bg);
+  color: var(--nav-rail-icon-active);
+}

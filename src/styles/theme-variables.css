@@ -1,0 +1,262 @@
+/* ================================================= */
+/* Theme Variables — Light (default) & Dark           */
+/* ================================================= */
+
+:root {
+  /* ---- Layout ---- */
+  --layout-bg: #f8fafc;
+
+  /* ---- Header ---- */
+  --header-bg: #ffffff;
+  --header-text: #1e293b;
+  --header-border: #e2e8f0;
+  --header-search-bg: rgba(0, 0, 0, 0.04);
+  --header-search-border: rgba(0, 0, 0, 0.08);
+  --header-search-text: #94a3b8;
+  --header-search-kbd-bg: rgba(0, 0, 0, 0.04);
+  --header-search-kbd-border: rgba(0, 0, 0, 0.1);
+  --header-search-kbd-text: #94a3b8;
+  --header-user-name: #475569;
+  --header-user-caret: #94a3b8;
+  --header-user-hover-bg: rgba(0, 0, 0, 0.04);
+
+  /* ---- NavRail ---- */
+  --nav-rail-bg: #1e293b;
+  --nav-rail-border: #334155;
+  --nav-rail-icon: #94a3b8;
+  --nav-rail-icon-hover: #e2e8f0;
+  --nav-rail-icon-active: #f1f5f9;
+  --nav-rail-hover-bg: rgba(255, 255, 255, 0.1);
+  --nav-rail-active-bg: rgba(255, 255, 255, 0.15);
+
+  /* ---- Sidebar ---- */
+  --sidebar-bg: #ffffff;
+  --sidebar-border: #e2e8f0;
+  --sidebar-text: #475569;
+  --sidebar-title: #94a3b8;
+  --sidebar-icon: #64748b;
+  --sidebar-icon-hover: #1e293b;
+  --sidebar-hover-bg: #f1f5f9;
+  --sidebar-active-bg: #eff6ff;
+  --sidebar-active-text: #2563eb;
+
+  /* ---- Content ---- */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --text-tertiary: #94a3b8;
+  --border-color: #e2e8f0;
+  --border-color-strong: #d1d5db;
+  --hover-bg: #f1f5f9;
+
+  /* ---- Cards ---- */
+  --card-bg: #ffffff;
+  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --card-border: #e2e8f0;
+
+  /* ---- Forms ---- */
+  --form-label: #374151;
+  --input-border: #d1d5db;
+
+  /* ---- Badges: Status ---- */
+  --badge-success-bg: #d1fae5;
+  --badge-success-text: #059669;
+  --badge-warning-bg: #fef3c7;
+  --badge-warning-text: #d97706;
+  --badge-info-bg: #dbeafe;
+  --badge-info-text: #2563eb;
+  --badge-danger-bg: #fee2e2;
+  --badge-danger-text: #dc2626;
+  --badge-neutral-bg: #f1f5f9;
+  --badge-neutral-text: #64748b;
+  --badge-purple-bg: #f3e8ff;
+  --badge-purple-text: #9333ea;
+
+  /* ---- Alerts ---- */
+  --alert-error-bg: #fef2f2;
+  --alert-error-text: #dc2626;
+  --alert-error-border: #fecaca;
+  --alert-success-bg: #f0fdf4;
+  --alert-success-text: #16a34a;
+  --alert-info-bg: #eff6ff;
+  --alert-info-text: #1e40af;
+  --alert-info-border: #bfdbfe;
+
+  /* ---- DataGrid ---- */
+  --grid-header-bg: #f8fafc;
+  --grid-border: #e2e8f0;
+  --grid-alt-row-bg: #f8fafc;
+
+  /* ---- Profile Menu ---- */
+  --menu-bg: #ffffff;
+  --menu-shadow: 0 4px 24px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.08);
+  --menu-hover-bg: #f1f5f9;
+  --menu-text: #374151;
+  --menu-email: #1e293b;
+  --menu-role: #94a3b8;
+  --menu-divider: #e2e8f0;
+  --menu-danger-text: #dc2626;
+  --menu-danger-hover-bg: #fef2f2;
+
+  /* ---- Workspace Toolbar ---- */
+  --toolbar-bg: #ffffff;
+  --toolbar-border: #e2e8f0;
+  --toolbar-text: #1e293b;
+  --toolbar-icon: #64748b;
+  --toolbar-btn-hover-bg: #f1f5f9;
+  --toolbar-btn-hover-text: #334155;
+  --toolbar-btn-active-bg: #eff6ff;
+  --toolbar-btn-active-text: #2563eb;
+
+  /* ---- Right Panel ---- */
+  --right-panel-bg: #ffffff;
+  --right-panel-border: #e2e8f0;
+  --right-panel-title: #1e293b;
+  --right-panel-close-icon: #94a3b8;
+  --right-panel-close-hover-bg: #f1f5f9;
+  --right-panel-close-hover-icon: #475569;
+
+  /* ---- Spinner ---- */
+  --spinner-border: #e2e8f0;
+  --spinner-active: #667eea;
+
+  /* ---- Avatar ---- */
+  --avatar-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+
+/* ================================================= */
+/* Dark Theme                                         */
+/* ================================================= */
+
+[data-theme="dark"] {
+  /* ---- Layout ---- */
+  --layout-bg: #0f172a;
+
+  /* ---- Header ---- */
+  --header-bg: #0f172a;
+  --header-text: #e2e8f0;
+  --header-border: #1e293b;
+  --header-search-bg: rgba(255, 255, 255, 0.06);
+  --header-search-border: rgba(255, 255, 255, 0.12);
+  --header-search-text: #64748b;
+  --header-search-kbd-bg: rgba(255, 255, 255, 0.06);
+  --header-search-kbd-border: rgba(255, 255, 255, 0.15);
+  --header-search-kbd-text: #64748b;
+  --header-user-name: #cbd5e1;
+  --header-user-caret: #64748b;
+  --header-user-hover-bg: rgba(255, 255, 255, 0.08);
+
+  /* ---- NavRail ---- */
+  --nav-rail-bg: #020617;
+  --nav-rail-border: #1e293b;
+  --nav-rail-icon: #64748b;
+  --nav-rail-icon-hover: #e2e8f0;
+  --nav-rail-icon-active: #f1f5f9;
+  --nav-rail-hover-bg: rgba(255, 255, 255, 0.1);
+  --nav-rail-active-bg: rgba(255, 255, 255, 0.15);
+
+  /* ---- Sidebar ---- */
+  --sidebar-bg: #1e293b;
+  --sidebar-border: #334155;
+  --sidebar-text: #cbd5e1;
+  --sidebar-title: #64748b;
+  --sidebar-icon: #94a3b8;
+  --sidebar-icon-hover: #e2e8f0;
+  --sidebar-hover-bg: #334155;
+  --sidebar-active-bg: rgba(99, 102, 241, 0.15);
+  --sidebar-active-text: #818cf8;
+
+  /* ---- Content ---- */
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-tertiary: #64748b;
+  --border-color: #334155;
+  --border-color-strong: #475569;
+  --hover-bg: #334155;
+
+  /* ---- Cards ---- */
+  --card-bg: #1e293b;
+  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --card-border: #334155;
+
+  /* ---- Forms ---- */
+  --form-label: #cbd5e1;
+  --input-border: #475569;
+
+  /* ---- Badges: Status ---- */
+  --badge-success-bg: rgba(5, 150, 105, 0.2);
+  --badge-success-text: #34d399;
+  --badge-warning-bg: rgba(217, 119, 6, 0.2);
+  --badge-warning-text: #fbbf24;
+  --badge-info-bg: rgba(37, 99, 235, 0.2);
+  --badge-info-text: #60a5fa;
+  --badge-danger-bg: rgba(220, 38, 38, 0.2);
+  --badge-danger-text: #f87171;
+  --badge-neutral-bg: rgba(100, 116, 139, 0.2);
+  --badge-neutral-text: #94a3b8;
+  --badge-purple-bg: rgba(147, 51, 234, 0.2);
+  --badge-purple-text: #c084fc;
+
+  /* ---- Alerts ---- */
+  --alert-error-bg: rgba(220, 38, 38, 0.15);
+  --alert-error-text: #f87171;
+  --alert-error-border: rgba(220, 38, 38, 0.3);
+  --alert-success-bg: rgba(22, 163, 74, 0.15);
+  --alert-success-text: #4ade80;
+  --alert-info-bg: rgba(37, 99, 235, 0.15);
+  --alert-info-text: #60a5fa;
+  --alert-info-border: rgba(37, 99, 235, 0.3);
+
+  /* ---- DataGrid ---- */
+  --grid-header-bg: #1e293b;
+  --grid-border: #334155;
+  --grid-alt-row-bg: rgba(255, 255, 255, 0.02);
+
+  /* ---- Profile Menu ---- */
+  --menu-bg: #1e293b;
+  --menu-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.3);
+  --menu-hover-bg: #334155;
+  --menu-text: #e2e8f0;
+  --menu-email: #f1f5f9;
+  --menu-role: #64748b;
+  --menu-divider: #334155;
+  --menu-danger-text: #f87171;
+  --menu-danger-hover-bg: rgba(220, 38, 38, 0.15);
+
+  /* ---- Workspace Toolbar ---- */
+  --toolbar-bg: #1e293b;
+  --toolbar-border: #334155;
+  --toolbar-text: #f1f5f9;
+  --toolbar-icon: #94a3b8;
+  --toolbar-btn-hover-bg: #334155;
+  --toolbar-btn-hover-text: #e2e8f0;
+  --toolbar-btn-active-bg: rgba(99, 102, 241, 0.15);
+  --toolbar-btn-active-text: #818cf8;
+
+  /* ---- Right Panel ---- */
+  --right-panel-bg: #1e293b;
+  --right-panel-border: #334155;
+  --right-panel-title: #f1f5f9;
+  --right-panel-close-icon: #64748b;
+  --right-panel-close-hover-bg: #334155;
+  --right-panel-close-hover-icon: #e2e8f0;
+
+  /* ---- Spinner ---- */
+  --spinner-border: #334155;
+  --spinner-active: #818cf8;
+}
+
+/* ================================================= */
+/* Theme Transition                                   */
+/* ================================================= */
+
+html.theme-transition,
+html.theme-transition *,
+html.theme-transition *::before,
+html.theme-transition *::after {
+  transition: background-color 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s !important;
+}

@@ -1,25 +1,21 @@
 import { type ReactNode, useEffect, useRef, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { Button } from 'devextreme-react/button';
+import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/lib/auth-store';
+import { useThemeStore } from '@/lib/theme-store';
 import { supabase } from '@/lib/supabase';
-import { usePMStore } from '@/lib/pm-store';
-
-const navItems = [
-  { path: '/dashboard', icon: 'dx-icon-home', label: 'Dashboard' },
-  { path: '/projects', icon: 'dx-icon-folder', label: 'Projects' },
-  { path: '/users', icon: 'dx-icon-group', label: 'Users' },
-  { path: '/audit', icon: 'dx-icon-fieldchooser', label: 'Audit' },
-];
 
 export function IDEHeader(): ReactNode {
   const navigate = useNavigate();
-  const location = useLocation();
   const profile = useAuthStore((s) => s.profile);
   const reset = useAuthStore((s) => s.reset);
-  const toggleLeftPanel = usePMStore((s) => s.toggleLeftPanel);
+  const theme = useThemeStore((s) => s.theme);
+  const setTheme = useThemeStore((s) => s.setTheme);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
+
+  const toggleTheme = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  };
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -39,36 +35,18 @@ export function IDEHeader(): ReactNode {
     return () => document.removeEventListener('mousedown', handleClick);
   }, [profileMenuOpen]);
 
-  const isActive = (path: string) => {
-    if (path === '/projects') return location.pathname.startsWith('/projects');
-    return location.pathname === path;
-  };
-
   return (
     <header className="ide-header">
       <div className="ide-header-left">
-        <Button
-          icon="menu"
-          stylingMode="text"
-          hint="Toggle sidebar"
-          className="ide-header-btn ide-hamburger"
-          onClick={toggleLeftPanel}
-        />
-        <span className="ide-app-title" onClick={() => navigate('/dashboard')} role="button" tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && navigate('/dashboard')}>
+        <span
+          className="ide-app-title"
+          onClick={() => navigate('/dashboard')}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === 'Enter' && navigate('/dashboard')}
+        >
           NanumProject
         </span>
-        <nav className="ide-header-nav">
-          {navItems.map((item) => (
-            <Button
-              key={item.path}
-              icon={item.icon.replace('dx-icon-', '')}
-              stylingMode="text"
-              hint={item.label}
-              className={`ide-header-btn ide-nav-btn ${isActive(item.path) ? 'active' : ''}`}
-              onClick={() => navigate(item.path)}
-            />
-          ))}
-        </nav>
       </div>
 
       <div className="ide-header-center">
@@ -80,6 +58,13 @@ export function IDEHeader(): ReactNode {
       </div>
 
       <div className="ide-header-right" ref={profileMenuRef}>
+        <button
+          className="ide-theme-toggle"
+          onClick={toggleTheme}
+          title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+        >
+          <i className={theme === 'dark' ? 'dx-icon-sun' : 'dx-icon-moon'} />
+        </button>
         <div
           className="ide-user-info"
           role="button"
@@ -107,7 +92,7 @@ export function IDEHeader(): ReactNode {
             <div className="ide-profile-menu-divider" />
             <button
               className="ide-profile-menu-item"
-              onClick={() => { setProfileMenuOpen(false); navigate('/settings'); }}
+              onClick={() => { setProfileMenuOpen(false); navigate('/settings/profile'); }}
             >
               <i className="dx-icon-user" />
               My Profile

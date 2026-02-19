@@ -53,7 +53,7 @@ const emptyForm: ProjectFormData = {
 
 export default function ProjectListPage(): ReactNode {
   const navigate = useNavigate();
-  const { projects, loading, error, refetch } = useProjects();
+  const { projects, loading, error, refetch } = useProjects({ status: 'active' });
   const { createProject } = useProjectCrud();
   const [showPopup, setShowPopup] = useState(false);
   const [formData, setFormData] = useState<ProjectFormData>(emptyForm);
@@ -134,6 +134,8 @@ export default function ProjectListPage(): ReactNode {
               dataField="name"
               caption="Project Name"
               minWidth={300}
+              sortOrder="asc"
+              sortIndex={0}
               cellRender={(data: { value: string; data: { is_starred: boolean } }) => (
                 <div className="project-name-cell">
                   {data.data.is_starred && (
@@ -174,8 +176,6 @@ export default function ProjectListPage(): ReactNode {
               caption="Last Updated"
               dataType="datetime"
               width={170}
-              sortOrder="desc"
-              sortIndex={0}
             />
 
             <Pager

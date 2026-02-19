@@ -9,6 +9,17 @@
   <body class="dx-viewport">
     <div id="root"></div>
     <script>
+      // Prevent FOUC: apply theme before React renders
+      try {
+        var s = JSON.parse(localStorage.getItem('nanum-theme') || '{}');
+        var m = s && s.state && s.state.theme;
+        var eff = m === 'dark' ? 'dark'
+          : m === 'system' && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark'
+          : 'light';
+        document.documentElement.setAttribute('data-theme', eff);
+      } catch(e) {}
+    </script>
+    <script>
       window.DevExpress = window.DevExpress || {};
       window.DevExpress.config = { licenseKey: '%VITE_DEVEXTREME_KEY%' };
     </script>

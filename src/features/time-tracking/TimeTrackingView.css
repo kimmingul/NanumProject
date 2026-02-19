@@ -8,14 +8,14 @@
   align-items: center;
   justify-content: center;
   min-height: 200px;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .time-tracking-loading .loading-spinner {
   width: 32px;
   height: 32px;
-  border: 3px solid #e0e0e0;
-  border-top-color: #0078d4;
+  border: 3px solid var(--spinner-border);
+  border-top-color: var(--spinner-active);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
   margin-bottom: 12px;
@@ -31,10 +31,10 @@
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  background: var(--alert-error-bg);
+  border: 1px solid var(--alert-error-border);
   border-radius: 6px;
-  color: #dc2626;
+  color: var(--alert-error-text);
   font-size: 0.85rem;
   margin-bottom: 1rem;
 }
@@ -45,7 +45,7 @@
   flex-direction: column;
   align-items: center;
   padding: 3rem 0;
-  color: #9ca3af;
+  color: var(--text-tertiary);
 }
 
 .time-tracking-empty i {
@@ -55,7 +55,7 @@
 
 .time-tracking-empty h3 {
   margin: 0 0 8px;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 /* Toolbar */
@@ -69,7 +69,7 @@
 
 .time-filter-label {
   font-size: 0.85rem;
-  color: #6b7280;
+  color: var(--text-secondary);
   white-space: nowrap;
 }
 
@@ -84,13 +84,13 @@
 }
 
 .type-punched {
-  background: #e3f2fd;
-  color: #1565c0;
+  background: var(--badge-info-bg);
+  color: var(--badge-info-text);
 }
 
 .type-manual {
-  background: #e8f5e9;
-  color: #2e7d32;
+  background: var(--badge-success-bg);
+  color: var(--badge-success-text);
 }
 
 /* Duration cell */
@@ -116,7 +116,7 @@
 .log-time-field label {
   font-size: 0.85rem;
   font-weight: 500;
-  color: #374151;
+  color: var(--form-label);
 }
 
 .log-time-actions {
@@ -124,7 +124,7 @@
   justify-content: flex-end;
   gap: 8px;
   padding-top: 8px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border-color);
 }
 
 /* Summary row */

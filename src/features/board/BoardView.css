@@ -11,19 +11,19 @@
   justify-content: center;
   padding: 4rem 2rem;
   text-align: center;
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 .board-error i,
 .board-empty i {
   font-size: 2.5rem;
-  color: #94a3b8;
+  color: var(--text-tertiary);
   margin-bottom: 1rem;
 }
 
 .board-empty h3 {
   margin: 0 0 0.5rem 0;
-  color: #334155;
+  color: var(--text-primary);
 }
 
 .board-empty p {
@@ -45,9 +45,9 @@
   flex: 1;
   min-width: 260px;
   max-width: 340px;
-  background: #f8fafc;
+  background: var(--bg-secondary);
   border-radius: 8px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
 }
@@ -59,7 +59,7 @@
   padding: 0.75rem 1rem;
   border-bottom: 2px solid;
   border-radius: 8px 8px 0 0;
-  background: white;
+  background: var(--card-bg);
 }
 
 .board-column-header h4 {
@@ -71,8 +71,8 @@
 }
 
 .board-column-count {
-  background: #e2e8f0;
-  color: #475569;
+  background: var(--badge-neutral-bg);
+  color: var(--badge-neutral-text);
   font-size: 0.75rem;
   font-weight: 600;
   padding: 0.15rem 0.5rem;
@@ -85,7 +85,7 @@
 }
 
 .board-column-todo .board-column-header h4 {
-  color: #475569;
+  color: var(--text-secondary);
 }
 
 .board-column-in_progress .board-column-header {
@@ -93,7 +93,7 @@
 }
 
 .board-column-in_progress .board-column-header h4 {
-  color: #2563eb;
+  color: #3b82f6;
 }
 
 .board-column-review .board-column-header {
@@ -101,7 +101,7 @@
 }
 
 .board-column-review .board-column-header h4 {
-  color: #d97706;
+  color: #f59e0b;
 }
 
 .board-column-done .board-column-header {
@@ -109,7 +109,7 @@
 }
 
 .board-column-done .board-column-header h4 {
-  color: #16a34a;
+  color: #22c55e;
 }
 
 /* Cards container inside column */
@@ -121,24 +121,24 @@
 
 /* Card */
 .board-card {
-  background: white;
+  background: var(--card-bg);
   border-radius: 6px;
   padding: 0.75rem;
   margin-bottom: 0.5rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color);
   cursor: pointer;
   transition: box-shadow 0.15s, border-color 0.15s;
 }
 
 .board-card:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  border-color: #cbd5e1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  border-color: var(--border-color-strong);
 }
 
 .board-card-name {
   font-size: 0.9rem;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
   margin-bottom: 0.5rem;
   line-height: 1.4;
 }
@@ -155,7 +155,7 @@
   align-items: center;
   gap: 0.25rem;
   font-size: 0.75rem;
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 .board-card-assignee i {
@@ -164,7 +164,7 @@
 
 .board-card-dates {
   font-size: 0.7rem;
-  color: #94a3b8;
+  color: var(--text-tertiary);
 }
 
 .board-card-progress {
@@ -177,7 +177,7 @@
 .board-card-progress-bar {
   width: 48px;
   height: 4px;
-  background: #e2e8f0;
+  background: var(--border-color);
   border-radius: 2px;
   overflow: hidden;
 }
@@ -191,7 +191,7 @@
 
 .board-card-progress-text {
   font-size: 0.7rem;
-  color: #94a3b8;
+  color: var(--text-tertiary);
   font-weight: 600;
 }
 
@@ -201,7 +201,7 @@
 }
 
 .board-column-cards .dx-sortable-placeholder {
-  background: #e0f2fe;
+  background: var(--badge-info-bg);
   border: 2px dashed #3b82f6;
   border-radius: 6px;
   min-height: 60px;

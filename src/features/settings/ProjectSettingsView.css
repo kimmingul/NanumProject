@@ -3,20 +3,20 @@
 }
 
 .settings-section {
-  background: white;
+  background: var(--card-bg);
   border-radius: 8px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--card-shadow);
 }
 
 .settings-section h3 {
   margin: 0 0 1.25rem;
   font-size: 1.1rem;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text-primary);
   padding-bottom: 0.75rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .settings-form .form-field {
@@ -27,7 +27,7 @@
   display: block;
   font-size: 0.85rem;
   font-weight: 600;
-  color: #374151;
+  color: var(--form-label);
   margin-bottom: 0.375rem;
 }
 
@@ -53,7 +53,7 @@
 .settings-form .form-actions {
   margin-top: 1.5rem;
   padding-top: 1rem;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border-color);
 }
 
 /* Members */
@@ -84,12 +84,12 @@
 .member-name {
   font-size: 0.85rem;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
 }
 
 .member-email {
   font-size: 0.75rem;
-  color: #9ca3af;
+  color: var(--text-tertiary);
 }
 
 /* Permission badges */
@@ -102,21 +102,21 @@
 }
 
 .perm-admin {
-  background: #ede9fe;
-  color: #6d28d9;
+  background: var(--badge-purple-bg);
+  color: var(--badge-purple-text);
 }
 
 .perm-edit {
-  background: #dbeafe;
-  color: #2563eb;
+  background: var(--badge-info-bg);
+  color: var(--badge-info-text);
 }
 
 .perm-own_progress {
-  background: #d1fae5;
-  color: #059669;
+  background: var(--badge-success-bg);
+  color: var(--badge-success-text);
 }
 
 .perm-view {
-  background: #f1f5f9;
-  color: #64748b;
+  background: var(--badge-neutral-bg);
+  color: var(--badge-neutral-text);
 }
