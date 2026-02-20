@@ -34,7 +34,7 @@ export default function CommentsView({
   targetType = 'project',
   targetId,
 }: CommentsViewProps): ReactNode {
-  const { comments, loading, error, addComment, deleteComment } = useComments(
+  const { comments, loading, error, addComment, updateComment, deleteComment } = useComments(
     projectId,
     targetType,
     targetId,
@@ -43,6 +43,11 @@ export default function CommentsView({
   const profile = useAuthStore((s) => s.profile);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
+
+  // Edit state
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editMessage, setEditMessage] = useState('');
+  const [saving, setSaving] = useState(false);
 
   // Mention state
   const [mentionedIds, setMentionedIds] = useState<Set<string>>(new Set());
@@ -145,6 +150,30 @@ export default function CommentsView({
       console.error('Failed to add comment:', err);
     } finally {
       setSending(false);
+    }
+  };
+
+  const handleStartEdit = (commentId: string, message: string) => {
+    setEditingId(commentId);
+    setEditMessage(message);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditMessage('');
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingId || !editMessage.trim()) return;
+    setSaving(true);
+    try {
+      await updateComment(editingId, editMessage.trim());
+      setEditingId(null);
+      setEditMessage('');
+    } catch (err) {
+      console.error('Failed to update comment:', err);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -271,17 +300,56 @@ export default function CommentsView({
                   <span className="comment-time">
                     {new Date(comment.created_at).toLocaleString()}
                   </span>
-                  {comment.created_by === profile?.user_id && (
-                    <Button
-                      icon="trash"
-                      stylingMode="text"
-                      hint="Delete comment"
-                      className="comment-delete-btn"
-                      onClick={() => deleteComment(comment.id)}
-                    />
+                  {comment.created_by === profile?.user_id && editingId !== comment.id && (
+                    <>
+                      <Button
+                        icon="edit"
+                        stylingMode="text"
+                        hint="Edit comment"
+                        className="comment-edit-btn"
+                        onClick={() => handleStartEdit(comment.id, comment.message)}
+                      />
+                      <Button
+                        icon="trash"
+                        stylingMode="text"
+                        hint="Delete comment"
+                        className="comment-delete-btn"
+                        onClick={() => deleteComment(comment.id)}
+                      />
+                    </>
                   )}
                 </div>
-                <div className="comment-message">{renderMessage(comment.message)}</div>
+                {editingId === comment.id ? (
+                  <div className="comment-edit-area">
+                    <TextArea
+                      value={editMessage}
+                      onValueChanged={(e) => setEditMessage(e.value ?? '')}
+                      valueChangeEvent="input"
+                      stylingMode="outlined"
+                      height={80}
+                      onKeyDown={(e) => {
+                        if (e.event?.key === 'Enter' && e.event?.ctrlKey) handleSaveEdit();
+                        if (e.event?.key === 'Escape') handleCancelEdit();
+                      }}
+                    />
+                    <div className="comment-edit-actions">
+                      <Button
+                        text="Cancel"
+                        stylingMode="text"
+                        onClick={handleCancelEdit}
+                      />
+                      <Button
+                        text={saving ? 'Saving...' : 'Save'}
+                        type="default"
+                        stylingMode="contained"
+                        disabled={!editMessage.trim() || saving}
+                        onClick={handleSaveEdit}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="comment-message">{renderMessage(comment.message)}</div>
+                )}
               </div>
             </div>
           ))

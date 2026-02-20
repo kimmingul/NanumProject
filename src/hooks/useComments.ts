@@ -13,6 +13,7 @@ interface UseCommentsResult {
   loading: boolean;
   error: string | null;
   addComment: (message: string, mentionedUserIds?: string[]) => Promise<void>;
+  updateComment: (commentId: string, message: string) => Promise<void>;
   deleteComment: (commentId: string) => Promise<void>;
   refetch: () => Promise<void>;
 }
@@ -105,6 +106,19 @@ export function useComments(
     [projectId, targetType, effectiveTargetId, profile, fetchComments],
   );
 
+  const updateComment = useCallback(
+    async (commentId: string, message: string) => {
+      const { error: updateError } = await supabase
+        .from('comments')
+        .update({ message })
+        .eq('id', commentId);
+
+      if (updateError) throw updateError;
+      await fetchComments();
+    },
+    [fetchComments],
+  );
+
   const deleteComment = useCallback(
     async (commentId: string) => {
       const { error: delError } = await supabase
@@ -122,5 +136,5 @@ export function useComments(
     fetchComments();
   }, [fetchComments]);
 
-  return { comments, loading, error, addComment, deleteComment, refetch: fetchComments };
+  return { comments, loading, error, addComment, updateComment, deleteComment, refetch: fetchComments };
 }

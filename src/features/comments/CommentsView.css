@@ -128,7 +128,8 @@
   color: var(--text-tertiary);
 }
 
-/* DevExtreme Button reset for comment delete */
+/* DevExtreme Button reset for comment edit/delete */
+.dx-button.comment-edit-btn,
 .dx-button.comment-delete-btn {
   margin-left: auto;
   min-width: 24px;
@@ -137,12 +138,32 @@
   background: transparent;
 }
 
+.dx-button.comment-edit-btn {
+  margin-left: auto;
+}
+
+.dx-button.comment-delete-btn {
+  margin-left: 0;
+}
+
+.dx-button.comment-edit-btn .dx-button-content,
 .dx-button.comment-delete-btn .dx-button-content {
   padding: 2px 4px;
 }
 
+.dx-button.comment-edit-btn .dx-icon,
 .dx-button.comment-delete-btn .dx-icon {
   color: var(--text-tertiary);
+}
+
+.dx-button.comment-edit-btn:hover .dx-icon,
+.dx-button.comment-edit-btn.dx-state-hover .dx-icon {
+  color: var(--accent-color);
+}
+
+.dx-button.comment-edit-btn:hover,
+.dx-button.comment-edit-btn.dx-state-hover {
+  background: var(--accent-bg-subtle);
 }
 
 .dx-button.comment-delete-btn:hover .dx-icon,
@@ -153,6 +174,18 @@
 .dx-button.comment-delete-btn:hover,
 .dx-button.comment-delete-btn.dx-state-hover {
   background: var(--alert-error-bg);
+}
+
+/* Comment edit area */
+.comment-edit-area {
+  margin-top: 4px;
+}
+
+.comment-edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
 }
 
 .comment-message {
