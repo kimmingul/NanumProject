@@ -12,7 +12,7 @@ interface UseCommentsResult {
   comments: CommentWithAuthor[];
   loading: boolean;
   error: string | null;
-  addComment: (message: string) => Promise<void>;
+  addComment: (message: string, mentionedUserIds?: string[]) => Promise<void>;
   deleteComment: (commentId: string) => Promise<void>;
   refetch: () => Promise<void>;
 }
@@ -86,7 +86,7 @@ export function useComments(
   }, [projectId, targetType, effectiveTargetId]);
 
   const addComment = useCallback(
-    async (message: string) => {
+    async (message: string, mentionedUserIds?: string[]) => {
       if (!projectId || !effectiveTargetId || !profile) return;
 
       const { error: insertError } = await supabase.from('comments').insert({
@@ -95,6 +95,7 @@ export function useComments(
         target_type: targetType,
         target_id: effectiveTargetId,
         message,
+        mentioned_user_ids: mentionedUserIds || [],
         created_by: profile.user_id,
       });
 

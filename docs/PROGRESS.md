@@ -611,6 +611,19 @@
   - `CalendarView`: 툴팁 `toLocaleDateString()` → `formatDate()` 변경
 - Zustand 구독으로 설정 변경 시 즉시 반영 (페이지 새로고침 불필요)
 
+### Phase 38: @멘션 기능 — 코멘트에서 팀원 태그 + 알림
+
+- **useComments 훅**: `addComment(message, mentionedUserIds?)` 시그니처 확장, insert에 `mentioned_user_ids` 포함 → DB 트리거가 자동으로 `comment_mention` 알림 생성
+- **CommentsView @자동완성**:
+  - `useProjectMembers(projectId)`로 프로젝트 멤버 목록 로드
+  - TextArea에서 `@` 입력 시 커서 위치 기반 검색어 추출 → 멤버 필터링 드롭다운 표시
+  - 키보드 ↑↓ 이동, Enter 선택, Esc 닫기, 마우스 클릭 선택
+  - 선택 시 `@이름 ` 삽입 + `mentionedIds` Set에 user_id 추가
+  - 전송 시 `addComment(message, Array.from(mentionedIds))` 호출
+- **코멘트 @멘션 하이라이트**: `@\S+` 패턴을 `<span className="mention">` 으로 래핑 (accent color + bold)
+- **스타일**: mention-dropdown (absolute positioning above TextArea), mention-item (avatar + name), mention highlight
+- **DB 변경 없음** — 기존 인프라 활용 (`comments.mentioned_user_ids`, `notify_on_comment_mention()` 트리거, `comment_mention` enum)
+
 ### Bugfix: 새로고침 시 데이터 미로딩 (Supabase Auth 데드락)
 
 **증상**: 페이지 새로고침(F5) 시 프로젝트 목록, 대시보드 통계 등 모든 데이터가 로드되지 않음. 콘솔 에러 없이 빈 화면 표시.

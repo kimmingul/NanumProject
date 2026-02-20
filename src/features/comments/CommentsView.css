@@ -161,3 +161,68 @@
   line-height: 1.5;
   white-space: pre-wrap;
 }
+
+/* Mention highlight */
+.mention {
+  color: var(--accent-color);
+  font-weight: 600;
+  cursor: default;
+}
+
+/* Mention dropdown */
+.mention-container {
+  position: relative;
+}
+
+.mention-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: 200px;
+  overflow-y: auto;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  z-index: 1000;
+  margin-top: 4px;
+}
+
+.mention-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+}
+
+.mention-item.active {
+  background: var(--sidebar-hover-bg);
+}
+
+.mention-item:hover {
+  background: var(--sidebar-hover-bg);
+}
+
+.mention-item-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--spinner-active);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.mention-item-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
