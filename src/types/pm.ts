@@ -6,17 +6,38 @@
 // ========================================
 // Enum types
 // ========================================
-export type ProjectStatus = 'active' | 'on_hold' | 'complete' | 'archived';
+export type ProjectStatus = string;
 export type MemberPermission = 'admin' | 'edit' | 'own_progress' | 'view';
 export type MemberStatus = 'pending' | 'accepted' | 'declined';
 export type ItemType = 'group' | 'task' | 'milestone';
 export type DependencyType = 'fs' | 'ss' | 'ff' | 'sf';
 export type CommentTarget = 'project' | 'item';
 export type TimeEntryType = 'punched' | 'manual';
-export type TaskStatus = 'todo' | 'in_progress' | 'review' | 'done';
+export type TaskStatus = string;
 export type ViewType = 'gantt' | 'board' | 'list' | 'calendar';
 export type LinkType = 'blocks' | 'related_to' | 'duplicates';
 export type NotificationType = 'assignment' | 'comment_mention' | 'status_change' | 'due_date';
+
+// ========================================
+// Enum config types (tenant-level customization)
+// ========================================
+export type EnumCategory =
+  | 'task_status'
+  | 'project_status'
+  | 'user_role'
+  | 'member_permission'
+  | 'department'
+  | 'link_type'
+  | 'item_type';
+
+export interface EnumOption {
+  value: string;
+  label: string;
+  color: string | null;
+  icon: string | null;
+  sort_order: number;
+  is_system: boolean;
+}
 
 // ========================================
 // Core entity interfaces

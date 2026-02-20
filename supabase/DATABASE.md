@@ -21,8 +21,9 @@ Supabase (PostgreSQL) 기반 멀티테넌트 프로젝트 관리 서비스.
 | `013_user_preferences.sql` | profiles.preferences JSONB 컬럼 추가 |
 | `014_project_manager.sql` | projects.manager_id 컬럼 추가 + 기존 데이터 backfill |
 | `015_user_project_stars.sql` | user_project_stars 테이블 (사용자별 프로젝트 별표) + projects.is_starred 컬럼 제거 |
+| `016_tenant_enum_config.sql` | tenant_enum_config 테이블 (Tenant별 Enum 설정) + task_status/project_status ENUM→TEXT 변환 + 시드 |
 
-> 실행 순서: 001 → 002 → 003 → 004 → 005 → 006 → 007 → 008 → 009 → 010 → 011 → 012 → 013 → 014 → 015
+> 실행 순서: 001 → 002 → 003 → 004 → 005 → 006 → 007 → 008 → 009 → 010 → 011 → 012 → 013 → 014 → 015 → 016
 
 ---
 
@@ -55,6 +56,7 @@ time_entries          시간 추적
 checklist_items       체크리스트
 activity_log          활동 로그 (immutable)
 notifications         알림 (할당/멘션/상태변경/기한)
+tenant_enum_config    Tenant별 Enum 설정 (JSONB options, UNIQUE: tenant_id + category)
 ```
 
 ---

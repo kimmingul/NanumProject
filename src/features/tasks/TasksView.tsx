@@ -4,6 +4,8 @@ import TreeList, {
   Editing,
   FilterRow,
   HeaderFilter,
+  Lookup,
+  RowDragging,
   Selection,
 } from 'devextreme-react/tree-list';
 import type { TreeListRef } from 'devextreme-react/tree-list';
@@ -12,6 +14,7 @@ import { Button } from 'devextreme-react/button';
 import { Popup } from 'devextreme-react/popup';
 import { DataGrid, Column as DGColumn } from 'devextreme-react/data-grid';
 import { useProjectItems } from '@/hooks/useProjectItems';
+import { useEnumOptions } from '@/hooks/useEnumOptions';
 import { useAuthStore } from '@/lib/auth-store';
 import { usePMStore } from '@/lib/pm-store';
 import { usePreferencesStore } from '@/lib/preferences-store';
@@ -30,15 +33,10 @@ const itemTypeIcons: Record<string, string> = {
   milestone: 'event',
 };
 
-const statusLabels: Record<string, string> = {
-  todo: 'To Do',
-  in_progress: 'In Progress',
-  review: 'Review',
-  done: 'Done',
-};
-
 export default function TasksView({ projectId, addRowRef }: TasksViewProps): ReactNode {
-  const { items, resources, assignments, loading, error, refetch } = useProjectItems(projectId);
+  const { labels: statusLabels, items: statusItems } = useEnumOptions('task_status');
+  const { items: itemTypeItems } = useEnumOptions('item_type');
+  const { items, resources, assignments, loading, error, refetch, moveItem } = useProjectItems(projectId);
   const setSelectedTaskId = usePMStore((s) => s.setSelectedTaskId);
   const profile = useAuthStore((s) => s.profile);
   const dateFormat = usePreferencesStore((s) => s.preferences.dateFormat);
@@ -197,6 +195,129 @@ export default function TasksView({ projectId, addRowRef }: TasksViewProps): Rea
     URL.revokeObjectURL(url);
   }, [enrichedItems]);
 
+  // Cell editing: persist update to DB
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleRowUpdating = useCallback((e: any) => {
+    const updates = { ...e.newData };
+    // Sync is_milestone flag when item_type changes (DB check constraint)
+    if ('item_type' in updates) {
+      updates.is_milestone = updates.item_type === 'milestone';
+    }
+    e.cancel = (async () => {
+      const { error } = await supabase
+        .from('project_items')
+        .update(updates)
+        .eq('id', e.oldData.id);
+      if (error) throw new Error(error.message);
+    })();
+  }, []);
+
+  // Cell editing: insert new row
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleRowInserting = useCallback((e: any) => {
+    if (!profile?.tenant_id) { e.cancel = true; return; }
+    const { assignee_names: _a, id: _id, ...rowData } = e.data;
+    const itemType = rowData.item_type || 'task';
+    e.cancel = (async () => {
+      const { error } = await supabase
+        .from('project_items')
+        .insert({
+          tenant_id: profile.tenant_id!,
+          project_id: projectId,
+          created_by: profile.user_id,
+          item_type: itemType,
+          is_milestone: itemType === 'milestone',
+          ...rowData,
+        });
+      if (error) throw new Error(error.message);
+      await refetch();
+    })();
+  }, [profile, projectId, refetch]);
+
+  // Cell editing: soft delete
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleRowRemoving = useCallback((e: any) => {
+    e.cancel = (async () => {
+      const { error } = await supabase
+        .from('project_items')
+        .update({ is_active: false })
+        .eq('id', e.data.id);
+      if (error) throw new Error(error.message);
+      await refetch();
+    })();
+  }, [refetch]);
+
+  // RowDragging: prevent dropping onto own descendants (circular ref)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleDragChange = useCallback((e: any) => {
+    const instance = treeListRef.current?.instance();
+    if (!instance) return;
+    const visibleRows = instance.getVisibleRows();
+    const sourceId = (e.itemData as { id: string }).id;
+    const targetRow = visibleRows[e.toIndex];
+    if (!targetRow) return;
+
+    // Walk up from target to check if source is an ancestor
+    let currentId: string | null = (targetRow.data as { id: string }).id;
+    while (currentId) {
+      if (currentId === sourceId) {
+        e.cancel = true;
+        return;
+      }
+      const row = visibleRows.find((r) => (r.data as { id: string }).id === currentId);
+      currentId = (row?.data as { parent_id: string | null } | undefined)?.parent_id || null;
+    }
+  }, []);
+
+  // RowDragging: reorder handler
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleReorder = useCallback(async (e: any) => {
+    const instance = treeListRef.current?.instance();
+    if (!instance) return;
+    const visibleRows = instance.getVisibleRows();
+    const sourceId = (e.itemData as { id: string }).id;
+
+    if (e.dropInsideItem) {
+      // Case 1: Drop inside a group — make source a child of target
+      const targetRow = visibleRows[e.toIndex];
+      if (!targetRow) return;
+      const targetId = (targetRow.data as { id: string }).id;
+
+      // Find max sort_order among target's children
+      const siblings = items.filter((it) => it.parent_id === targetId);
+      const maxOrder = siblings.length > 0
+        ? Math.max(...siblings.map((s) => s.sort_order))
+        : 0;
+
+      await moveItem([{ id: sourceId, parent_id: targetId, sort_order: maxOrder + 1 }]);
+    } else {
+      // Case 2: Drop between rows — insert at target position
+      const targetRow = visibleRows[e.toIndex];
+      if (!targetRow) return;
+      const targetData = targetRow.data as { id: string; parent_id: string | null };
+      const newParentId = targetData.parent_id;
+
+      // Get siblings under the same parent, sorted by sort_order
+      const siblings = items
+        .filter((it) => it.parent_id === newParentId && it.id !== sourceId)
+        .sort((a, b) => a.sort_order - b.sort_order);
+
+      // Find insertion index based on target's position in siblings
+      const targetIdx = siblings.findIndex((s) => s.id === targetData.id);
+      const insertAt = e.fromIndex < e.toIndex ? targetIdx + 1 : targetIdx;
+      siblings.splice(insertAt, 0, { id: sourceId } as typeof siblings[0]);
+
+      // Reassign sort_order for all siblings
+      const updates = siblings.map((s, i) => ({
+        id: s.id,
+        ...(s.id === sourceId ? { parent_id: newParentId } : {}),
+        sort_order: i,
+      }));
+
+      await moveItem(updates);
+    }
+  }, [items, moveItem]);
+
   if (loading) {
     return (
       <div className="tasks-loading">
@@ -252,12 +373,7 @@ export default function TasksView({ projectId, addRowRef }: TasksViewProps): Rea
         <div className="bulk-toolbar">
           <span className="bulk-toolbar-count">{selectedKeys.length} selected</span>
           <SelectBox
-            items={[
-              { value: 'todo', label: 'To Do' },
-              { value: 'in_progress', label: 'In Progress' },
-              { value: 'review', label: 'Review' },
-              { value: 'done', label: 'Done' },
-            ]}
+            items={statusItems}
             displayExpr="label"
             valueExpr="value"
             placeholder="Set Status..."
@@ -295,10 +411,20 @@ export default function TasksView({ projectId, addRowRef }: TasksViewProps): Rea
         autoExpandAll={true}
         height="calc(100vh - 90px)"
         onRowClick={handleRowClick}
+        onRowUpdating={handleRowUpdating}
+        onRowInserting={handleRowInserting}
+        onRowRemoving={handleRowRemoving}
         onSelectionChanged={(e) => {
           setSelectedKeys((e.selectedRowKeys || []) as string[]);
         }}
+        repaintChangesOnly={true}
       >
+        <RowDragging
+          allowReordering={true}
+          allowDropInsideItem={true}
+          onDragChange={handleDragChange}
+          onReorder={handleReorder}
+        />
         <FilterRow visible={true} />
         <HeaderFilter visible={true} />
         <Selection mode="multiple" />
@@ -324,7 +450,9 @@ export default function TasksView({ projectId, addRowRef }: TasksViewProps): Rea
               {data.value}
             </span>
           )}
-        />
+        >
+          <Lookup dataSource={itemTypeItems} displayExpr="label" valueExpr="value" />
+        </Column>
 
         <Column dataField="start_date" caption="Start" dataType="date" format={dxDateFmt} width={110} />
         <Column dataField="end_date" caption="End" dataType="date" format={dxDateFmt} width={110} />
@@ -333,6 +461,8 @@ export default function TasksView({ projectId, addRowRef }: TasksViewProps): Rea
           dataField="percent_complete"
           caption="Progress"
           width={100}
+          dataType="number"
+          editorOptions={{ min: 0, max: 100 }}
           cellRender={(data: { value: number }) => (
             <div className="progress-cell">
               <div className="progress-bar">
@@ -358,13 +488,15 @@ export default function TasksView({ projectId, addRowRef }: TasksViewProps): Rea
               </span>
             );
           }}
-        />
+        >
+          <Lookup dataSource={statusItems} displayExpr="label" valueExpr="value" />
+        </Column>
 
-        <Column dataField="assignee_names" caption="Assignees" width={180} />
-        <Column dataField="wbs" caption="WBS" width={70} />
+        <Column dataField="assignee_names" caption="Assignees" width={180} allowEditing={false} />
+        <Column dataField="wbs" caption="WBS" width={70} allowEditing={false} />
 
         <Editing
-          mode="row"
+          mode="cell"
           allowUpdating={true}
           allowDeleting={true}
           allowAdding={true}

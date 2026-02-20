@@ -10,7 +10,8 @@ import { supabase, dbUpdate } from '@/lib/supabase';
 import { usePMStore } from '@/lib/pm-store';
 import { useItemLinks } from '@/hooks/useItemLinks';
 import { useItemRelations } from '@/hooks/useItemRelations';
-import type { ProjectItem, TaskDependency, ItemType, TaskStatus } from '@/types';
+import { useEnumOptions } from '@/hooks/useEnumOptions';
+import type { ProjectItem, TaskDependency, ItemType } from '@/types';
 import RelationsTab from './tabs/RelationsTab';
 import CommentsTab from './tabs/CommentsTab';
 import ChecklistTab from './tabs/ChecklistTab';
@@ -26,19 +27,6 @@ interface TaskDetailPopupProps {
   onTaskUpdated: () => void;
 }
 
-const itemTypeOptions = [
-  { text: 'Group', value: 'group' },
-  { text: 'Task', value: 'task' },
-  { text: 'Milestone', value: 'milestone' },
-];
-
-const taskStatusOptions = [
-  { text: 'To Do', value: 'todo' },
-  { text: 'In Progress', value: 'in_progress' },
-  { text: 'Review', value: 'review' },
-  { text: 'Done', value: 'done' },
-];
-
 const formatDate = (d: Date | null): string | null =>
   d ? d.toISOString().split('T')[0] : null;
 
@@ -51,6 +39,11 @@ export default function TaskDetailPopup({
   onClose,
   onTaskUpdated,
 }: TaskDetailPopupProps): ReactNode {
+  const { items: taskStatusItems } = useEnumOptions('task_status');
+  const { items: itemTypeItems } = useEnumOptions('item_type');
+  const taskStatusOptions = taskStatusItems.map((i) => ({ text: i.label, value: i.value }));
+  const itemTypeOptions = itemTypeItems.map((i) => ({ text: i.label, value: i.value }));
+
   const [task, setTask] = useState<ProjectItem | null>(null);
   const [taskLoading, setTaskLoading] = useState(false);
   const [tabIndex, setTabIndex] = useState(0);
@@ -136,7 +129,7 @@ export default function TaskDetailPopup({
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleStatusChange = useCallback((e: any) => {
-    const v: TaskStatus = e.value ?? 'todo';
+    const v: string = e.value ?? 'todo';
     setTask((prev) => prev ? { ...prev, task_status: v } as ProjectItem : prev);
     saveField('task_status', v);
   }, [saveField]);

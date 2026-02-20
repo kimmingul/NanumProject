@@ -15,30 +15,16 @@ import { TextArea } from 'devextreme-react/text-area';
 import { DateBox } from 'devextreme-react/date-box';
 import { SelectBox } from 'devextreme-react/select-box';
 import { supabase } from '@/lib/supabase';
-import { useProjects, useProjectCrud } from '@/hooks';
+import { useProjects, useProjectCrud, useEnumOptions } from '@/hooks';
 import { usePreferencesStore } from '@/lib/preferences-store';
 import { getDxDateFormat, getDxDateTimeFormat } from '@/utils/formatDate';
-import type { ProjectStatus, Project } from '@/types';
+import type { Project } from '@/types';
 import './ProjectListPage.css';
-
-const statusLabels: Record<string, string> = {
-  active: 'Active',
-  on_hold: 'On Hold',
-  complete: 'Complete',
-  archived: 'Archived',
-};
-
-const statusOptions: { value: ProjectStatus; label: string }[] = [
-  { value: 'active', label: 'Active' },
-  { value: 'on_hold', label: 'On Hold' },
-  { value: 'complete', label: 'Complete' },
-  { value: 'archived', label: 'Archived' },
-];
 
 interface ProjectFormData {
   name: string;
   description: string;
-  status: ProjectStatus;
+  status: string;
   start_date: Date | null;
   end_date: Date | null;
 }
@@ -64,6 +50,7 @@ interface EnrichedProject extends Project {
 
 export default function ProjectListPage(): ReactNode {
   const navigate = useNavigate();
+  const { labels: statusLabels, items: statusOptions } = useEnumOptions('project_status');
   const { projects, loading, error, refetch } = useProjects({ status: 'all' });
   const { createProject, cloneFromTemplate, toggleStar } = useProjectCrud();
   const dateFormat = usePreferencesStore((s) => s.preferences.dateFormat);

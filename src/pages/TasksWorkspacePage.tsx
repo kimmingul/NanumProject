@@ -1,7 +1,7 @@
 import { type ReactNode, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from 'devextreme-react/button';
-import { useProject, useProjectCrud } from '@/hooks';
+import { useProject, useProjectCrud, useEnumOptions } from '@/hooks';
 import { usePreferencesStore } from '@/lib/preferences-store';
 import { ScrollArrowOverlay } from '@/components/ScrollArrowOverlay';
 import GanttView, { type GanttActions } from '@/features/gantt/GanttView';
@@ -14,13 +14,6 @@ import ActivityView from '@/features/activity/ActivityView';
 import TimeTrackingView, { type TimeActions } from '@/features/time-tracking/TimeTrackingView';
 import ProjectSettingsView from '@/features/settings/ProjectSettingsView';
 import './ProjectDetailPage.css';
-
-const statusLabels: Record<string, string> = {
-  active: 'Active',
-  on_hold: 'On Hold',
-  complete: 'Complete',
-  archived: 'Archived',
-};
 
 const projectTabs = [
   { id: 'gantt', icon: 'chart', label: 'Gantt Chart' },
@@ -39,6 +32,7 @@ const LAST_PROJECT_KEY = 'nanum-last-project-id';
 export default function TasksWorkspacePage(): ReactNode {
   const { projectId, tab } = useParams<{ projectId: string; tab?: string }>();
   const navigate = useNavigate();
+  const { labels: statusLabels } = useEnumOptions('project_status');
   const { project, loading, refetch } = useProject(projectId);
   const { toggleStar } = useProjectCrud();
 

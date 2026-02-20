@@ -1,7 +1,7 @@
 import { type ReactNode } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from 'devextreme-react/button';
-import { useProject } from '@/hooks';
+import { useProject, useEnumOptions } from '@/hooks';
 import GanttView from '@/features/gantt/GanttView';
 import TasksView from '@/features/tasks/TasksView';
 import BoardView from '@/features/board/BoardView';
@@ -12,13 +12,6 @@ import ActivityView from '@/features/activity/ActivityView';
 import TimeTrackingView from '@/features/time-tracking/TimeTrackingView';
 import ProjectSettingsView from '@/features/settings/ProjectSettingsView';
 import './ProjectDetailPage.css';
-
-const statusLabels: Record<string, string> = {
-  active: 'Active',
-  on_hold: 'On Hold',
-  complete: 'Complete',
-  archived: 'Archived',
-};
 
 const projectTabs = [
   { id: 'gantt', icon: 'chart', label: 'Gantt Chart' },
@@ -35,6 +28,7 @@ const projectTabs = [
 export default function ProjectDetailPage(): ReactNode {
   const { projectId, tab } = useParams<{ projectId: string; tab?: string }>();
   const navigate = useNavigate();
+  const { labels: statusLabels } = useEnumOptions('project_status');
   const { project, loading, refetch } = useProject(projectId);
 
   const activeTab = tab || 'gantt';

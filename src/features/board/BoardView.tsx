@@ -3,10 +3,11 @@ import Sortable from 'devextreme-react/sortable';
 import type { DragEndEvent } from 'devextreme/ui/sortable';
 import { ScrollArrowOverlay } from '@/components/ScrollArrowOverlay';
 import { useProjectItems } from '@/hooks/useProjectItems';
+import { useEnumOptions } from '@/hooks/useEnumOptions';
 import { useAuthStore } from '@/lib/auth-store';
 import { usePMStore } from '@/lib/pm-store';
 import { supabase } from '@/lib/supabase';
-import type { ProjectItem, TaskStatus } from '@/types';
+import type { ProjectItem } from '@/types';
 import './BoardView.css';
 
 export interface BoardActions {
@@ -19,18 +20,16 @@ interface BoardViewProps {
 }
 
 interface BoardColumn {
-  id: TaskStatus;
+  id: string;
   label: string;
 }
 
-const COLUMNS: BoardColumn[] = [
-  { id: 'todo', label: 'To Do' },
-  { id: 'in_progress', label: 'In Progress' },
-  { id: 'review', label: 'Review' },
-  { id: 'done', label: 'Done' },
-];
-
 export default function BoardView({ projectId, actionsRef }: BoardViewProps): ReactNode {
+  const { values: statusValues, labels: statusLabels } = useEnumOptions('task_status');
+  const COLUMNS: BoardColumn[] = useMemo(
+    () => statusValues.map((v) => ({ id: v, label: statusLabels[v] || v })),
+    [statusValues, statusLabels],
+  );
   const { items, resources, assignments, loading, error, refetch } =
     useProjectItems(projectId);
   const profile = useAuthStore((s) => s.profile);
@@ -99,25 +98,23 @@ export default function BoardView({ projectId, actionsRef }: BoardViewProps): Re
 
   // Group tasks by task_status
   const grouped = useMemo(() => {
-    const map: Record<TaskStatus, ProjectItem[]> = {
-      todo: [],
-      in_progress: [],
-      review: [],
-      done: [],
-    };
+    const map: Record<string, ProjectItem[]> = {};
+    for (const v of statusValues) map[v] = [];
     for (const t of tasks) {
-      map[t.task_status || 'todo'].push(t);
+      const status = t.task_status || statusValues[0] || 'todo';
+      if (!map[status]) map[status] = [];
+      map[status].push(t);
     }
     return map;
-  }, [tasks]);
+  }, [tasks, statusValues]);
 
   // Handle drag-end across columns
   const handleDragEnd = useCallback(
     async (e: DragEndEvent) => {
       const { fromData, toData, fromIndex, toIndex } = e;
       if (fromData === undefined || toData === undefined) return;
-      const fromCol = fromData as TaskStatus;
-      const toCol = toData as TaskStatus;
+      const fromCol = fromData as string;
+      const toCol = toData as string;
 
       // Find the dragged item
       const sourceItems = grouped[fromCol];

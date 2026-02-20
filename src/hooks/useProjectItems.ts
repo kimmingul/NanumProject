@@ -12,6 +12,12 @@ interface ProjectMemberResource {
   text: string;
 }
 
+export interface MoveItemUpdate {
+  id: string;
+  parent_id?: string | null;
+  sort_order?: number;
+}
+
 interface UseProjectItemsResult {
   items: ProjectItem[];
   dependencies: TaskDependency[];
@@ -21,6 +27,35 @@ interface UseProjectItemsResult {
   loading: boolean;
   error: string | null;
   refetch: () => Promise<void>;
+  moveItem: (updates: MoveItemUpdate[]) => Promise<void>;
+}
+
+/** Compute WBS codes from a flat list of items based on parent_id tree + sort_order */
+function computeWbs(
+  items: { id: string; parent_id: string | null; sort_order: number }[],
+): Map<string, string> {
+  // Build children map (normalize empty string parent_id to null)
+  const childrenMap = new Map<string | null, typeof items>();
+  for (const item of items) {
+    const key = item.parent_id || null;
+    if (!childrenMap.has(key)) childrenMap.set(key, []);
+    childrenMap.get(key)!.push(item);
+  }
+  for (const children of childrenMap.values()) {
+    children.sort((a, b) => a.sort_order - b.sort_order);
+  }
+
+  const result = new Map<string, string>();
+  function traverse(parentId: string | null, prefix: string): void {
+    const children = childrenMap.get(parentId) || [];
+    children.forEach((child, index) => {
+      const wbs = prefix ? `${prefix}.${index + 1}` : `${index + 1}`;
+      result.set(child.id, wbs);
+      traverse(child.id, wbs);
+    });
+  }
+  traverse(null, '');
+  return result;
 }
 
 export function useProjectItems(projectId: string | undefined, paused?: boolean): UseProjectItemsResult {
@@ -122,7 +157,50 @@ export function useProjectItems(projectId: string | undefined, paused?: boolean)
     fetchData();
   }, [fetchData]);
 
+  const moveItem = useCallback(async (updates: MoveItemUpdate[]) => {
+    if (!projectId) return;
+
+    // 1. Update sort_order / parent_id
+    await Promise.all(
+      updates.map(({ id, ...fields }) =>
+        supabase.from('project_items').update(fields).eq('id', id),
+      ),
+    );
+
+    // 2. Fetch fresh items to recompute WBS
+    const { data: freshItems } = await supabase
+      .from('project_items')
+      .select('id, parent_id, sort_order, wbs')
+      .eq('project_id', projectId)
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true });
+
+    if (freshItems && freshItems.length > 0) {
+      const newWbs = computeWbs(freshItems);
+
+      // 3. Only update rows whose WBS actually changed
+      const wbsUpdates = freshItems.filter((item) => {
+        const computed = newWbs.get(item.id);
+        return computed && computed !== (item.wbs || '');
+      });
+
+      if (wbsUpdates.length > 0) {
+        await Promise.all(
+          wbsUpdates.map((item) =>
+            supabase
+              .from('project_items')
+              .update({ wbs: newWbs.get(item.id)! })
+              .eq('id', item.id),
+          ),
+        );
+      }
+    }
+
+    // 4. Refetch full data
+    await fetchData();
+  }, [fetchData, projectId]);
+
   useAutoRefresh(fetchData, 30_000, !!projectId && !paused);
 
-  return { items, dependencies, resources, assignments, commentCounts, loading, error, refetch: fetchData };
+  return { items, dependencies, resources, assignments, commentCounts, loading, error, refetch: fetchData, moveItem };
 }

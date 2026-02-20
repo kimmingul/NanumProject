@@ -20,6 +20,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/lib/auth-store';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserManagement } from '@/hooks/useUserManagement';
+import { useEnumOptions } from '@/hooks/useEnumOptions';
 import type { UserRole } from '@/types';
 import './UsersSection.css';
 
@@ -44,30 +45,15 @@ interface UserRow {
   zip_code: string | null;
 }
 
-const roleOptions: { value: UserRole; label: string }[] = [
-  { value: 'admin', label: 'Admin' },
-  { value: 'manager', label: 'Manager' },
-  { value: 'member', label: 'Member' },
-  { value: 'viewer', label: 'Viewer' },
-];
-
-const statusOptions = [
+const activeStatusOptions = [
   { value: true, label: 'Active' },
   { value: false, label: 'Inactive' },
 ];
 
-const departmentOptions = [
-  'Clinical Operations',
-  'Data Management',
-  'Biostatistics',
-  'Regulatory Affairs',
-  'Medical Writing',
-  'Quality Assurance',
-  'Pharmacovigilance',
-  'Project Management',
-];
-
 export default function UsersSection(): ReactNode {
+  const { items: roleOptions } = useEnumOptions('user_role');
+  const { options: departmentEnumOptions } = useEnumOptions('department');
+  const departmentOptions = departmentEnumOptions.map((o) => o.label);
   const tenantId = useAuthStore((s) => s.profile?.tenant_id);
   const currentUserId = useAuthStore((s) => s.profile?.user_id);
   const currentRole = useAuthStore((s) => s.profile?.role);
@@ -540,7 +526,7 @@ export default function UsersSection(): ReactNode {
             </div>
             <div className="form-field">
               <label>Status</label>
-              <SelectBox dataSource={statusOptions} displayExpr="label" valueExpr="value" value={editIsActive} onValueChanged={(e) => setEditIsActive(e.value)} stylingMode="outlined" disabled={!isAdmin || isSelf} />
+              <SelectBox dataSource={activeStatusOptions} displayExpr="label" valueExpr="value" value={editIsActive} onValueChanged={(e) => setEditIsActive(e.value)} stylingMode="outlined" disabled={!isAdmin || isSelf} />
             </div>
           </div>
 

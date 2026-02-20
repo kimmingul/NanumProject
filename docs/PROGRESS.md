@@ -691,6 +691,31 @@ _initialize() → navigator.locks 획득 → _recoverAndRefresh()
 - 데이터 fetching 시 `getSession()` guard는 불필요 — Supabase 클라이언트가 `_getAccessToken()`을 통해 자동으로 auth 토큰을 포함함
 - `auth-store`의 zustand persist에서 복원된 `profile.tenant_id`로 guard하는 것이 더 적절
 
+### Phase 41: Tenant별 Enum 설정
+
+- **목적**: 하드코딩된 12개 enum 값(status 라벨, 색상, 부서 등)을 tenant별로 관리자가 커스터마이징 가능하도록 전환
+- **DB 변경** (`016_tenant_enum_config.sql`):
+  - `tenant_enum_config` 테이블 생성 (JSONB options, UNIQUE: tenant_id + category)
+  - `task_status`, `project_status` ENUM→TEXT 변환 (커스텀 값 지원)
+  - 7개 카테고리 시드: task_status, project_status, user_role, member_permission, department, item_type, link_type
+  - RLS: 인증 사용자 SELECT, admin만 INSERT/UPDATE/DELETE
+- **타입**: `EnumCategory`, `EnumOption` 타입 추가, `TaskStatus`/`ProjectStatus` → `string` 확장
+- **스토어**: `enum-config-store.ts` — Zustand (in-memory), `loadConfigs()`/`getOptions()`/`updateOptions()`, 기본값 fallback
+- **소비자 훅**: `useEnumOptions(category)` — `options`, `items`, `labels`, `colors`, `values`, `getLabel()`, `getColor()` 반환
+- **ProtectedRoute**: `tenant_id` 확보 시 `loadConfigs()` 자동 호출
+- **Admin UI**: `EnumConfigSection.tsx` — 7개 카테고리 탭 + 옵션 편집기 (value/label/color + 순서변경 + 추가/삭제)
+- **소비자 업데이트** (12개 컴포넌트):
+  - BoardView: 동적 컬럼/그룹
+  - TaskDetailPopup: 동적 SelectBox items
+  - TasksView: 동적 statusLabels + bulk SelectBox
+  - DashboardTaskDistribution: 동적 colors/labels/order
+  - DashboardProjectStatus: 동적 colors/labels/palette
+  - ProjectListPage: 동적 statusLabels/statusOptions
+  - ProjectDetailPage: 동적 statusLabels
+  - TasksWorkspacePage: 동적 statusLabels
+  - ProjectSettingsView: 동적 statusOptions/permissionOptions/permissionLabels
+  - UsersSection: 동적 roleOptions/departmentOptions
+
 ---
 
 ## 미완료 / 진행 예정

@@ -6,6 +6,7 @@ import {
   SecuritySection,
   AppearanceSection,
   UsersSection,
+  EnumConfigSection,
 } from './admin';
 import './AdminPage.css';
 
@@ -27,6 +28,8 @@ export default function AdminPage(): ReactNode {
         return <SecuritySection />;
       case 'appearance':
         return <AppearanceSection />;
+      case 'enums':
+        return <EnumConfigSection />;
       default:
         return <OrganizationSection />;
     }

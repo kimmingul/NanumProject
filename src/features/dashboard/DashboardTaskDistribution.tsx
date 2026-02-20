@@ -1,5 +1,6 @@
 import { type ReactNode } from 'react';
 import Chart, { Series, ArgumentAxis, ValueAxis, Size, Tooltip } from 'devextreme-react/chart';
+import { useEnumOptions } from '@/hooks/useEnumOptions';
 import type { TaskStatusCount } from '@/hooks/useDashboardData';
 
 interface Props {
@@ -7,28 +8,14 @@ interface Props {
   loading: boolean;
 }
 
-const STATUS_COLORS: Record<string, string> = {
-  todo: '#94a3b8',
-  in_progress: '#3b82f6',
-  review: '#f59e0b',
-  done: '#22c55e',
-};
-
-const STATUS_LABELS: Record<string, string> = {
-  todo: 'To Do',
-  in_progress: 'In Progress',
-  review: 'Review',
-  done: 'Done',
-};
-
-const STATUS_ORDER = ['todo', 'in_progress', 'review', 'done'];
-
 export default function DashboardTaskDistribution({ data, loading }: Props): ReactNode {
+  const { values, labels, colors } = useEnumOptions('task_status');
+
   // Ensure all statuses present and in order
-  const chartData = STATUS_ORDER.map((status) => ({
-    status: STATUS_LABELS[status],
+  const chartData = values.map((status) => ({
+    status: labels[status] || status,
     count: data.find((d) => d.task_status === status)?.count || 0,
-    color: STATUS_COLORS[status],
+    color: colors[status] || '#94a3b8',
   }));
 
   return (

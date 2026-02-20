@@ -13,3 +13,4 @@ export { useChecklist } from './useChecklist';
 export { useUserManagement } from './useUserManagement';
 export { useItemLinks } from './useItemLinks';
 export { useItemRelations } from './useItemRelations';
+export { useEnumOptions } from './useEnumOptions';

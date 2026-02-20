@@ -14,6 +14,7 @@ const navItems: NavItem[] = [
   { key: 'users', label: 'User Management', icon: 'dx-icon-group', adminOnly: true },
   { key: 'security', label: 'Security', icon: 'dx-icon-lock', adminOnly: true },
   { key: 'appearance', label: 'Branding', icon: 'dx-icon-palette', adminOnly: true },
+  { key: 'enums', label: 'Enum Settings', icon: 'dx-icon-variable', adminOnly: true },
 ];
 
 export function AdminSidebarList(): ReactNode {

@@ -510,6 +510,25 @@ export interface Database {
         };
         Relationships: [];
       };
+      tenant_enum_config: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          category: string;
+          options: unknown;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          tenant_id: string;
+          category: string;
+          options: unknown;
+        };
+        Update: {
+          options?: unknown;
+        };
+        Relationships: [];
+      };
       user_project_stars: {
         Row: {
           id: string;

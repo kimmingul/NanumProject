@@ -9,35 +9,15 @@ import { DataGrid } from 'devextreme-react/data-grid';
 import { Column } from 'devextreme-react/data-grid';
 import { useProjectCrud } from '@/hooks/useProjectCrud';
 import { useProjectMembers } from '@/hooks/useProjectMembers';
+import { useEnumOptions } from '@/hooks/useEnumOptions';
 import { useAuthStore } from '@/lib/auth-store';
-import type { Project, ProjectStatus, MemberPermission } from '@/types';
+import type { Project, MemberPermission } from '@/types';
 import './ProjectSettingsView.css';
 
 interface ProjectSettingsViewProps {
   project: Project;
   onProjectUpdated?: (project: Project) => void;
 }
-
-const statusOptions = [
-  { value: 'active', label: 'Active' },
-  { value: 'on_hold', label: 'On Hold' },
-  { value: 'complete', label: 'Complete' },
-  { value: 'archived', label: 'Archived' },
-];
-
-const permissionOptions = [
-  { value: 'admin', label: 'Admin' },
-  { value: 'edit', label: 'Editor' },
-  { value: 'own_progress', label: 'Own Progress' },
-  { value: 'view', label: 'Viewer' },
-];
-
-const permissionLabels: Record<string, string> = {
-  admin: 'Admin',
-  edit: 'Editor',
-  own_progress: 'Own Progress',
-  view: 'Viewer',
-};
 
 export default function ProjectSettingsView({
   project,
@@ -47,10 +27,12 @@ export default function ProjectSettingsView({
   const { members, loading: membersLoading, updateMemberPermission, removeMember } =
     useProjectMembers(project.id);
   const profile = useAuthStore((s) => s.profile);
+  const { items: statusOptions } = useEnumOptions('project_status');
+  const { items: permissionOptions, labels: permissionLabels } = useEnumOptions('member_permission');
 
   const [name, setName] = useState(project.name);
   const [description, setDescription] = useState(project.description || '');
-  const [status, setStatus] = useState<ProjectStatus>(project.status);
+  const [status, setStatus] = useState<string>(project.status);
   const [managerId, setManagerId] = useState<string | null>(project.manager_id);
   const [startDate, setStartDate] = useState<Date | null>(
     project.start_date ? new Date(project.start_date) : null,
