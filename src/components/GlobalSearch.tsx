@@ -5,6 +5,24 @@ import { usePMStore } from '@/lib/pm-store';
 import { useGlobalSearch, type SearchResultItem } from '@/hooks/useGlobalSearch';
 import './GlobalSearch.css';
 
+function highlightMatch(text: string, query: string): ReactNode {
+  if (!query || query.length < 2) return text;
+  const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+  const parts = text.split(regex);
+  if (parts.length === 1) return text;
+  return (
+    <>
+      {parts.map((part, i) =>
+        regex.test(part) ? (
+          <mark key={i} className="search-highlight">{part}</mark>
+        ) : (
+          part
+        )
+      )}
+    </>
+  );
+}
+
 interface GlobalSearchProps {
   open: boolean;
   onClose: () => void;
@@ -123,9 +141,9 @@ export function GlobalSearch({ open, onClose }: GlobalSearchProps): ReactNode {
                 <i className={`dx-icon-${item.icon}`} />
               </div>
               <div className="global-search-item-text">
-                <div className="global-search-item-name">{item.name}</div>
+                <div className="global-search-item-name">{highlightMatch(item.name, query)}</div>
                 {item.secondary && (
-                  <div className="global-search-item-secondary">{item.secondary}</div>
+                  <div className="global-search-item-secondary">{highlightMatch(item.secondary, query)}</div>
                 )}
               </div>
             </div>

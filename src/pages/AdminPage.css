@@ -1,25 +1,25 @@
-.settings-page {
+.admin-page {
   padding: 2rem;
 }
 
-.settings-page .page-header {
+.admin-page .page-header {
   margin-bottom: 2rem;
 }
 
-.settings-page .page-header h1 {
+.admin-page .page-header h1 {
   margin: 0 0 0.5rem 0;
   font-size: 1.75rem;
   color: var(--text-primary);
   font-weight: 700;
 }
 
-.settings-page .page-header p {
+.admin-page .page-header p {
   margin: 0;
   color: var(--text-secondary);
   font-size: 0.95rem;
 }
 
-.settings-content {
+.admin-content {
   max-width: 100%;
 }
 

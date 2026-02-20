@@ -6,12 +6,13 @@ import LoginPage from '@/pages/LoginPage';
 import SignUpPage from '@/pages/SignUpPage';
 import ResetPasswordPage from '@/pages/ResetPasswordPage';
 import DashboardPage from '@/pages/DashboardPage';
-import SettingsPage from '@/pages/SettingsPage';
+import AdminPage from '@/pages/AdminPage';
 import UsersPage from '@/pages/UsersPage';
 import AuditLogPage from '@/pages/AuditLogPage';
 import ProjectListPage from '@/pages/ProjectListPage';
 import TasksWorkspacePage from '@/pages/TasksWorkspacePage';
 import MyProfilePage from '@/pages/MyProfilePage';
+import UserSettingsPage from '@/pages/UserSettingsPage';
 
 /** Redirect /projects/:projectId(/:tab) → /tasks/:projectId(/:tab) */
 function ProjectRedirect() {
@@ -54,15 +55,17 @@ const router = createBrowserRouter([
       { path: '/users', element: <UsersPage /> },
       { path: '/users/:userId', element: <UsersPage /> },
       { path: '/audit', element: <AuditLogPage /> },
-      { path: '/settings', element: <SettingsPage /> },
-      { path: '/settings/:section', element: <SettingsPage /> },
+      { path: '/settings', element: <UserSettingsPage /> },
+      { path: '/settings/:section', element: <UserSettingsPage /> },
+      { path: '/admin', element: <AdminPage /> },
+      { path: '/admin/:section', element: <AdminPage /> },
       // Legacy: /projects/:projectId → /tasks/:projectId
       { path: '/projects/:projectId', element: <ProjectRedirect /> },
       { path: '/projects/:projectId/:tab', element: <ProjectRedirect /> },
       // Legacy redirects
       { path: '/dashboard/users', element: <Navigate to="/users" replace /> },
       { path: '/dashboard/audit', element: <Navigate to="/audit" replace /> },
-      { path: '/dashboard/settings', element: <Navigate to="/settings" replace /> },
+      { path: '/dashboard/settings', element: <Navigate to="/admin" replace /> },
       { path: '/dashboard/overview', element: <Navigate to="/dashboard" replace /> },
     ],
   },

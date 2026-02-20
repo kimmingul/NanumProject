@@ -199,6 +199,15 @@
   color: var(--search-kbd-text);
 }
 
+/* ---- Search highlight ---- */
+
+.search-highlight {
+  background: var(--search-highlight-bg);
+  color: inherit;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
 /* ---- Animations ---- */
 
 @keyframes searchFadeIn {

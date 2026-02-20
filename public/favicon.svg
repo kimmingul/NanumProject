@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Progress arc (270 degrees, gap at bottom-right) -->
+  <circle cx="32" cy="32" r="28" fill="none" stroke="#667eea" stroke-width="5"
+          stroke-dasharray="132 44" stroke-dashoffset="11"
+          stroke-linecap="round" transform="rotate(-90 32 32)"/>
+  <!-- Filled background circle -->
+  <circle cx="32" cy="32" r="24" fill="#667eea"/>
+  <!-- Letter N: left vertical -->
+  <rect x="20" y="20" width="6" height="24" rx="1.5" fill="#ffffff"/>
+  <!-- Letter N: right vertical -->
+  <rect x="38" y="20" width="6" height="24" rx="1.5" fill="#ffffff"/>
+  <!-- Letter N: diagonal -->
+  <polygon points="20,20 26,20 44,44 38,44" fill="#ffffff"/>
+  <!-- Progress indicator dot -->
+  <circle cx="52" cy="46" r="3" fill="#667eea"/>
+</svg>

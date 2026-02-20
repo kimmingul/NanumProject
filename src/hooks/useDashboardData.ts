@@ -68,6 +68,15 @@ export interface DashboardData {
 }
 
 /* -------------------------------------------------- */
+/* Filter Options                                      */
+/* -------------------------------------------------- */
+
+export interface DashboardFilterOptions {
+  period?: string | undefined;   // 'this_week' | 'this_month' | 'last_30' | 'last_90' | 'this_year'
+  projectId?: string | undefined; // specific project ID or undefined for all
+}
+
+/* -------------------------------------------------- */
 /* Helpers                                             */
 /* -------------------------------------------------- */
 
@@ -81,11 +90,44 @@ function daysFromNow(n: number): string {
   return d.toISOString().split('T')[0];
 }
 
+function getDateRange(period?: string): { from: string; to: string } | null {
+  if (!period || period === 'all') return null;
+  const now = new Date();
+  const to = now.toISOString().split('T')[0];
+  let from: Date;
+
+  switch (period) {
+    case 'this_week': {
+      from = new Date(now);
+      const day = from.getDay();
+      from.setDate(from.getDate() - (day === 0 ? 6 : day - 1));
+      break;
+    }
+    case 'this_month':
+      from = new Date(now.getFullYear(), now.getMonth(), 1);
+      break;
+    case 'last_30':
+      from = new Date(now);
+      from.setDate(from.getDate() - 30);
+      break;
+    case 'last_90':
+      from = new Date(now);
+      from.setDate(from.getDate() - 90);
+      break;
+    case 'this_year':
+      from = new Date(now.getFullYear(), 0, 1);
+      break;
+    default:
+      return null;
+  }
+  return { from: from.toISOString().split('T')[0], to };
+}
+
 /* -------------------------------------------------- */
 /* Hook                                                */
 /* -------------------------------------------------- */
 
-export function useDashboardData(): DashboardData & { refetch: () => void } {
+export function useDashboardData(options: DashboardFilterOptions = {}): DashboardData & { refetch: () => void } {
   const profile = useAuthStore((s) => s.profile);
   const userId = profile?.user_id;
 
@@ -117,68 +159,102 @@ export function useDashboardData(): DashboardData & { refetch: () => void } {
     const todayStr = today();
     const weekEndStr = daysFromNow(7);
     const twoWeeksStr = daysFromNow(14);
+    const dateRange = getDateRange(options.period);
+    const pid = options.projectId;
 
     setLoading({ kpi: true, lists: true, charts: true, activity: true });
 
     /* --- KPI queries (parallel) --- */
     const kpiPromise = Promise.all([
       // Overdue tasks
-      supabase
-        .from('project_items')
-        .select('*', { count: 'exact', head: true })
-        .eq('is_active', true)
-        .in('item_type', ['task', 'milestone'])
-        .neq('task_status', 'done')
-        .lt('end_date', todayStr)
-        .not('end_date', 'is', null),
+      (() => {
+        let q = supabase
+          .from('project_items')
+          .select('*', { count: 'exact', head: true })
+          .eq('is_active', true)
+          .in('item_type', ['task', 'milestone'])
+          .neq('task_status', 'done')
+          .lt('end_date', todayStr)
+          .not('end_date', 'is', null);
+        if (pid) q = q.eq('project_id', pid);
+        if (dateRange) q = q.gte('end_date', dateRange.from);
+        return q;
+      })(),
       // In-progress tasks
-      supabase
-        .from('project_items')
-        .select('*', { count: 'exact', head: true })
-        .eq('is_active', true)
-        .in('item_type', ['task', 'milestone'])
-        .eq('task_status', 'in_progress'),
+      (() => {
+        let q = supabase
+          .from('project_items')
+          .select('*', { count: 'exact', head: true })
+          .eq('is_active', true)
+          .in('item_type', ['task', 'milestone'])
+          .eq('task_status', 'in_progress');
+        if (pid) q = q.eq('project_id', pid);
+        if (dateRange) q = q.gte('end_date', dateRange.from);
+        return q;
+      })(),
       // Due this week
-      supabase
-        .from('project_items')
-        .select('*', { count: 'exact', head: true })
-        .eq('is_active', true)
-        .in('item_type', ['task', 'milestone'])
-        .neq('task_status', 'done')
-        .gte('end_date', todayStr)
-        .lte('end_date', weekEndStr),
+      (() => {
+        let q = supabase
+          .from('project_items')
+          .select('*', { count: 'exact', head: true })
+          .eq('is_active', true)
+          .in('item_type', ['task', 'milestone'])
+          .neq('task_status', 'done')
+          .gte('end_date', todayStr)
+          .lte('end_date', weekEndStr);
+        if (pid) q = q.eq('project_id', pid);
+        return q;
+      })(),
       // Total tasks
-      supabase
-        .from('project_items')
-        .select('*', { count: 'exact', head: true })
-        .eq('is_active', true)
-        .in('item_type', ['task', 'milestone']),
+      (() => {
+        let q = supabase
+          .from('project_items')
+          .select('*', { count: 'exact', head: true })
+          .eq('is_active', true)
+          .in('item_type', ['task', 'milestone']);
+        if (pid) q = q.eq('project_id', pid);
+        if (dateRange) q = q.gte('end_date', dateRange.from);
+        return q;
+      })(),
       // Completed tasks
-      supabase
-        .from('project_items')
-        .select('*', { count: 'exact', head: true })
-        .eq('is_active', true)
-        .in('item_type', ['task', 'milestone'])
-        .eq('task_status', 'done'),
+      (() => {
+        let q = supabase
+          .from('project_items')
+          .select('*', { count: 'exact', head: true })
+          .eq('is_active', true)
+          .in('item_type', ['task', 'milestone'])
+          .eq('task_status', 'done');
+        if (pid) q = q.eq('project_id', pid);
+        if (dateRange) q = q.gte('end_date', dateRange.from);
+        return q;
+      })(),
       // My in-progress (assigned to me)
       userId
-        ? supabase
-            .from('task_assignees')
-            .select('item_id, project_items!inner(task_status)')
-            .eq('is_active', true)
-            .eq('user_id', userId)
-            .eq('project_items.task_status' as string, 'in_progress')
+        ? (() => {
+            let q = supabase
+              .from('task_assignees')
+              .select('item_id, project_items!inner(task_status, project_id)')
+              .eq('is_active', true)
+              .eq('user_id', userId)
+              .eq('project_items.task_status' as string, 'in_progress');
+            if (pid) q = q.eq('project_items.project_id' as string, pid);
+            return q;
+          })()
         : Promise.resolve({ data: [], error: null }),
       // My due this week
       userId
-        ? supabase
-            .from('task_assignees')
-            .select('item_id, project_items!inner(end_date, task_status)')
-            .eq('is_active', true)
-            .eq('user_id', userId)
-            .neq('project_items.task_status' as string, 'done')
-            .gte('project_items.end_date' as string, todayStr)
-            .lte('project_items.end_date' as string, weekEndStr)
+        ? (() => {
+            let q = supabase
+              .from('task_assignees')
+              .select('item_id, project_items!inner(end_date, task_status, project_id)')
+              .eq('is_active', true)
+              .eq('user_id', userId)
+              .neq('project_items.task_status' as string, 'done')
+              .gte('project_items.end_date' as string, todayStr)
+              .lte('project_items.end_date' as string, weekEndStr);
+            if (pid) q = q.eq('project_items.project_id' as string, pid);
+            return q;
+          })()
         : Promise.resolve({ data: [], error: null }),
     ]).then(([overdueRes, inProgRes, dueWeekRes, totalRes, completedRes, myInProgRes, myDueRes]) => {
       const total = totalRes.count ?? 0;
@@ -198,42 +274,49 @@ export function useDashboardData(): DashboardData & { refetch: () => void } {
     const listsPromise = Promise.all([
       // My tasks (assigned to me, not done, limit 8)
       userId
-        ? supabase
-            .from('task_assignees')
-            .select(`
-              item_id,
-              project_items!inner(
-                id, name, project_id, item_type, task_status, percent_complete, end_date, start_date
-              )
-            `)
-            .eq('is_active', true)
-            .eq('user_id', userId)
-            .neq('project_items.task_status' as string, 'done')
-            .order('item_id')
-            .limit(20)
+        ? (() => {
+            let q = supabase
+              .from('task_assignees')
+              .select(`
+                item_id,
+                project_items!inner(
+                  id, name, project_id, item_type, task_status, percent_complete, end_date, start_date
+                )
+              `)
+              .eq('is_active', true)
+              .eq('user_id', userId)
+              .neq('project_items.task_status' as string, 'done');
+            if (pid) q = q.eq('project_items.project_id' as string, pid);
+            return q.order('item_id').limit(20);
+          })()
         : Promise.resolve({ data: [], error: null }),
       // Overdue items (top 6)
-      supabase
-        .from('project_items')
-        .select('id, name, project_id, item_type, task_status, percent_complete, end_date, start_date')
-        .eq('is_active', true)
-        .in('item_type', ['task', 'milestone'])
-        .neq('task_status', 'done')
-        .lt('end_date', todayStr)
-        .not('end_date', 'is', null)
-        .order('end_date', { ascending: true })
-        .limit(6),
+      (() => {
+        let q = supabase
+          .from('project_items')
+          .select('id, name, project_id, item_type, task_status, percent_complete, end_date, start_date')
+          .eq('is_active', true)
+          .in('item_type', ['task', 'milestone'])
+          .neq('task_status', 'done')
+          .lt('end_date', todayStr)
+          .not('end_date', 'is', null);
+        if (pid) q = q.eq('project_id', pid);
+        if (dateRange) q = q.gte('end_date', dateRange.from);
+        return q.order('end_date', { ascending: true }).limit(6);
+      })(),
       // Upcoming deadlines (next 14 days, limit 10)
-      supabase
-        .from('project_items')
-        .select('id, name, project_id, item_type, task_status, percent_complete, end_date, start_date')
-        .eq('is_active', true)
-        .in('item_type', ['task', 'milestone'])
-        .neq('task_status', 'done')
-        .gte('end_date', todayStr)
-        .lte('end_date', twoWeeksStr)
-        .order('end_date', { ascending: true })
-        .limit(10),
+      (() => {
+        let q = supabase
+          .from('project_items')
+          .select('id, name, project_id, item_type, task_status, percent_complete, end_date, start_date')
+          .eq('is_active', true)
+          .in('item_type', ['task', 'milestone'])
+          .neq('task_status', 'done')
+          .gte('end_date', todayStr)
+          .lte('end_date', twoWeeksStr);
+        if (pid) q = q.eq('project_id', pid);
+        return q.order('end_date', { ascending: true }).limit(10);
+      })(),
     ]).then(async ([myTasksRes, overdueRes, upcomingRes]) => {
       // Collect project IDs for name lookup
       const projectIds = new Set<string>();
@@ -296,16 +379,22 @@ export function useDashboardData(): DashboardData & { refetch: () => void } {
     /* --- Chart queries (parallel) --- */
     const chartsPromise = Promise.all([
       // Project status counts
-      supabase
-        .from('projects')
-        .select('status')
-        .eq('is_active', true),
+      (() => {
+        let q = supabase.from('projects').select('status').eq('is_active', true);
+        if (pid) q = q.eq('id', pid);
+        return q;
+      })(),
       // Task status counts
-      supabase
-        .from('project_items')
-        .select('task_status')
-        .eq('is_active', true)
-        .in('item_type', ['task', 'milestone']),
+      (() => {
+        let q = supabase
+          .from('project_items')
+          .select('task_status')
+          .eq('is_active', true)
+          .in('item_type', ['task', 'milestone']);
+        if (pid) q = q.eq('project_id', pid);
+        if (dateRange) q = q.gte('end_date', dateRange.from);
+        return q;
+      })(),
     ]).then(([projectsRes, tasksRes]) => {
       // Count project statuses
       const pCounts: Record<string, number> = {};
@@ -332,11 +421,13 @@ export function useDashboardData(): DashboardData & { refetch: () => void } {
     });
 
     /* --- Activity query --- */
-    const activityPromise = supabase
-      .from('activity_log')
-      .select('id, project_id, target_type, target_id, action, actor_id, details, created_at')
-      .order('created_at', { ascending: false })
-      .limit(10)
+    const activityPromise = (() => {
+      let q = supabase
+        .from('activity_log')
+        .select('id, project_id, target_type, target_id, action, actor_id, details, created_at');
+      if (pid) q = q.eq('project_id', pid);
+      return q.order('created_at', { ascending: false }).limit(10);
+    })()
       .then(async ({ data: logs }) => {
         if (!logs || logs.length === 0) {
           setActivities([]);
@@ -391,7 +482,7 @@ export function useDashboardData(): DashboardData & { refetch: () => void } {
       console.error('Dashboard data fetch error:', err);
       setLoading({ kpi: false, lists: false, charts: false, activity: false });
     });
-  }, [profile?.tenant_id, userId]);
+  }, [profile?.tenant_id, userId, options.period, options.projectId]);
 
   useEffect(() => {
     fetchAll();

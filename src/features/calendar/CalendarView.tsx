@@ -1,8 +1,11 @@
-import { type ReactNode, useMemo } from 'react';
+import { type ReactNode, useCallback, useMemo } from 'react';
 import Scheduler, { View, Resource } from 'devextreme-react/scheduler';
 import type { AppointmentClickEvent } from 'devextreme/ui/scheduler';
 import { useProjectItems } from '@/hooks/useProjectItems';
+import { useAuthStore } from '@/lib/auth-store';
 import { usePMStore } from '@/lib/pm-store';
+import { supabase } from '@/lib/supabase';
+import { formatDate } from '@/utils/formatDate';
 import type { ProjectItem } from '@/types';
 import './CalendarView.css';
 
@@ -35,7 +38,8 @@ function toDate(dateStr: string): Date {
 }
 
 export default function CalendarView({ projectId }: CalendarViewProps): ReactNode {
-  const { items, loading, error } = useProjectItems(projectId);
+  const { items, loading, error, refetch } = useProjectItems(projectId);
+  const profile = useAuthStore((s) => s.profile);
   const setSelectedTaskId = usePMStore((s) => s.setSelectedTaskId);
 
   const appointments = useMemo<CalendarAppointment[]>(() => {
@@ -61,6 +65,58 @@ export default function CalendarView({ projectId }: CalendarViewProps): ReactNod
       });
   }, [items]);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleAppointmentUpdated = useCallback(async (e: any) => {
+    const apt = e.appointmentData as CalendarAppointment | undefined;
+    if (!apt?.id) return;
+    try {
+      const startDate = apt.startDate instanceof Date ? apt.startDate : new Date(apt.startDate);
+      const endDate = apt.endDate instanceof Date ? apt.endDate : new Date(apt.endDate);
+      // Undo the +1 day adjustment for endDate
+      endDate.setDate(endDate.getDate() - 1);
+
+      await supabase
+        .from('project_items')
+        .update({
+          start_date: startDate.toISOString().split('T')[0],
+          end_date: endDate.toISOString().split('T')[0],
+        })
+        .eq('id', apt.id);
+      await refetch();
+    } catch (err) {
+      console.error('Calendar: Failed to update:', err);
+    }
+  }, [refetch]);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleAppointmentAdding = useCallback(async (e: any) => {
+    e.cancel = true; // prevent default add behavior
+    if (!profile?.tenant_id) return;
+    try {
+      const startDate = e.appointmentData.startDate instanceof Date
+        ? e.appointmentData.startDate
+        : new Date(e.appointmentData.startDate);
+      const endDate = e.appointmentData.endDate instanceof Date
+        ? e.appointmentData.endDate
+        : new Date(e.appointmentData.endDate);
+      // Undo the +1 day adjustment
+      endDate.setDate(endDate.getDate() - 1);
+
+      await supabase.from('project_items').insert({
+        tenant_id: profile.tenant_id,
+        project_id: projectId,
+        item_type: 'task',
+        name: e.appointmentData.text || 'New Task',
+        start_date: startDate.toISOString().split('T')[0],
+        end_date: endDate.toISOString().split('T')[0],
+        created_by: profile.user_id,
+      });
+      await refetch();
+    } catch (err) {
+      console.error('Calendar: Failed to add task:', err);
+    }
+  }, [projectId, profile, refetch]);
+
   const handleAppointmentClick = (e: AppointmentClickEvent) => {
     const apt = e.appointmentData as CalendarAppointment | undefined;
     if (apt) {
@@ -78,10 +134,10 @@ export default function CalendarView({ projectId }: CalendarViewProps): ReactNod
 
   const tooltipTemplate = (data: { appointmentData: CalendarAppointment }) => {
     const apt = data.appointmentData;
-    const startStr = apt.startDate.toLocaleDateString();
+    const startStr = formatDate(apt.startDate);
     const endDate = new Date(apt.endDate);
     endDate.setDate(endDate.getDate() - 1); // undo the +1 adjustment
-    const endStr = endDate.toLocaleDateString();
+    const endStr = formatDate(endDate);
     return (
       <div className="calendar-tooltip">
         <div className="calendar-tooltip-name">{apt.text}</div>
@@ -142,9 +198,11 @@ export default function CalendarView({ projectId }: CalendarViewProps): ReactNod
         height="calc(100vh - 90px)"
         startDayHour={0}
         endDayHour={24}
-        editing={false}
+        editing={{ allowUpdating: true, allowDragging: true, allowResizing: true }}
         showAllDayPanel={false}
         onAppointmentClick={handleAppointmentClick}
+        onAppointmentUpdated={handleAppointmentUpdated}
+        onAppointmentAdding={handleAppointmentAdding}
         appointmentRender={appointmentTemplate}
         appointmentTooltipRender={tooltipTemplate}
         textExpr="text"

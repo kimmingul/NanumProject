@@ -6,10 +6,10 @@ import {
   SecuritySection,
   AppearanceSection,
   UsersSection,
-} from './settings';
-import './SettingsPage.css';
+} from './admin';
+import './AdminPage.css';
 
-export default function SettingsPage(): ReactNode {
+export default function AdminPage(): ReactNode {
   const { section } = useParams<{ section?: string }>();
   const role = useAuthStore((s) => s.profile?.role);
   const isAdmin = role === 'admin';
@@ -33,13 +33,13 @@ export default function SettingsPage(): ReactNode {
   };
 
   return (
-    <div className="settings-page">
+    <div className="admin-page">
       <div className="page-header">
-        <h1>Settings</h1>
-        <p>Manage your account and organization preferences</p>
+        <h1>Admin</h1>
+        <p>Organization and system administration</p>
       </div>
 
-      <div className="settings-content">
+      <div className="admin-content">
         {renderSection()}
       </div>
     </div>

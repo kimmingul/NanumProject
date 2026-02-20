@@ -10,11 +10,14 @@ export interface CreateProjectInput {
   start_date?: string | null | undefined;
   end_date?: string | null | undefined;
   has_hours_enabled?: boolean | undefined;
+  manager_id?: string | undefined;
 }
 
-export interface UpdateProjectInput extends Partial<CreateProjectInput> {
+export interface UpdateProjectInput extends Partial<Omit<CreateProjectInput, 'manager_id'>> {
   is_starred?: boolean | undefined;
   is_active?: boolean | undefined;
+  is_template?: boolean | undefined;
+  manager_id?: string | null | undefined;
 }
 
 export function useProjectCrud() {
@@ -35,6 +38,7 @@ export function useProjectCrud() {
           end_date: input.end_date || null,
           has_hours_enabled: input.has_hours_enabled || false,
           created_by: profile.user_id,
+          manager_id: input.manager_id || profile.user_id,
         })
         .select()
         .single();
@@ -80,5 +84,20 @@ export function useProjectCrud() {
     if (error) throw error;
   }, []);
 
-  return { createProject, updateProject, deleteProject };
+  const cloneFromTemplate = useCallback(
+    async (templateId: string, name: string, startDate: string): Promise<string> => {
+      const { data, error } = await (supabase.rpc as unknown as (
+        fn: string,
+        params: Record<string, unknown>,
+      ) => Promise<{ data: unknown; error: { message: string } | null }>)(
+        'clone_project_from_template',
+        { p_template_id: templateId, p_name: name, p_start_date: startDate },
+      );
+      if (error) throw error;
+      return data as string;
+    },
+    [],
+  );
+
+  return { createProject, updateProject, deleteProject, cloneFromTemplate };
 }

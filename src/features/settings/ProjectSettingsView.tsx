@@ -51,6 +51,7 @@ export default function ProjectSettingsView({
   const [name, setName] = useState(project.name);
   const [description, setDescription] = useState(project.description || '');
   const [status, setStatus] = useState<ProjectStatus>(project.status);
+  const [managerId, setManagerId] = useState<string | null>(project.manager_id);
   const [startDate, setStartDate] = useState<Date | null>(
     project.start_date ? new Date(project.start_date) : null,
   );
@@ -58,6 +59,7 @@ export default function ProjectSettingsView({
     project.end_date ? new Date(project.end_date) : null,
   );
   const [hoursEnabled, setHoursEnabled] = useState(project.has_hours_enabled);
+  const [isTemplate, setIsTemplate] = useState(project.is_template);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
@@ -65,9 +67,11 @@ export default function ProjectSettingsView({
     setName(project.name);
     setDescription(project.description || '');
     setStatus(project.status);
+    setManagerId(project.manager_id);
     setStartDate(project.start_date ? new Date(project.start_date) : null);
     setEndDate(project.end_date ? new Date(project.end_date) : null);
     setHoursEnabled(project.has_hours_enabled);
+    setIsTemplate(project.is_template);
   }, [project]);
 
   const handleSave = useCallback(async () => {
@@ -79,9 +83,11 @@ export default function ProjectSettingsView({
         name: name.trim(),
         description: description.trim() || undefined,
         status,
+        manager_id: managerId,
         start_date: startDate?.toISOString().split('T')[0] ?? null,
         end_date: endDate?.toISOString().split('T')[0] ?? null,
         has_hours_enabled: hoursEnabled,
+        is_template: isTemplate,
       });
       setSaved(true);
       onProjectUpdated?.(updated);
@@ -91,7 +97,7 @@ export default function ProjectSettingsView({
     } finally {
       setSaving(false);
     }
-  }, [name, description, status, startDate, endDate, hoursEnabled, project.id, updateProject, onProjectUpdated]);
+  }, [name, description, status, managerId, startDate, endDate, hoursEnabled, isTemplate, project.id, updateProject, onProjectUpdated]);
 
   return (
     <div className="project-settings-view">
@@ -130,6 +136,22 @@ export default function ProjectSettingsView({
             />
           </div>
 
+          <div className="form-field">
+            <label>Manager</label>
+            <SelectBox
+              dataSource={members}
+              displayExpr={(item: { profile?: { full_name: string | null; email: string } } | null) =>
+                item ? (item.profile?.full_name || item.profile?.email || 'Unknown') : ''
+              }
+              valueExpr="user_id"
+              value={managerId}
+              onValueChanged={(e) => setManagerId(e.value)}
+              stylingMode="outlined"
+              placeholder="Select manager..."
+              showClearButton={true}
+            />
+          </div>
+
           <div className="form-row">
             <div className="form-field">
               <label>Start Date</label>
@@ -157,6 +179,14 @@ export default function ProjectSettingsView({
               onValueChanged={(e) => setHoursEnabled(e.value)}
             />
             <label>Enable time tracking</label>
+          </div>
+
+          <div className="form-field form-switch">
+            <Switch
+              value={isTemplate}
+              onValueChanged={(e) => setIsTemplate(e.value)}
+            />
+            <label>Mark as Template</label>
           </div>
 
           <div className="form-actions">

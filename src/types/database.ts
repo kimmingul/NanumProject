@@ -42,6 +42,7 @@ export interface Profile {
   role: UserRole;
   tenant_name?: string | null;
   metadata: Record<string, unknown> | null;
+  preferences: Record<string, unknown> | null;
   created_at: string;
   updated_at: string;
 }

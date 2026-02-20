@@ -33,6 +33,7 @@ export function useProjects(options: UseProjectsOptions = {}) {
         .from('projects')
         .select('*')
         .eq('is_active', true)
+        .order('is_starred', { ascending: false })
         .order('name', { ascending: true });
 
       if (status !== 'all') {

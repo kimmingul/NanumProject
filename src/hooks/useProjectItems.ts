@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useAutoRefresh } from './useAutoRefresh';
 import type {
   ProjectItem,
   TaskDependency,
@@ -120,6 +121,8 @@ export function useProjectItems(projectId: string | undefined): UseProjectItemsR
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  useAutoRefresh(fetchData, 30_000, !!projectId);
 
   return { items, dependencies, resources, assignments, commentCounts, loading, error, refetch: fetchData };
 }

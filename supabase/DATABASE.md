@@ -16,8 +16,12 @@ Supabase (PostgreSQL) 기반 멀티테넌트 프로젝트 관리 서비스.
 | `008_fix_missing_functions.sql` | deactivate_user, reactivate_user, revoke_user_sessions 함수 생성 |
 | `009_item_links.sql` | item_links 테이블, link_type enum, hierarchy trigger, comment count RPC |
 | `010_profile_extended_fields.sql` | profiles 확장 컬럼 (phone, department, position, address 등) + get_user_profile 재생성 |
+| `011_notifications.sql` | 알림 시스템: notifications 테이블 + RLS + RPC (mark_notification_read, mark_all_notifications_read) + 트리거 (할당/멘션) |
+| `012_project_templates.sql` | clone_project_from_template RPC: 프로젝트 복제 (아이템/의존성 포함, parent_id 매핑) |
+| `013_user_preferences.sql` | profiles.preferences JSONB 컬럼 추가 |
+| `014_project_manager.sql` | projects.manager_id 컬럼 추가 + 기존 데이터 backfill |
 
-> 실행 순서: 001 → 002 → 003 → 004 → 005 → 006 → 007 → 008 → 009 → 010
+> 실행 순서: 001 → 002 → 003 → 004 → 005 → 006 → 007 → 008 → 009 → 010 → 011 → 012 → 013 → 014
 
 ---
 
@@ -36,7 +40,7 @@ sessions           활성 세션 관리
 ### PM 모듈 (12개)
 
 ```
-projects           프로젝트 메타데이터
+projects           프로젝트 메타데이터 (manager_id: 프로젝트 매니저)
 project_members    프로젝트-사용자 매핑 (권한 관리)
 project_items      ★ 통합 아이템 (그룹/태스크/마일스톤)
 task_assignees     아이템-담당자 할당
@@ -48,6 +52,7 @@ document_versions  문서 버전 히스토리
 time_entries       시간 추적
 checklist_items    체크리스트
 activity_log       활동 로그 (immutable)
+notifications      알림 (할당/멘션/상태변경/기한)
 ```
 
 ---

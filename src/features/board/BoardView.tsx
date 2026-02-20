@@ -75,15 +75,27 @@ export default function BoardView({ projectId, actionsRef }: BoardViewProps): Re
     return map;
   }, [resources]);
 
-  const assigneeNameFor = useCallback(
-    (itemId: string) => {
-      const names = assignments
+  const assigneeNamesFor = useCallback(
+    (itemId: string): string[] => {
+      return assignments
         .filter((a) => a.item_id === itemId)
         .map((a) => resourceMap.get(a.user_id) || 'Unknown');
-      return names.join(', ');
     },
     [assignments, resourceMap],
   );
+
+  // Due date badge helper
+  const getDueBadge = useCallback((endDate: string | null): { label: string; className: string } | null => {
+    if (!endDate) return null;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const end = new Date(endDate + 'T00:00:00');
+    const diffMs = end.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+    if (diffDays < 0) return { label: 'Overdue', className: 'due-overdue' };
+    if (diffDays <= 3) return { label: `Due ${diffDays}d`, className: 'due-soon' };
+    return { label: endDate, className: 'due-normal' };
+  }, []);
 
   // Group tasks by task_status
   const grouped = useMemo(() => {
@@ -177,25 +189,30 @@ export default function BoardView({ projectId, actionsRef }: BoardViewProps): Re
                 onDragEnd={handleDragEnd}
               >
                 {colTasks.map((task) => {
-                  const assignee = assigneeNameFor(task.id);
-                  const dates = [task.start_date, task.end_date]
-                    .filter(Boolean)
-                    .join(' ~ ');
+                  const assignees = assigneeNamesFor(task.id);
+                  const dueBadge = getDueBadge(task.end_date);
                   return (
                     <div
                       key={task.id}
-                      className="board-card"
+                      className={`board-card ${task.is_critical ? 'board-card-critical' : ''}`}
                       onClick={() => setSelectedTaskId(task.id)}
                     >
                       <div className="board-card-name">{task.name}</div>
                       <div className="board-card-meta">
-                        {assignee && (
-                          <span className="board-card-assignee">
-                            <i className="dx-icon-user" />
-                            {assignee}
+                        {assignees.length > 0 && (
+                          <div className="board-card-avatars">
+                            {assignees.map((name, i) => (
+                              <span key={i} className="board-card-avatar" title={name}>
+                                {name.charAt(0).toUpperCase()}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        {dueBadge && (
+                          <span className={`board-card-due ${dueBadge.className}`}>
+                            {dueBadge.label}
                           </span>
                         )}
-                        {dates && <span className="board-card-dates">{dates}</span>}
                         {task.percent_complete > 0 && (
                           <span className="board-card-progress">
                             <span className="board-card-progress-bar">

@@ -15,6 +15,8 @@ import 'devexpress-gantt/dist/dx-gantt.css';
 import { supabase, dbUpdate } from '@/lib/supabase';
 import { useAuthStore } from '@/lib/auth-store';
 import { usePMStore } from '@/lib/pm-store';
+import { usePreferencesStore } from '@/lib/preferences-store';
+import { getDxDateFormat } from '@/utils/formatDate';
 import { useProjectItems } from '@/hooks/useProjectItems';
 import TaskDetailPopup from '@/features/tasks/TaskDetailPopup';
 import type { DependencyType } from '@/types';
@@ -57,6 +59,8 @@ export default function GanttView({ projectId, actionsRef }: GanttViewProps): Re
   const profile = useAuthStore((s) => s.profile);
   const setSelectedTaskId = usePMStore((s) => s.setSelectedTaskId);
   const selectedTaskId = usePMStore((s) => s.selectedTaskId);
+  const dateFormat = usePreferencesStore((s) => s.preferences.dateFormat);
+  const dxDateFmt = useMemo(() => getDxDateFormat(), [dateFormat]);
   const ganttRef = useRef<GanttRef>(null);
 
   // Popup state
@@ -286,12 +290,13 @@ export default function GanttView({ projectId, actionsRef }: GanttViewProps): Re
 
         if (Object.keys(updates).length > 0) {
           await supabase.from('project_items').update(dbUpdate(updates)).eq('id', e.key);
+          await refetch();
         }
       } catch (err) {
         console.error('Failed to update task:', err);
       }
     },
-    [],
+    [refetch],
   );
 
   const handleTaskDeleted = useCallback(
@@ -404,7 +409,7 @@ export default function GanttView({ projectId, actionsRef }: GanttViewProps): Re
     <div className="gantt-view">
       <Gantt
         ref={ganttRef}
-        taskListWidth={700}
+        taskListWidth={600}
         scaleType="weeks"
         height="calc(100vh - 90px)"
         rootValue=""
@@ -448,10 +453,10 @@ export default function GanttView({ projectId, actionsRef }: GanttViewProps): Re
         />
 
         <Column dataField="title" caption="Task Name" width={280} cellRender={taskNameCellRender} />
-        <Column dataField="start" caption="Start" width={90} />
-        <Column dataField="end" caption="End" width={90} />
+        <Column dataField="start" caption="Start" width={90} format={dxDateFmt} />
+        <Column dataField="end" caption="End" width={90} format={dxDateFmt} />
         <Column dataField="progress" caption="%" width={50} />
-        <Column dataField="assignees" caption="Assigned" width={120} cellRender={assigneesCellRender} />
+        <Column dataField="assignees" caption="Assigned" width={90} cellRender={assigneesCellRender} />
 
         <Validation autoUpdateParentTasks={true} />
 

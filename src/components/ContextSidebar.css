@@ -162,10 +162,10 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 7px 14px;
+  padding: 7px 11px;
   background: transparent;
   color: var(--sidebar-text);
-  font-size: 13px;
+  font-size: 12px;
   cursor: pointer;
   transition: background 0.12s;
   border: none;
@@ -262,6 +262,24 @@
 .sidebar-user-role.role-color-manager { color: var(--role-manager-color); }
 .sidebar-user-role.role-color-member { color: var(--role-member-color); }
 .sidebar-user-role.role-color-viewer { color: var(--role-viewer-color); }
+
+/* ---- Sidebar Star ---- */
+.sidebar-list-item .sidebar-star {
+  font-size: 14px;
+  width: auto;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: color 0.15s;
+  padding: 2px;
+}
+
+.sidebar-list-item .sidebar-star:hover {
+  color: var(--star-color);
+}
+
+.sidebar-list-item .sidebar-star.starred {
+  color: var(--star-color);
+}
 
 /* Loading / Empty */
 .sidebar-loading,

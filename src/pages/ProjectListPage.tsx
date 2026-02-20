@@ -1,4 +1,4 @@
-import { type ReactNode, useCallback, useState } from 'react';
+import { type ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DataGrid } from 'devextreme-react/data-grid';
 import {
@@ -14,8 +14,11 @@ import { TextBox } from 'devextreme-react/text-box';
 import { TextArea } from 'devextreme-react/text-area';
 import { DateBox } from 'devextreme-react/date-box';
 import { SelectBox } from 'devextreme-react/select-box';
+import { supabase } from '@/lib/supabase';
 import { useProjects, useProjectCrud } from '@/hooks';
-import type { ProjectStatus } from '@/types';
+import { usePreferencesStore } from '@/lib/preferences-store';
+import { getDxDateFormat, getDxDateTimeFormat } from '@/utils/formatDate';
+import type { ProjectStatus, Project } from '@/types';
 import './ProjectListPage.css';
 
 const statusLabels: Record<string, string> = {
@@ -48,13 +51,94 @@ const emptyForm: ProjectFormData = {
   end_date: null,
 };
 
+interface ProjectStats {
+  taskCount: number;
+  doneCount: number;
+}
+
+interface EnrichedProject extends Project {
+  manager_name: string | null;
+  task_count: number;
+  progress: number;
+}
+
 export default function ProjectListPage(): ReactNode {
   const navigate = useNavigate();
   const { projects, loading, error, refetch } = useProjects({ status: 'all' });
-  const { createProject } = useProjectCrud();
+  const { createProject, updateProject, cloneFromTemplate } = useProjectCrud();
+  const dateFormat = usePreferencesStore((s) => s.preferences.dateFormat);
+  const dxDateFmt = useMemo(() => getDxDateFormat(), [dateFormat]);
+  const dxDateTimeFmt = useMemo(() => getDxDateTimeFormat(), [dateFormat]);
   const [showPopup, setShowPopup] = useState(false);
   const [formData, setFormData] = useState<ProjectFormData>(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [showTemplatePopup, setShowTemplatePopup] = useState(false);
+  const [templateForm, setTemplateForm] = useState({ templateId: '', name: '', startDate: new Date() });
+  const [templateSaving, setTemplateSaving] = useState(false);
+
+  // Supplementary data
+  const [managerMap, setManagerMap] = useState<Record<string, string>>({});
+  const [statsMap, setStatsMap] = useState<Record<string, ProjectStats>>({});
+
+  const templateProjects = projects.filter((p: Project) => p.is_template);
+
+  // Fetch manager names and task stats when projects change
+  useEffect(() => {
+    if (!projects.length) return;
+
+    // Manager names from manager_id
+    const managerIds = [...new Set(projects.map((p) => p.manager_id).filter(Boolean))] as string[];
+    if (managerIds.length) {
+      supabase
+        .from('profiles')
+        .select('user_id, full_name')
+        .in('user_id', managerIds)
+        .then(({ data }) => {
+          if (!data) return;
+          const map: Record<string, string> = {};
+          for (const p of data) map[p.user_id] = p.full_name || '';
+          setManagerMap(map);
+        });
+    } else {
+      setManagerMap({});
+    }
+
+    // Task stats per project
+    const projectIds = projects.map((p) => p.id);
+    supabase
+      .from('project_items')
+      .select('project_id, task_status')
+      .in('project_id', projectIds)
+      .eq('item_type', 'task')
+      .eq('is_active', true)
+      .then(({ data }) => {
+        if (!data) return;
+        const map: Record<string, ProjectStats> = {};
+        for (const row of data) {
+          if (!map[row.project_id]) {
+            map[row.project_id] = { taskCount: 0, doneCount: 0 };
+          }
+          map[row.project_id].taskCount++;
+          if (row.task_status === 'done') {
+            map[row.project_id].doneCount++;
+          }
+        }
+        setStatsMap(map);
+      });
+  }, [projects]);
+
+  // Enriched projects for the grid
+  const enrichedProjects: EnrichedProject[] = projects.map((p) => {
+    const stats = statsMap[p.id];
+    const taskCount = stats?.taskCount ?? 0;
+    const doneCount = stats?.doneCount ?? 0;
+    return {
+      ...p,
+      manager_name: p.manager_id ? managerMap[p.manager_id] || null : null,
+      task_count: taskCount,
+      progress: taskCount > 0 ? Math.round((doneCount / taskCount) * 100) : 0,
+    };
+  });
 
   const handleCreate = useCallback(async () => {
     if (!formData.name.trim()) return;
@@ -77,6 +161,26 @@ export default function ProjectListPage(): ReactNode {
     }
   }, [formData, createProject, refetch]);
 
+  const handleCloneFromTemplate = useCallback(async () => {
+    if (!templateForm.templateId || !templateForm.name.trim()) return;
+    setTemplateSaving(true);
+    try {
+      const newProjectId = await cloneFromTemplate(
+        templateForm.templateId,
+        templateForm.name.trim(),
+        templateForm.startDate?.toISOString().split('T')[0] ?? new Date().toISOString().split('T')[0],
+      );
+      setShowTemplatePopup(false);
+      setTemplateForm({ templateId: '', name: '', startDate: new Date() });
+      await refetch();
+      navigate(`/tasks/${newProjectId}`);
+    } catch (err) {
+      console.error('Failed to clone from template:', err);
+    } finally {
+      setTemplateSaving(false);
+    }
+  }, [templateForm, cloneFromTemplate, refetch, navigate]);
+
   return (
       <div className="project-list-page">
         <div className="project-list-header">
@@ -87,6 +191,13 @@ export default function ProjectListPage(): ReactNode {
             stylingMode="text"
             className="project-list-header-btn"
             onClick={() => setShowPopup(true)}
+          />
+          <Button
+            icon="copy"
+            text="Template"
+            stylingMode="text"
+            className="project-list-header-btn"
+            onClick={() => setShowTemplatePopup(true)}
           />
         </div>
 
@@ -99,7 +210,7 @@ export default function ProjectListPage(): ReactNode {
 
         <div className="project-grid-container">
           <DataGrid
-            dataSource={projects}
+            dataSource={enrichedProjects}
             keyExpr="id"
             height="100%"
             showBorders={false}
@@ -107,7 +218,6 @@ export default function ProjectListPage(): ReactNode {
             showColumnLines={false}
             rowAlternationEnabled={true}
             hoverStateEnabled={true}
-            columnAutoWidth={true}
             onRowClick={(e) => {
               if (e.data?.id) {
                 navigate(`/tasks/${e.data.id}`);
@@ -121,21 +231,34 @@ export default function ProjectListPage(): ReactNode {
             <Column
               dataField="name"
               caption="Project Name"
-              minWidth={300}
-              cellRender={(data: { value: string; data: { is_starred: boolean } }) => (
+              minWidth={200}
+              cellRender={(data: { value: string; data: { id: string; is_starred: boolean } }) => (
                 <div className="project-name-cell">
-                  {data.data.is_starred && (
-                    <i className="dx-icon-favorites project-star"></i>
-                  )}
+                  <i
+                    className={`dx-icon-favorites project-star${data.data.is_starred ? ' starred' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      updateProject(data.data.id, { is_starred: !data.data.is_starred }).then(() => refetch());
+                    }}
+                  />
                   <span>{data.value}</span>
                 </div>
               )}
             />
 
             <Column
+              dataField="manager_name"
+              caption="Manager"
+              width={120}
+              cellRender={(data: { value: string | null }) => (
+                <span className="project-owner-cell">{data.value || '—'}</span>
+              )}
+            />
+
+            <Column
               dataField="status"
               caption="Status"
-              width={120}
+              width={100}
               defaultFilterValue="active"
               cellRender={(data: { value: string }) => (
                 <span className={`project-status-badge status-${data.value}`}>
@@ -145,10 +268,37 @@ export default function ProjectListPage(): ReactNode {
             />
 
             <Column
+              dataField="progress"
+              caption="Progress"
+              width={120}
+              dataType="number"
+              cellRender={(data: { value: number }) => (
+                <div className="project-progress-cell">
+                  <div className="progress-bar-track">
+                    <div
+                      className="progress-bar-fill"
+                      style={{ width: `${data.value}%` }}
+                    />
+                  </div>
+                  <span className="progress-label">{data.value}%</span>
+                </div>
+              )}
+            />
+
+            <Column
+              dataField="task_count"
+              caption="Tasks"
+              width={110}
+              dataType="number"
+              alignment="center"
+            />
+
+            <Column
               dataField="start_date"
               caption="Start"
               dataType="date"
-              width={120}
+              format={dxDateFmt}
+              width={100}
               sortOrder="desc"
               sortIndex={0}
             />
@@ -157,14 +307,16 @@ export default function ProjectListPage(): ReactNode {
               dataField="end_date"
               caption="End"
               dataType="date"
-              width={120}
+              format={dxDateFmt}
+              width={100}
             />
 
             <Column
               dataField="updated_at"
-              caption="Last Updated"
+              caption="Updated"
               dataType="datetime"
-              width={170}
+              format={dxDateTimeFmt}
+              width={160}
             />
 
             <Pager
@@ -258,6 +410,59 @@ export default function ProjectListPage(): ReactNode {
                 stylingMode="contained"
                 disabled={!formData.name.trim() || saving}
                 onClick={handleCreate}
+              />
+            </div>
+          </div>
+        </Popup>
+
+        <Popup
+          visible={showTemplatePopup}
+          onHiding={() => setShowTemplatePopup(false)}
+          title="New Project from Template"
+          showCloseButton={true}
+          width={480}
+          height="auto"
+        >
+          <div className="project-form">
+            <div className="form-field">
+              <label>Template *</label>
+              <SelectBox
+                dataSource={templateProjects}
+                displayExpr="name"
+                valueExpr="id"
+                value={templateForm.templateId}
+                onValueChanged={(e) => setTemplateForm((f) => ({ ...f, templateId: e.value }))}
+                stylingMode="outlined"
+                placeholder="Select a template..."
+                noDataText="No template projects. Mark a project as template in Settings."
+              />
+            </div>
+            <div className="form-field">
+              <label>Project Name *</label>
+              <TextBox
+                value={templateForm.name}
+                onValueChanged={(e) => setTemplateForm((f) => ({ ...f, name: e.value }))}
+                placeholder="New project name"
+                stylingMode="outlined"
+              />
+            </div>
+            <div className="form-field">
+              <label>Start Date</label>
+              <DateBox
+                value={templateForm.startDate}
+                onValueChanged={(e) => setTemplateForm((f) => ({ ...f, startDate: e.value }))}
+                type="date"
+                stylingMode="outlined"
+              />
+            </div>
+            <div className="form-actions">
+              <Button text="Cancel" stylingMode="outlined" onClick={() => setShowTemplatePopup(false)} />
+              <Button
+                text={templateSaving ? 'Creating...' : 'Create from Template'}
+                type="default"
+                stylingMode="contained"
+                disabled={!templateForm.templateId || !templateForm.name.trim() || templateSaving}
+                onClick={handleCloneFromTemplate}
               />
             </div>
           </div>

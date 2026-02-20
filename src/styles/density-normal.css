@@ -1,0 +1,46 @@
+/* Normal density overrides — active when html.density-normal */
+
+html.density-normal .dx-datagrid-rowsview .dx-row > td {
+  padding: 9px 12px;
+}
+
+html.density-normal .dx-datagrid-headers .dx-header-row > td {
+  padding: 9px 12px;
+}
+
+html.density-normal .dx-texteditor {
+  min-height: 36px;
+}
+
+html.density-normal .dx-button {
+  min-height: 36px;
+  padding: 6px 16px;
+}
+
+html.density-normal .dx-treelist-rowsview .dx-row > td {
+  padding: 8px 10px;
+}
+
+html.density-normal .dx-treelist-headers .dx-header-row > td {
+  padding: 8px 10px;
+}
+
+html.density-normal .dx-selectbox {
+  min-height: 36px;
+}
+
+html.density-normal .dx-list-item {
+  padding: 10px 14px;
+}
+
+html.density-normal .dx-toolbar-items-container {
+  min-height: 40px;
+}
+
+html.density-normal .sidebar-list-item {
+  padding: 8px 12px;
+}
+
+html.density-normal .workspace-tab-btn {
+  min-height: 36px;
+}

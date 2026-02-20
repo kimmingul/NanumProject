@@ -496,6 +496,121 @@
 - **UI**: min(560px, 90vw) 너비, 12px radius, 카테고리별 아이콘 색상, footer kbd 힌트
 - **다크/라이트 모드**: CSS 변수 기반 완전 지원
 
+### Phase 28: DB 마이그레이션 + 타입
+
+- **`supabase/migrations/011_notifications.sql`**: 알림 테이블 (notifications), RLS 정책, 인덱스, `mark_notification_read`/`mark_all_notifications_read` RPC, 할당/멘션 트리거
+- **`supabase/migrations/012_project_templates.sql`**: `clone_project_from_template(p_template_id, p_name, p_start_date)` RPC — 아이템/의존성 복사, parent_id 매핑
+- **`src/types/pm.ts`**: `Notification` 인터페이스 + `NotificationType` 타입 추가
+- **`src/styles/theme-variables.css`**: `--notification-*`, `--board-card-*`, `--search-highlight-bg` 변수 추가 (light/dark)
+
+### Phase 29: 프로젝트 별표
+
+- **`src/hooks/useProjects.ts`**: `is_starred DESC, name ASC` 정렬 (별표 프로젝트 상단)
+- **`src/components/sidebars/ProjectSidebarList.tsx`**: 각 프로젝트에 별 아이콘 토글 추가 (`useProjectCrud().updateProject`)
+- **`src/pages/ProjectListPage.tsx`**: Name 컬럼 별 아이콘 항상 표시 + 클릭 토글 (`stopPropagation`)
+- **`src/pages/TasksWorkspacePage.tsx`**: 툴바에 클릭 가능한 별표 토글
+- **`src/components/ContextSidebar.css`**: `.sidebar-star` 스타일 추가
+
+### Phase 30: 알림 시스템 + 실시간 폴링
+
+- **`src/hooks/useAutoRefresh.ts`** (신규): 범용 폴링 훅 — `document.hidden` 체크, `setInterval` 기반
+- **`src/hooks/useNotifications.ts`** (신규): 알림 fetch (limit 20) + 30초 폴링 + `markAsRead`/`markAllAsRead` RPC
+- **`src/components/NotificationBell.tsx`** (신규): 벨 아이콘 + unread 뱃지 + 드롭다운 (항목별 타입 아이콘, 상대 시간, 읽음 처리)
+- **`src/components/NotificationBell.css`** (신규): 드롭다운 스타일 (애니메이션, 읽지 않음 배경)
+- **`src/components/IDEHeader.tsx`**: 테마 토글 옆에 `<NotificationBell />` 추가
+- **`src/hooks/useProjectItems.ts`**: `useAutoRefresh(fetchData, 30_000)` 적용
+- **`src/pages/DashboardPage.tsx`**: `useAutoRefresh(data.refetch, 60_000)` 적용
+
+### Phase 31: Board 강화 + Calendar 편집 + Gantt 개선
+
+- **Board 뷰** (`src/features/board/BoardView.tsx`):
+  - 담당자 이니셜 아바타 뱃지 (24px 원형)
+  - 기한 뱃지: overdue(빨강), due-soon(3일 이내, 주황), normal
+  - `is_critical` 태스크 → 좌측 빨간 보더
+  - `BoardView.css` 스타일 추가
+- **Calendar 뷰** (`src/features/calendar/CalendarView.tsx`):
+  - `editing={{ allowUpdating: true, allowDragging: true, allowResizing: true }}`
+  - `onAppointmentUpdated`: 드래그/리사이즈 → start_date/end_date DB 업데이트
+  - `onAppointmentAdding`: 클릭 → 새 태스크 생성 (project_items INSERT)
+- **Gantt 뷰** (`src/features/gantt/GanttView.tsx`):
+  - `handleTaskUpdated` 완료 후 `refetch()` 호출 추가 — 드래그 완료 시 즉시 데이터 동기화
+
+### Phase 32: 대시보드 필터 + 검색 하이라이트
+
+- **`src/hooks/useDashboardData.ts`**: `DashboardFilterOptions { period?, projectId? }` 파라미터 추가, 기간/프로젝트 필터로 모든 쿼리 필터링
+- **`src/pages/DashboardPage.tsx`**: Greeting 아래에 필터 바 (기간 SelectBox + 프로젝트 SelectBox)
+- **`src/pages/DashboardPage.css`**: `.dashboard-filter-bar` 스타일
+- **`src/components/GlobalSearch.tsx`**: `highlightMatch(text, query)` 유틸리티 — 대소문자 무시 매칭 → `<mark className="search-highlight">` 래핑
+- **`src/components/GlobalSearch.css`**: `.search-highlight` 스타일 (theme variable 기반)
+
+### Phase 33: 템플릿 + 대량 작업 + Excel
+
+- **프로젝트 템플릿**:
+  - `src/hooks/useProjectCrud.ts`: `cloneFromTemplate(templateId, name, startDate)` RPC 추가, `is_template` in UpdateProjectInput
+  - `src/pages/ProjectListPage.tsx`: "Template" 버튼 + Popup (템플릿 SelectBox, 이름, 시작일)
+  - `src/features/settings/ProjectSettingsView.tsx`: "Mark as Template" Switch 토글 추가
+- **대량 태스크 작업** (`src/features/tasks/TasksView.tsx`):
+  - TreeList `Selection mode="multiple"` 활성화
+  - 벌크 툴바: 상태 일괄 변경 SelectBox + 삭제 버튼 + Clear Selection
+  - `TasksView.css`: `.bulk-toolbar` 스타일
+- **Excel 내보내기/가져오기** (`src/features/tasks/TasksView.tsx`):
+  - Export: DevExtreme `<Export enabled={true} />` 내장 기능
+  - Import: "Import" 버튼 → `exceljs`로 .xlsx 파싱 → DataGrid 미리보기 → batch insert
+  - 의존성: `exceljs`, `file-saver` 설치
+
+### Phase 34: User Settings 페이지
+
+- **DB**: `profiles.preferences JSONB` 컬럼 추가 (`013_user_preferences.sql`)
+- **Preferences Store** (`src/lib/preferences-store.ts`):
+  - Zustand persist (localStorage key: `nanum-preferences`)
+  - theme, density, dateFormat, timezone, weekStart, defaultView, sidebarDefault
+  - Debounced DB sync (1초) — 크로스 디바이스 동기화
+  - `loadFromDb()` — 로그인 후 DB에서 불러와 로컬 병합
+- **User Settings 페이지** (`/settings`):
+  - Appearance: Theme (Light/Dark/System) + Density (Compact/Normal) — 즉시 적용
+  - Regional: 날짜 포맷 (5종 + 미리보기), 타임존, 주 시작일
+  - Workspace: 기본 뷰, 사이드바 기본 상태
+- **Admin 변경**:
+  - Appearance 섹션에서 Theme 제거 → Branding Colors만 유지
+  - 사이드바 레이블 "Appearance" → "Branding"
+- **Density CSS** (`src/styles/density-normal.css`): DataGrid, Button, TreeList 등 간격 증가
+- **Default View 적용**: `TasksWorkspacePage` — tab 미지정 시 preferences.defaultView 사용
+- **Navigation**: NavRail에 Settings 추가, 프로필 메뉴에 Settings 링크, ContextSidebar에 Settings 사이드바
+- **Date Format**: `src/utils/formatDate.ts` 유틸리티 함수 (preferences 기반)
+
+### Phase 35: Project Manager 필드 추가
+
+- **DB 마이그레이션** (`014_project_manager.sql`):
+  - `projects` 테이블에 `manager_id UUID REFERENCES auth.users(id)` 컬럼 추가
+  - 기존 프로젝트: 첫 번째 admin 멤버를 manager로 backfill
+- **타입 수정**: `Project` 인터페이스 + Supabase Row/Insert/Update에 `manager_id` 추가
+- **useProjectCrud**: 프로젝트 생성 시 `manager_id`를 생성자로 자동 설정
+- **Project Settings**: Manager SelectBox 추가 (멤버 목록에서 선택, clear 가능)
+- **ProjectListPage**: `ownerMap` (project_members admin 조회) → `managerMap` (manager_id 기반 profiles 조회)로 단순화, "Owner" → "Manager" 컬럼명 변경
+- **파일**: 신규 1개 (migration), 수정 6개 (types 2, hook 1, settings 1, list page 1, docs 2)
+
+### Phase 36: 파비콘 + DataGrid 컬럼 폭 개선
+
+- **파비콘 제작**: N + Progress Arc 디자인 SVG 파비콘 (`public/favicon.svg`)
+  - 파란 원(#667eea) 위에 흰색 "N" 문자 + 75% 진행 아크
+  - 192x192 PNG (`public/favicon-192.png`) 생성 — 모바일/PWA용
+  - `index.html`: favicon.svg + apple-touch-icon 링크 추가, 기존 vite.svg 삭제
+- **ProjectListPage DataGrid 컬럼 폭 수정**:
+  - `columnAutoWidth={true}` 제거 — 긴 프로젝트명이 과도하게 넓어지는 원인
+  - Progress 100→120px, Tasks 70→110px, Updated 150→160px
+
+### Phase 37: Date Format 설정 반영
+
+- **문제**: Settings > Regional > Date Format 변경이 DataGrid/Gantt/Calendar에 미반영
+- **원인**: `formatDate` 유틸리티와 preferences store는 존재하지만, 컴포넌트들이 DevExtreme 기본 포맷 사용
+- **해결**: `getDxDateFormat()` / `getDxDateTimeFormat()` 헬퍼 추가 (우리 포맷 → DevExtreme 포맷 변환)
+- **적용 컴포넌트**:
+  - `ProjectListPage` DataGrid: Start/End/Updated 컬럼 `format` 속성
+  - `TasksView` TreeList: Start/End 컬럼 `format` 속성
+  - `GanttView` Gantt: Start/End 컬럼 `format` 속성
+  - `CalendarView`: 툴팁 `toLocaleDateString()` → `formatDate()` 변경
+- Zustand 구독으로 설정 변경 시 즉시 반영 (페이지 새로고침 불필요)
+
 ### Bugfix: 새로고침 시 데이터 미로딩 (Supabase Auth 데드락)
 
 **증상**: 페이지 새로고침(F5) 시 프로젝트 목록, 대시보드 통계 등 모든 데이터가 로드되지 않음. 콘솔 에러 없이 빈 화면 표시.
@@ -557,9 +672,9 @@ _initialize() → navigator.locks 획득 → _recoverAndRefresh()
 | Application 관리 | OAuth2/OIDC 앱 관리 페이지 |
 | ~~Audit 로그 뷰어~~ | **완료** — AuditLogPage + useAuditLog 훅, DataGrid (날짜/사용자/액션/리소스/메타데이터), 프로필 조인, 필터/검색/내보내기 |
 | MFA 구현 | TOTP, SMS 인증 |
-| 실시간 업데이트 | Supabase Realtime 구독 |
+| ~~실시간 업데이트~~ | **완료** — 30초/60초 자동 폴링 (useAutoRefresh 훅), document.hidden 체크 |
 | ~~테넌트 설정~~ | **완료** — Settings 페이지: Organization(이름/도메인), Security(비밀번호 규칙/세션 타임아웃), Appearance(브랜딩 컬러) |
-| 알림 시스템 | 멘션, 할당 알림 |
+| ~~알림 시스템~~ | **완료** — notifications 테이블 + NotificationBell 드롭다운 + 트리거 (할당/멘션) + 30초 폴링 |
 | ~~Supabase 타입 생성~~ | **완료** — `db` any-cast 제거, `Database` 타입 동기화, `dbUpdate()` 헬퍼, `gen:types` 스크립트 추가 |
 
 ---

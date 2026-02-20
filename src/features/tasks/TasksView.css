@@ -152,3 +152,57 @@
   background: var(--badge-success-bg);
   color: var(--badge-success-text);
 }
+
+/* Tasks toolbar */
+.tasks-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+}
+
+/* Bulk action toolbar */
+.bulk-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--accent-bg-subtle);
+  border: 1px solid var(--accent-color);
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.bulk-toolbar-count {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent-color);
+  margin-right: 4px;
+}
+
+.dx-button.bulk-delete-btn {
+  color: var(--badge-danger-text);
+}
+
+/* Import form */
+.import-form {
+  padding: 8px 0;
+}
+
+.import-upload {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--text-secondary);
+}
+
+.import-upload p {
+  margin: 0 0 16px;
+  font-size: 13px;
+}
+
+.import-preview-count {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 8px;
+}

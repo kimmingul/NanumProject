@@ -16,6 +16,7 @@ export type TimeEntryType = 'punched' | 'manual';
 export type TaskStatus = 'todo' | 'in_progress' | 'review' | 'done';
 export type ViewType = 'gantt' | 'board' | 'list' | 'calendar';
 export type LinkType = 'blocks' | 'related_to' | 'duplicates';
+export type NotificationType = 'assignment' | 'comment_mention' | 'status_change' | 'due_date';
 
 // ========================================
 // Core entity interfaces
@@ -41,6 +42,7 @@ export interface Project {
   settings: Record<string, unknown>;
   is_active: boolean;
   created_by: string | null;
+  manager_id: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -227,6 +229,21 @@ export interface ItemLink {
 export interface ItemLinkWithNames extends ItemLink {
   source_name: string;
   target_name: string;
+}
+
+export interface Notification {
+  id: string;
+  tenant_id: string;
+  user_id: string;
+  type: NotificationType;
+  title: string;
+  message: string | null;
+  target_type: string | null;
+  target_id: string | null;
+  project_id: string | null;
+  is_read: boolean;
+  read_at: string | null;
+  created_at: string;
 }
 
 // ========================================

@@ -4,6 +4,7 @@ import { useAuthStore } from '@/lib/auth-store';
 import { useThemeStore } from '@/lib/theme-store';
 import { supabase } from '@/lib/supabase';
 import { GlobalSearch } from './GlobalSearch';
+import { NotificationBell } from './NotificationBell';
 
 export function IDEHeader(): ReactNode {
   const navigate = useNavigate();
@@ -80,6 +81,7 @@ export function IDEHeader(): ReactNode {
         >
           <i className={theme === 'dark' ? 'dx-icon-sun' : 'dx-icon-moon'} />
         </button>
+        <NotificationBell />
         <div
           className="ide-user-info"
           role="button"
@@ -112,13 +114,20 @@ export function IDEHeader(): ReactNode {
               <i className="dx-icon-user" />
               My Profile
             </button>
-            {profile?.role === 'admin' && (
             <button
               className="ide-profile-menu-item"
               onClick={() => { setProfileMenuOpen(false); navigate('/settings'); }}
             >
               <i className="dx-icon-preferences" />
               Settings
+            </button>
+            {profile?.role === 'admin' && (
+            <button
+              className="ide-profile-menu-item"
+              onClick={() => { setProfileMenuOpen(false); navigate('/admin'); }}
+            >
+              <i className="dx-icon-lock" />
+              Admin
             </button>
             )}
             <div className="ide-profile-menu-divider" />

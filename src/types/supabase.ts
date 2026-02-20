@@ -42,6 +42,7 @@ export interface Database {
           avatar_url: string | null;
           role: string;
           metadata: unknown | null;
+          preferences: unknown;
           is_active: boolean;
           last_login_at: string | null;
           created_at: string;
@@ -54,6 +55,7 @@ export interface Database {
           full_name?: string | null;
           avatar_url?: string | null;
           role?: string;
+          preferences?: unknown;
         };
         Update: {
           email?: string;
@@ -61,6 +63,7 @@ export interface Database {
           avatar_url?: string | null;
           role?: string;
           metadata?: unknown | null;
+          preferences?: unknown;
         };
         Relationships: [];
       };
@@ -144,6 +147,7 @@ export interface Database {
           settings: unknown;
           is_active: boolean;
           created_by: string | null;
+          manager_id: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -161,6 +165,7 @@ export interface Database {
           has_hours_enabled?: boolean;
           settings?: unknown;
           created_by?: string | null;
+          manager_id?: string | null;
           tg_id?: number | null;
         };
         Update: {
@@ -173,6 +178,7 @@ export interface Database {
           has_hours_enabled?: boolean;
           is_active?: boolean;
           settings?: unknown;
+          manager_id?: string | null;
         };
         Relationships: [];
       };

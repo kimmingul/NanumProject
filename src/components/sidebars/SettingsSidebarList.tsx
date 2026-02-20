@@ -1,33 +1,26 @@
 import { type ReactNode } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useAuthStore } from '@/lib/auth-store';
 
 interface NavItem {
   key: string;
   label: string;
   icon: string;
-  adminOnly: boolean;
 }
 
 const navItems: NavItem[] = [
-  { key: 'organization', label: 'Organization', icon: 'dx-icon-home', adminOnly: true },
-  { key: 'users', label: 'User Management', icon: 'dx-icon-group', adminOnly: true },
-  { key: 'security', label: 'Security', icon: 'dx-icon-lock', adminOnly: true },
-  { key: 'appearance', label: 'Appearance', icon: 'dx-icon-palette', adminOnly: true },
+  { key: 'appearance', label: 'Appearance', icon: 'dx-icon-palette' },
+  { key: 'regional', label: 'Regional', icon: 'dx-icon-globe' },
+  { key: 'workspace', label: 'Workspace', icon: 'dx-icon-contentlayout' },
 ];
 
 export function SettingsSidebarList(): ReactNode {
   const navigate = useNavigate();
   const { section } = useParams<{ section?: string }>();
-  const role = useAuthStore((s) => s.profile?.role);
-  const isAdmin = role === 'admin';
-
-  const activeSection = section || 'organization';
-  const visibleItems = navItems.filter((item) => !item.adminOnly || isAdmin);
+  const activeSection = section || 'appearance';
 
   return (
     <div className="sidebar-list">
-      {visibleItems.map((item) => (
+      {navItems.map((item) => (
         <div
           key={item.key}
           className={`sidebar-list-item ${activeSection === item.key ? 'active' : ''}`}

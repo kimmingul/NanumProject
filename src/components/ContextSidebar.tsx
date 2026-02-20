@@ -5,6 +5,7 @@ import { usePMStore } from '@/lib/pm-store';
 import { ProjectSidebarList } from './sidebars/ProjectSidebarList';
 import { UserSidebarList } from './sidebars/UserSidebarList';
 import { AuditSidebarList } from './sidebars/AuditSidebarList';
+import { AdminSidebarList } from './sidebars/AdminSidebarList';
 import { SettingsSidebarList } from './sidebars/SettingsSidebarList';
 import './ContextSidebar.css';
 
@@ -13,6 +14,7 @@ function getSidebarContent(pathname: string): ReactNode | null {
   if (pathname.startsWith('/users')) return <UserSidebarList />;
   if (pathname.startsWith('/audit')) return <AuditSidebarList />;
   if (pathname.startsWith('/settings')) return <SettingsSidebarList />;
+  if (pathname.startsWith('/admin')) return <AdminSidebarList />;
   return null;
 }
 
@@ -21,6 +23,7 @@ function getSectionTitle(pathname: string): string | null {
   if (pathname.startsWith('/users')) return 'USERS';
   if (pathname.startsWith('/audit')) return 'AUDIT LOG';
   if (pathname.startsWith('/settings')) return 'SETTINGS';
+  if (pathname.startsWith('/admin')) return 'ADMIN';
   return null;
 }
 

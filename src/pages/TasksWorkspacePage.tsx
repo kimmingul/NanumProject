@@ -1,7 +1,8 @@
 import { type ReactNode, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from 'devextreme-react/button';
-import { useProject } from '@/hooks';
+import { useProject, useProjectCrud } from '@/hooks';
+import { usePreferencesStore } from '@/lib/preferences-store';
 import { ScrollArrowOverlay } from '@/components/ScrollArrowOverlay';
 import GanttView, { type GanttActions } from '@/features/gantt/GanttView';
 import TasksView from '@/features/tasks/TasksView';
@@ -39,6 +40,7 @@ export default function TasksWorkspacePage(): ReactNode {
   const { projectId, tab } = useParams<{ projectId: string; tab?: string }>();
   const navigate = useNavigate();
   const { project, loading, refetch } = useProject(projectId);
+  const { updateProject } = useProjectCrud();
 
   // Redirect to last project or show empty state
   useEffect(() => {
@@ -57,7 +59,8 @@ export default function TasksWorkspacePage(): ReactNode {
   const timeActionsRef = useRef<TimeActions | undefined>(undefined);
   const workspaceContentRef = useRef<HTMLDivElement>(null);
 
-  const activeTab = tab || 'gantt';
+  const defaultView = usePreferencesStore((s) => s.preferences.defaultView);
+  const activeTab = tab || defaultView;
   const handleTabClick = (tabId: string) => {
     if (projectId) {
       navigate(`/tasks/${projectId}/${tabId}`);
@@ -99,7 +102,10 @@ export default function TasksWorkspacePage(): ReactNode {
     <div className="project-workspace">
       <div className="workspace-toolbar">
         <div className="workspace-toolbar-left">
-          {project.is_starred && <i className="dx-icon-favorites project-star"></i>}
+          <i
+            className={`dx-icon-favorites project-star${project.is_starred ? ' starred' : ''}`}
+            onClick={() => updateProject(project.id, { is_starred: !project.is_starred }).then(() => refetch())}
+          />
           <span className="workspace-project-name">{project.name}</span>
           <span className={`project-status-badge status-${project.status}`}>
             {statusLabels[project.status] || project.status}

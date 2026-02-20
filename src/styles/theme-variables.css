@@ -196,6 +196,25 @@
   --search-kbd-bg: rgba(0, 0, 0, 0.06);
   --search-kbd-border: rgba(0, 0, 0, 0.1);
   --search-kbd-text: #64748b;
+  --search-highlight-bg: #fef08a;
+
+  /* ---- Notifications ---- */
+  --notification-bg: #ffffff;
+  --notification-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+  --notification-hover-bg: #f1f5f9;
+  --notification-unread-bg: #eff6ff;
+  --notification-badge-bg: #ef4444;
+  --notification-badge-text: #ffffff;
+  --notification-time: #94a3b8;
+  --notification-icon-assignment: #3b82f6;
+  --notification-icon-comment: #8b5cf6;
+  --notification-icon-status: #22c55e;
+  --notification-icon-due: #f59e0b;
+
+  /* ---- Board Card Enhancements ---- */
+  --board-card-overdue: #ef4444;
+  --board-card-due-soon: #f59e0b;
+  --board-card-critical-border: #ef4444;
 }
 
 
@@ -394,6 +413,25 @@
   --search-kbd-bg: rgba(255, 255, 255, 0.08);
   --search-kbd-border: rgba(255, 255, 255, 0.15);
   --search-kbd-text: #94a3b8;
+  --search-highlight-bg: rgba(250, 204, 21, 0.3);
+
+  /* ---- Notifications ---- */
+  --notification-bg: #1e293b;
+  --notification-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+  --notification-hover-bg: #334155;
+  --notification-unread-bg: rgba(99, 102, 241, 0.1);
+  --notification-badge-bg: #ef4444;
+  --notification-badge-text: #ffffff;
+  --notification-time: #64748b;
+  --notification-icon-assignment: #60a5fa;
+  --notification-icon-comment: #a78bfa;
+  --notification-icon-status: #4ade80;
+  --notification-icon-due: #fbbf24;
+
+  /* ---- Board Card Enhancements ---- */
+  --board-card-overdue: #f87171;
+  --board-card-due-soon: #fbbf24;
+  --board-card-critical-border: #f87171;
 }
 
 /* ================================================= */

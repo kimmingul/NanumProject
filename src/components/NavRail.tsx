@@ -13,11 +13,12 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { path: '/dashboard', icon: 'home', label: 'Dashboard' },
-  { path: '/projects', icon: 'folder', label: 'Projects' },
-  { path: '/tasks', icon: 'todo', label: 'Tasks' },
-  { path: '/users', icon: 'group', label: 'Users' },
+  { path: '/dashboard', icon: 'datatrending', label: 'Dashboard' },
+  { path: '/projects', icon: 'activefolder', label: 'Projects' },
+  { path: '/tasks', icon: 'clipboardtasklist', label: 'Tasks' },
+  { path: '/users', icon: 'user', label: 'Users' },
   { path: '/settings', icon: 'preferences', label: 'Settings', bottom: true },
+  { path: '/admin', icon: 'lock', label: 'Admin', adminOnly: true, bottom: true },
 ];
 
 export function NavRail(): ReactNode {
@@ -31,6 +32,7 @@ export function NavRail(): ReactNode {
     if (path === '/tasks') return location.pathname.startsWith('/tasks');
     if (path === '/users') return location.pathname.startsWith('/users');
     if (path === '/settings') return location.pathname.startsWith('/settings');
+    if (path === '/admin') return location.pathname.startsWith('/admin');
     return location.pathname === path;
   };
 

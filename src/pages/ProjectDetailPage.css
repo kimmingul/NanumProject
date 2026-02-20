@@ -35,6 +35,16 @@
 }
 
 .project-star {
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.project-star:hover {
+  color: var(--star-color);
+}
+
+.project-star.starred {
   color: var(--star-color);
 }
 
