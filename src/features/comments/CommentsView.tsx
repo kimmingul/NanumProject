@@ -142,7 +142,19 @@ export default function CommentsView({
     if (!newMessage.trim()) return;
     setSending(true);
     try {
-      await addComment(newMessage.trim(), Array.from(mentionedIds));
+      // Auto-detect @mentions from text in addition to dropdown-selected ones
+      const allMentionedIds = new Set(mentionedIds);
+      const mentionMatches = newMessage.match(/@(\S+)/g);
+      if (mentionMatches) {
+        for (const mention of mentionMatches) {
+          const name = mention.slice(1); // remove @
+          const match = candidates.find(
+            (c) => c.display === name || c.display.startsWith(name),
+          );
+          if (match) allMentionedIds.add(match.user_id);
+        }
+      }
+      await addComment(newMessage.trim(), Array.from(allMentionedIds));
       setNewMessage('');
       setMentionedIds(new Set());
       setMentionQuery(null);
