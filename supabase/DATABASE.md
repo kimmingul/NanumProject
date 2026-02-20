@@ -20,8 +20,9 @@ Supabase (PostgreSQL) 기반 멀티테넌트 프로젝트 관리 서비스.
 | `012_project_templates.sql` | clone_project_from_template RPC: 프로젝트 복제 (아이템/의존성 포함, parent_id 매핑) |
 | `013_user_preferences.sql` | profiles.preferences JSONB 컬럼 추가 |
 | `014_project_manager.sql` | projects.manager_id 컬럼 추가 + 기존 데이터 backfill |
+| `015_user_project_stars.sql` | user_project_stars 테이블 (사용자별 프로젝트 별표) + projects.is_starred 컬럼 제거 |
 
-> 실행 순서: 001 → 002 → 003 → 004 → 005 → 006 → 007 → 008 → 009 → 010 → 011 → 012 → 013 → 014
+> 실행 순서: 001 → 002 → 003 → 004 → 005 → 006 → 007 → 008 → 009 → 010 → 011 → 012 → 013 → 014 → 015
 
 ---
 
@@ -37,22 +38,23 @@ audit_logs         감사 로그 (immutable)
 sessions           활성 세션 관리
 ```
 
-### PM 모듈 (12개)
+### PM 모듈 (13개)
 
 ```
-projects           프로젝트 메타데이터 (manager_id: 프로젝트 매니저)
-project_members    프로젝트-사용자 매핑 (권한 관리)
-project_items      ★ 통합 아이템 (그룹/태스크/마일스톤)
-task_assignees     아이템-담당자 할당
-task_dependencies  아이템 간 의존성 (Gantt 화살표)
-item_links         아이템 간 의미적 링크 (blocks/related_to/duplicates)
-comments           코멘트 (다형성: project/item 대상)
-documents          문서 메타데이터
-document_versions  문서 버전 히스토리
-time_entries       시간 추적
-checklist_items    체크리스트
-activity_log       활동 로그 (immutable)
-notifications      알림 (할당/멘션/상태변경/기한)
+projects              프로젝트 메타데이터 (manager_id: 프로젝트 매니저)
+project_members       프로젝트-사용자 매핑 (권한 관리)
+project_items         ★ 통합 아이템 (그룹/태스크/마일스톤)
+user_project_stars    사용자별 프로젝트 별표 (UNIQUE: user_id + project_id)
+task_assignees        아이템-담당자 할당
+task_dependencies     아이템 간 의존성 (Gantt 화살표)
+item_links            아이템 간 의미적 링크 (blocks/related_to/duplicates)
+comments              코멘트 (다형성: project/item 대상)
+documents             문서 메타데이터
+document_versions     문서 버전 히스토리
+time_entries          시간 추적
+checklist_items       체크리스트
+activity_log          활동 로그 (immutable)
+notifications         알림 (할당/멘션/상태변경/기한)
 ```
 
 ---
@@ -95,6 +97,7 @@ tenants ────────────────────────
                                                       │
 projects ←──── tenant_id ────────────────────────────┘
    │
+   ├── user_project_stars ──→ auth.users (사용자별 별표)
    ├── project_members ──→ auth.users
    │
    ├── project_items (self-ref: parent_id)
@@ -175,6 +178,7 @@ projects ←──── tenant_id ───────────────
 | document_versions | 멤버 (documents JOIN) | 멤버 |
 | time_entries | 멤버 | 본인만 |
 | checklist_items | 멤버 (project_items JOIN) | 멤버 |
+| user_project_stars | 본인만 | 본인만 (INSERT/DELETE) |
 | activity_log | 멤버 또는 admin | 시스템만 (immutable) |
 
 > **테넌트 admin**: `profiles.role = 'admin'`인 사용자는 project_members에 등록되지 않아도 테넌트 내 모든 프로젝트 데이터를 조회/수정할 수 있음.

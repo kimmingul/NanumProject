@@ -6,14 +6,14 @@ export function ProjectSidebarList(): ReactNode {
   const navigate = useNavigate();
   const { projectId } = useParams();
   const { projects, loading, refetch } = useProjects({ status: 'active' });
-  const { updateProject } = useProjectCrud();
+  const { toggleStar } = useProjectCrud();
 
   const handleStarClick = useCallback(
-    (e: React.MouseEvent, id: string, isStarred: boolean) => {
+    (e: React.MouseEvent, id: string) => {
       e.stopPropagation();
-      updateProject(id, { is_starred: !isStarred }).then(() => refetch());
+      toggleStar(id).then(() => refetch());
     },
-    [updateProject, refetch],
+    [toggleStar, refetch],
   );
 
   if (loading) {
@@ -38,7 +38,7 @@ export function ProjectSidebarList(): ReactNode {
         >
           <i
             className={`dx-icon-favorites sidebar-star${p.is_starred ? ' starred' : ''}`}
-            onClick={(e) => handleStarClick(e, p.id, p.is_starred)}
+            onClick={(e) => handleStarClick(e, p.id)}
           />
           <span className="sidebar-item-name">{p.name}</span>
         </div>

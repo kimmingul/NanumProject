@@ -65,7 +65,7 @@ interface EnrichedProject extends Project {
 export default function ProjectListPage(): ReactNode {
   const navigate = useNavigate();
   const { projects, loading, error, refetch } = useProjects({ status: 'all' });
-  const { createProject, updateProject, cloneFromTemplate } = useProjectCrud();
+  const { createProject, cloneFromTemplate, toggleStar } = useProjectCrud();
   const dateFormat = usePreferencesStore((s) => s.preferences.dateFormat);
   const dxDateFmt = useMemo(() => getDxDateFormat(), [dateFormat]);
   const dxDateTimeFmt = useMemo(() => getDxDateTimeFormat(), [dateFormat]);
@@ -238,7 +238,7 @@ export default function ProjectListPage(): ReactNode {
                     className={`dx-icon-favorites project-star${data.data.is_starred ? ' starred' : ''}`}
                     onClick={(e) => {
                       e.stopPropagation();
-                      updateProject(data.data.id, { is_starred: !data.data.is_starred }).then(() => refetch());
+                      toggleStar(data.data.id).then(() => refetch());
                     }}
                   />
                   <span>{data.value}</span>

@@ -14,7 +14,6 @@ export interface CreateProjectInput {
 }
 
 export interface UpdateProjectInput extends Partial<Omit<CreateProjectInput, 'manager_id'>> {
-  is_starred?: boolean | undefined;
   is_active?: boolean | undefined;
   is_template?: boolean | undefined;
   manager_id?: string | null | undefined;
@@ -99,5 +98,37 @@ export function useProjectCrud() {
     [],
   );
 
-  return { createProject, updateProject, deleteProject, cloneFromTemplate };
+  const toggleStar = useCallback(
+    async (projectId: string): Promise<void> => {
+      if (!profile?.tenant_id || !profile?.user_id) throw new Error('Not authenticated');
+
+      // Check if already starred
+      const { data: existing } = await supabase
+        .from('user_project_stars')
+        .select('id')
+        .eq('user_id', profile.user_id)
+        .eq('project_id', projectId)
+        .maybeSingle();
+
+      if (existing) {
+        const { error } = await supabase
+          .from('user_project_stars')
+          .delete()
+          .eq('id', existing.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('user_project_stars')
+          .insert({
+            tenant_id: profile.tenant_id,
+            user_id: profile.user_id,
+            project_id: projectId,
+          });
+        if (error) throw error;
+      }
+    },
+    [profile],
+  );
+
+  return { createProject, updateProject, deleteProject, cloneFromTemplate, toggleStar };
 }

@@ -139,7 +139,6 @@ export interface Database {
           end_date: string | null;
           work_days: number[];
           is_template: boolean;
-          is_starred: boolean;
           has_hours_enabled: boolean;
           lock_milestone_dates: boolean;
           allow_scheduling_on_holidays: boolean;
@@ -161,7 +160,6 @@ export interface Database {
           end_date?: string | null;
           work_days?: number[];
           is_template?: boolean;
-          is_starred?: boolean;
           has_hours_enabled?: boolean;
           settings?: unknown;
           created_by?: string | null;
@@ -174,7 +172,6 @@ export interface Database {
           status?: string;
           start_date?: string | null;
           end_date?: string | null;
-          is_starred?: boolean;
           has_hours_enabled?: boolean;
           is_active?: boolean;
           settings?: unknown;
@@ -511,6 +508,22 @@ export interface Database {
           completed_at?: string | null;
           is_active?: boolean;
         };
+        Relationships: [];
+      };
+      user_project_stars: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          user_id: string;
+          project_id: string;
+          created_at: string;
+        };
+        Insert: {
+          tenant_id: string;
+          user_id: string;
+          project_id: string;
+        };
+        Update: Record<string, never>;
         Relationships: [];
       };
       activity_log: {

@@ -40,7 +40,7 @@ export default function TasksWorkspacePage(): ReactNode {
   const { projectId, tab } = useParams<{ projectId: string; tab?: string }>();
   const navigate = useNavigate();
   const { project, loading, refetch } = useProject(projectId);
-  const { updateProject } = useProjectCrud();
+  const { toggleStar } = useProjectCrud();
 
   // Redirect to last project or show empty state
   useEffect(() => {
@@ -104,7 +104,7 @@ export default function TasksWorkspacePage(): ReactNode {
         <div className="workspace-toolbar-left">
           <i
             className={`dx-icon-favorites project-star${project.is_starred ? ' starred' : ''}`}
-            onClick={() => updateProject(project.id, { is_starred: !project.is_starred }).then(() => refetch())}
+            onClick={() => toggleStar(project.id).then(() => refetch())}
           />
           <span className="workspace-project-name">{project.name}</span>
           <span className={`project-status-badge status-${project.status}`}>

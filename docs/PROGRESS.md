@@ -624,6 +624,41 @@
 - **스타일**: mention-dropdown (absolute positioning above TextArea), mention-item (avatar + name), mention highlight
 - **DB 변경 없음** — 기존 인프라 활용 (`comments.mentioned_user_ids`, `notify_on_comment_mention()` 트리거, `comment_mention` enum)
 
+### Phase 39: 종합 문서화 + 프로젝트 정리
+
+- **신규 문서 8개** (`docs/`):
+  - `SYSTEM-OVERVIEW.md` — 시스템 개요, 기술 스택, 아키텍처 다이어그램, 디렉토리 구조, 환경 변수
+  - `FRONTEND-ARCHITECTURE.md` — 라우팅 (17개 경로 + 6개 리다이렉트), 레이아웃 시스템, Zustand 4개 스토어, 공유/페이지/피처 컴포넌트
+  - `HOOKS-REFERENCE.md` — 21개 커스텀 훅 API 레퍼런스 (시그니처, Supabase 테이블/RPC, 사용 컴포넌트, 주의사항)
+  - `DATABASE-GUIDE.md` — DB 설계 원칙, 마이그레이션 14개, RPC 함수 17개, 트리거, Enum 11개, Storage 버킷
+  - `SECURITY-MODEL.md` — 인증 흐름, 역할 체계, RLS 정책 매트릭스 (18개 테이블 × CRUD), 데드락 방지
+  - `UI-DESIGN-SYSTEM.md` — CSS 변수 시스템 (12개 카테고리), Light/Dark 테마, Density, DevExtreme 가이드, 반응형
+  - `DEPLOYMENT.md` — 개발 환경, Vite 빌드, Vercel 배포, Supabase 설정, TeamGantt 마이그레이션
+  - `FUTURE-ROADMAP.md` — 미구현 기능 7개, 기술 부채, 성능/UX 개선, 우선순위 매트릭스
+- **`docs/ARCHITECTURE.md`**: 320줄 → 54줄로 축약, 8개 신규 문서를 참조하는 인덱스 역할로 변경
+- **불필요 파일 정리**:
+  - `database/` 폴더 삭제 (supabase/migrations/와 중복된 초기 스키마 실험본)
+  - `scripts/migrate.ts`, `scripts/migrate.mjs` 삭제 (미사용 마이그레이션 스크립트)
+  - `TeamGantt프로젝트들.xlsx`, `teamgantt 가져오기 프롬프트.txt` 삭제 (임시 파일)
+- **총 3,669줄** 문서 생성, 코드 변경 없음
+
+### Phase 40: Per-User Project Stars
+
+- **기존 문제**: `projects.is_starred`가 프로젝트 공유 속성이라 한 사용자의 별표가 모든 사용자에게 공유됨. UPDATE RLS가 admin 권한을 요구하여 일반 멤버는 별표 불가.
+- **해결**: `user_project_stars` 별도 테이블로 전환 — 사용자별 독립 별표 관리
+- **DB 변경** (`015_user_project_stars.sql`):
+  - `user_project_stars` 테이블 생성 (UNIQUE: user_id + project_id)
+  - RLS: 본인 별표만 SELECT/INSERT/DELETE (UPDATE 불필요)
+  - 기존 `projects.is_starred` 데이터를 프로젝트 생성자에게 마이그레이션
+  - `projects.is_starred` 컬럼 제거
+- **타입**: `supabase.ts`에서 projects Row/Insert/Update `is_starred` 제거, `user_project_stars` 타입 추가
+- **Hooks**:
+  - `useProjects`: projects + user_project_stars 병렬 조회 → `is_starred` 클라이언트 주입 + 정렬
+  - `useProject`: 단일 프로젝트 조회 시 star 존재 여부 확인
+  - `useProjectCrud`: `toggleStar(projectId)` 함수 추가 (존재하면 DELETE, 없으면 INSERT)
+- **컴포넌트 3곳** 별표 토글 호출을 `toggleStar(id)` 로 변경:
+  - `ProjectSidebarList.tsx`, `ProjectListPage.tsx`, `TasksWorkspacePage.tsx`
+
 ### Bugfix: 새로고침 시 데이터 미로딩 (Supabase Auth 데드락)
 
 **증상**: 페이지 새로고침(F5) 시 프로젝트 목록, 대시보드 통계 등 모든 데이터가 로드되지 않음. 콘솔 에러 없이 빈 화면 표시.
