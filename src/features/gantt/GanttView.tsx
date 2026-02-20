@@ -54,18 +54,18 @@ const typeIconMap: Record<string, string> = {
 };
 
 export default function GanttView({ projectId, actionsRef }: GanttViewProps): ReactNode {
+  // Popup state (declared early — used by useProjectItems paused flag)
+  const [popupVisible, setPopupVisible] = useState(false);
+  const [popupItemId, setPopupItemId] = useState<string | null>(null);
+
   const { items, dependencies, resources, assignments, commentCounts, loading, error, refetch } =
-    useProjectItems(projectId);
+    useProjectItems(projectId, popupVisible);
   const profile = useAuthStore((s) => s.profile);
   const setSelectedTaskId = usePMStore((s) => s.setSelectedTaskId);
   const selectedTaskId = usePMStore((s) => s.selectedTaskId);
   const dateFormat = usePreferencesStore((s) => s.preferences.dateFormat);
   const dxDateFmt = useMemo(() => getDxDateFormat(), [dateFormat]);
   const ganttRef = useRef<GanttRef>(null);
-
-  // Popup state
-  const [popupVisible, setPopupVisible] = useState(false);
-  const [popupItemId, setPopupItemId] = useState<string | null>(null);
 
   // Expose add/delete actions to parent via ref
   useEffect(() => {

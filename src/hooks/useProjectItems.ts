@@ -23,7 +23,7 @@ interface UseProjectItemsResult {
   refetch: () => Promise<void>;
 }
 
-export function useProjectItems(projectId: string | undefined): UseProjectItemsResult {
+export function useProjectItems(projectId: string | undefined, paused?: boolean): UseProjectItemsResult {
   const [items, setItems] = useState<ProjectItem[]>([]);
   const [dependencies, setDependencies] = useState<TaskDependency[]>([]);
   const [resources, setResources] = useState<ProjectMemberResource[]>([]);
@@ -122,7 +122,7 @@ export function useProjectItems(projectId: string | undefined): UseProjectItemsR
     fetchData();
   }, [fetchData]);
 
-  useAutoRefresh(fetchData, 30_000, !!projectId);
+  useAutoRefresh(fetchData, 30_000, !!projectId && !paused);
 
   return { items, dependencies, resources, assignments, commentCounts, loading, error, refetch: fetchData };
 }
