@@ -203,6 +203,7 @@ export default function CommentsView({
               <TextArea
                 value={newMessage}
                 onValueChanged={handleValueChanged}
+                valueChangeEvent="input"
                 onKeyDown={handleKeyDown}
                 placeholder="Write a comment... (Ctrl+Enter to send, @ to mention)"
                 stylingMode="outlined"
