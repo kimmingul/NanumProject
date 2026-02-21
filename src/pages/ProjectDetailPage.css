@@ -5,7 +5,7 @@
   height: 100%;
 }
 
-/* Workspace Toolbar */
+/* Workspace Toolbar — matches my-tasks-header style */
 .workspace-toolbar {
   display: flex;
   align-items: center;
@@ -13,8 +13,8 @@
   height: 40px;
   min-height: 40px;
   padding: 0 12px;
-  background: var(--toolbar-bg);
-  border-bottom: 1px solid var(--toolbar-border);
+  background: var(--sidebar-bg);
+  border-bottom: 1px solid var(--sidebar-border);
   gap: 12px;
 }
 
