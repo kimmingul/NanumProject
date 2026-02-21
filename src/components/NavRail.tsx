@@ -14,8 +14,8 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { path: '/dashboard', icon: 'datatrending', label: 'Dashboard' },
-  { path: '/projects', icon: 'activefolder', label: 'Projects' },
   { path: '/my-tasks', icon: 'todo', label: 'My Tasks' },
+  { path: '/projects', icon: 'activefolder', label: 'Projects' },
   { path: '/tasks', icon: 'clipboardtasklist', label: 'Tasks' },
   { path: '/users', icon: 'user', label: 'Users' },
   { path: '/settings', icon: 'preferences', label: 'Settings', bottom: true },
