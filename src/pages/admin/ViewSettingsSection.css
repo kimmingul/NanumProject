@@ -1,39 +1,5 @@
-.view-settings-section {
-  display: flex;
-  gap: 24px;
-  flex: 1; /* Fill available space from admin-content */
-  min-height: 0; /* Allow shrinking */
-  overflow: hidden;
-}
-
-/* Sidebar */
-.view-settings-sidebar {
-  width: 140px;
-  flex-shrink: 0;
-  border-right: 1px solid var(--border-color, #e2e8f0);
-  padding-right: 16px;
-  overflow-y: auto;
-}
-
-.view-settings-sidebar-item {
-  padding: 10px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 13px;
-  color: var(--text-secondary, #475569);
-  transition: background 0.15s;
-  margin-bottom: 4px;
-}
-
-.view-settings-sidebar-item:hover {
-  background: var(--bg-hover, #f1f5f9);
-}
-
-.view-settings-sidebar-item.active {
-  background: var(--primary-bg, #eff6ff);
-  color: var(--primary-color, #1d4ed8);
-  font-weight: 600;
-}
+/* View Settings Section
+   Uses admin-sections.css common styles (.admin-section-layout, .admin-section-sidebar) */
 
 /* Main Editor */
 .view-settings-main {
@@ -397,24 +363,7 @@
 
 /* Responsive: stack on narrow screens */
 @media (max-width: 900px) {
-  .view-settings-section {
-    flex-direction: column;
-  }
-
-  .view-settings-sidebar {
-    width: 100%;
-    border-right: none;
-    border-bottom: 1px solid var(--border-color, #e2e8f0);
-    padding-right: 0;
-    padding-bottom: 12px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-  }
-
-  .view-settings-sidebar-item {
-    margin-bottom: 0;
-  }
+  /* Uses admin-sections.css responsive styles for sidebar */
 
   .column-list-header,
   .column-item {

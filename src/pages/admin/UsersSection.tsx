@@ -729,42 +729,20 @@ export default function UsersSection(): ReactNode {
           )}
         />
 
-        <Column dataField="email" caption="Email" width={250} />
-        <Column dataField="full_name" caption="Full Name" width={180} />
-        <Column dataField="department" caption="Department" width={140} />
-        <Column dataField="position" caption="Position" width={140} />
+        <Column dataField="full_name" caption="Name" width={80} />
+        <Column dataField="department" caption="Department" width={120} />
 
         <Column
           dataField="role"
           caption="Role"
-          width={100}
+          width={90}
           cellRender={(data: { value: string }) => (
             <span className={`role-badge role-${data.value}`}>{data.value}</span>
           )}
         />
 
-        {showStatusColumn && (
-          <Column
-            dataField="employment_status"
-            caption="Status"
-            width={100}
-            cellRender={(data: { value: EmploymentStatus }) => {
-              const statusLabels: Record<EmploymentStatus, string> = {
-                active: 'Active',
-                on_leave: 'On Leave',
-                terminated: 'Terminated',
-              };
-              const statusClass = data.value || 'active';
-              return (
-                <span className={`status-badge status-${statusClass}`}>
-                  {statusLabels[data.value] || 'Active'}
-                </span>
-              );
-            }}
-          />
-        )}
-
-        <Column dataField="last_login_at" caption="Last Login" dataType="datetime" width={160} />
+        <Column dataField="position" caption="Position" width={80} />
+        <Column dataField="email" caption="Email" width={120} />
 
         <Column
           type="buttons"
@@ -1005,7 +983,6 @@ export default function UsersSection(): ReactNode {
             tabIndex={0}
             onKeyDown={(e) => e.key === 'Enter' && setActiveTab(tab.key)}
           >
-            <i className={`${tab.icon} sidebar-tab-icon`} />
             {tab.label}
           </div>
         ))}

@@ -1,42 +1,8 @@
 /* Enum Config Section
    Uses admin-sections.css common styles */
 
-.enum-config-section {
-  display: flex;
-  gap: 24px;
-  flex: 1; /* Fill available space from admin-content */
-  min-height: 0; /* Allow shrinking */
-  overflow: hidden;
-}
-
-/* Sidebar */
-.enum-config-sidebar {
-  width: 140px;
-  flex-shrink: 0;
-  border-right: 1px solid var(--border-color, #e2e8f0);
-  padding-right: 16px;
-  overflow-y: auto;
-}
-
-.enum-config-sidebar-item {
-  padding: 10px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 13px;
-  color: var(--text-secondary, #475569);
-  transition: background 0.15s;
-  margin-bottom: 4px;
-}
-
-.enum-config-sidebar-item:hover {
-  background: var(--bg-hover, #f1f5f9);
-}
-
-.enum-config-sidebar-item.active {
-  background: var(--primary-bg, #eff6ff);
-  color: var(--primary-color, #1d4ed8);
-  font-weight: 600;
-}
+/* Enum Config Section
+   Uses admin-sections.css common styles (.admin-section-layout, .admin-section-sidebar) */
 
 /* Editor Main */
 .enum-config-editor {
@@ -160,25 +126,4 @@
   width: 100%;
 }
 
-/* Responsive */
-@media (max-width: 900px) {
-  .enum-config-section {
-    flex-direction: column;
-    overflow-y: auto;
-  }
-
-  .enum-config-sidebar {
-    width: 100%;
-    border-right: none;
-    border-bottom: 1px solid var(--border-color, #e2e8f0);
-    padding-right: 0;
-    padding-bottom: 12px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-  }
-
-  .enum-config-sidebar-item {
-    margin-bottom: 0;
-  }
-}
+/* Responsive - uses admin-sections.css responsive styles */

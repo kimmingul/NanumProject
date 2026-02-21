@@ -245,13 +245,13 @@ export default function ViewSettingsSection(): ReactNode {
   const gridSettings = editConfig.gridSettings || {};
 
   return (
-    <div className="view-settings-section">
+    <div className="view-settings-section admin-section-layout">
       {/* Sidebar */}
-      <div className="view-settings-sidebar">
+      <div className="admin-section-sidebar">
         {VIEWS.map((view) => (
           <div
             key={view.key}
-            className={`view-settings-sidebar-item ${activeView === view.key ? 'active' : ''}`}
+            className={`admin-section-sidebar-item ${activeView === view.key ? 'active' : ''}`}
             onClick={() => setActiveView(view.key)}
             role="button"
             tabIndex={0}

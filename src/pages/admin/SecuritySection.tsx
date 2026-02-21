@@ -195,7 +195,6 @@ export default function SecuritySection(): ReactNode {
         <div className="admin-section-sidebar">
           {TABS.map((tab) => (
             <div key={tab.key} className="admin-section-sidebar-item">
-              <i className={`${tab.icon} sidebar-tab-icon`} />
               {tab.label}
             </div>
           ))}
@@ -224,7 +223,6 @@ export default function SecuritySection(): ReactNode {
             tabIndex={0}
             onKeyDown={(e) => e.key === 'Enter' && setActiveTab(tab.key)}
           >
-            <i className={`${tab.icon} sidebar-tab-icon`} />
             {tab.label}
           </div>
         ))}

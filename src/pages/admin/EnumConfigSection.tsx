@@ -126,12 +126,12 @@ export default function EnumConfigSection(): ReactNode {
   }, [tenantId, activeCategory, editOptions, updateOptions]);
 
   return (
-    <div className="enum-config-section">
-      <div className="enum-config-sidebar">
+    <div className="enum-config-section admin-section-layout">
+      <div className="admin-section-sidebar">
         {CATEGORIES.map((cat) => (
           <div
             key={cat.key}
-            className={`enum-config-sidebar-item ${activeCategory === cat.key ? 'active' : ''}`}
+            className={`admin-section-sidebar-item ${activeCategory === cat.key ? 'active' : ''}`}
             onClick={() => setActiveCategory(cat.key)}
             role="button"
             tabIndex={0}
