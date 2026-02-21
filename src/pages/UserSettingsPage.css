@@ -1,26 +1,39 @@
 .user-settings-page {
-  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
-.user-settings-page .page-header {
-  margin-bottom: 2rem;
+/* Breadcrumb — matches context-sidebar-header style */
+.settings-breadcrumb {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  min-height: 40px;
+  padding: 0 14px;
+  background: var(--sidebar-bg);
+  border-bottom: 1px solid var(--sidebar-border);
+  gap: 6px;
 }
 
-.user-settings-page .page-header h1 {
-  margin: 0 0 0.5rem 0;
-  font-size: 1.75rem;
-  color: var(--text-primary);
-  font-weight: 700;
+.settings-breadcrumb .breadcrumb-root,
+.settings-breadcrumb .breadcrumb-current {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--sidebar-title);
 }
 
-.user-settings-page .page-header p {
-  margin: 0;
-  color: var(--text-secondary);
-  font-size: 0.95rem;
+.settings-breadcrumb .breadcrumb-sep {
+  font-size: 10px;
+  color: var(--text-tertiary);
 }
 
 .settings-content {
-  max-width: 100%;
+  flex: 1;
+  padding: 1.5rem;
+  overflow-y: auto;
 }
 
 /* Theme option description text */

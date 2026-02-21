@@ -47,7 +47,8 @@
       "mcp__chrome-devtools__performance_stop_trace",
       "mcp__chrome-devtools__performance_analyze_insight",
       "mcp__claude_ai_DevExpressDocs__devexpress_docs_search",
-      "mcp__claude_ai_DevExpressDocs__devexpress_docs_get_content"
+      "mcp__claude_ai_DevExpressDocs__devexpress_docs_get_content",
+      "mcp__claude_ai_Supabase__list_projects"
     ]
   }
 }

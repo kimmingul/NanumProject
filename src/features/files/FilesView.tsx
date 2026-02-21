@@ -6,6 +6,7 @@ import { Popup } from 'devextreme-react/popup';
 import { useDocuments, type DocumentWithVersion } from '@/hooks/useDocuments';
 import { useAuthStore } from '@/lib/auth-store';
 import type { DocumentVersion } from '@/types';
+import { DEFAULT_GRID_SETTINGS } from '@/lib/view-config-store';
 import './FilesView.css';
 
 export interface FileActions {
@@ -141,11 +142,12 @@ export default function FilesView({ projectId, actionsRef }: FilesViewProps): Re
           dataSource={documents}
           keyExpr="id"
           showBorders={true}
-          showRowLines={true}
-          showColumnLines={false}
+          showRowLines={DEFAULT_GRID_SETTINGS.showRowLines ?? true}
+          showColumnLines={DEFAULT_GRID_SETTINGS.showColumnLines ?? false}
+          rowAlternationEnabled={DEFAULT_GRID_SETTINGS.rowAlternationEnabled ?? true}
           hoverStateEnabled={true}
           columnAutoWidth={true}
-          wordWrapEnabled={true}
+          wordWrapEnabled={DEFAULT_GRID_SETTINGS.wordWrapEnabled ?? false}
         >
           <Column
             caption="File Name"

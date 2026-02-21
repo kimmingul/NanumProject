@@ -12,6 +12,7 @@ import { useProjectMembers } from '@/hooks/useProjectMembers';
 import { useEnumOptions } from '@/hooks/useEnumOptions';
 import { useAuthStore } from '@/lib/auth-store';
 import type { Project, MemberPermission } from '@/types';
+import { DEFAULT_GRID_SETTINGS } from '@/lib/view-config-store';
 import './ProjectSettingsView.css';
 
 interface ProjectSettingsViewProps {
@@ -192,8 +193,9 @@ export default function ProjectSettingsView({
             dataSource={members}
             keyExpr="id"
             showBorders={true}
-            showRowLines={true}
-            showColumnLines={false}
+            showRowLines={DEFAULT_GRID_SETTINGS.showRowLines ?? true}
+            showColumnLines={DEFAULT_GRID_SETTINGS.showColumnLines ?? false}
+            rowAlternationEnabled={DEFAULT_GRID_SETTINGS.rowAlternationEnabled ?? true}
             hoverStateEnabled={true}
             columnAutoWidth={true}
             noDataText={membersLoading ? 'Loading members...' : 'No members yet'}

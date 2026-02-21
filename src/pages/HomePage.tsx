@@ -1,55 +1,77 @@
 import { type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from 'devextreme-react';
+import '@/styles/auth-common.css';
 import './HomePage.css';
 
 export default function HomePage(): ReactNode {
   const navigate = useNavigate();
 
   return (
-    <div className="home-page">
-      <div className="hero-section">
-        <div className="hero-content">
-          <h1>Welcome to Nanum Project</h1>
-          <p className="subtitle">Clinical Trial Project Management</p>
-          <p className="description">
-            Comprehensive project management for clinical trials.
-            Gantt charts, task boards, team collaboration, and audit logging built-in.
+    <div className="auth-page home-page">
+      {/* Decorative elements */}
+      <div className="auth-decoration auth-decoration--1" />
+      <div className="auth-decoration auth-decoration--2" />
+
+      <div className="home-hero">
+        <div className="home-hero-content">
+          {/* Badge */}
+          <div className="home-badge">
+            <span className="home-badge-dot" />
+            <span>Built for Modern Teams</span>
+          </div>
+
+          {/* Headline */}
+          <h1 className="home-headline">
+            Your Projects,{' '}
+            <span className="home-headline-highlight">Perfectly Organized</span>
+          </h1>
+
+          {/* Subtitle */}
+          <p className="home-subtitle">
+            From planning to completion, stay in control. <br />
+            Visual timelines, task boards, real-time collaboration, and secure access for your entire team.
           </p>
-          
-          <div className="cta-buttons">
+
+          {/* CTA Buttons */}
+          <div className="home-cta">
             <Button
               text="Get Started"
-              type="default"
-              stylingMode="contained"
+              className="primary-cta"
               onClick={() => navigate('/signup')}
-              width={160}
             />
             <Button
               text="Sign In"
-              type="normal"
-              stylingMode="outlined"
+              className="secondary-cta"
               onClick={() => navigate('/login')}
-              width={160}
             />
           </div>
 
-          <div className="features">
-            <div className="feature">
-              <i className="dx-icon-check"></i>
-              <span>Multi-Tenancy</span>
+          {/* Features */}
+          <div className="home-features">
+            <div className="home-feature">
+              <div className="home-feature-icon">
+                <i className="dx-icon-group" />
+              </div>
+              <span className="home-feature-text">Multi-Tenancy</span>
             </div>
-            <div className="feature">
-              <i className="dx-icon-check"></i>
-              <span>Role-Based Access Control</span>
+            <div className="home-feature">
+              <div className="home-feature-icon">
+                <i className="dx-icon-key" />
+              </div>
+              <span className="home-feature-text">Role-Based Access</span>
             </div>
-            <div className="feature">
-              <i className="dx-icon-check"></i>
-              <span>Multi-Factor Authentication</span>
+            <div className="home-feature">
+              <div className="home-feature-icon">
+                <i className="dx-icon-lock" />
+              </div>
+              <span className="home-feature-text">Multi-Factor Auth</span>
             </div>
-            <div className="feature">
-              <i className="dx-icon-check"></i>
-              <span>Comprehensive Audit Logs</span>
+            <div className="home-feature">
+              <div className="home-feature-icon">
+                <i className="dx-icon-selectall" />
+              </div>
+              <span className="home-feature-text">Audit Logs</span>
             </div>
           </div>
         </div>

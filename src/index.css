@@ -45,3 +45,13 @@ button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
+
+/* Hide scrollbars globally (scroll functionality preserved) */
+* {
+  scrollbar-width: none;           /* Firefox */
+  -ms-overflow-style: none;        /* IE/Edge */
+}
+
+*::-webkit-scrollbar {
+  display: none;                   /* Chrome, Safari, Opera */
+}

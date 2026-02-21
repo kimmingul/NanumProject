@@ -27,6 +27,7 @@ interface UseProjectItemsResult {
   loading: boolean;
   error: string | null;
   refetch: () => Promise<void>;
+  refetchAssignees: () => Promise<void>;
   moveItem: (updates: MoveItemUpdate[]) => Promise<void>;
 }
 
@@ -157,6 +158,16 @@ export function useProjectItems(projectId: string | undefined, paused?: boolean)
     fetchData();
   }, [fetchData]);
 
+  const refetchAssignees = useCallback(async () => {
+    if (!projectId) return;
+    const { data, error: err } = await supabase
+      .from('task_assignees')
+      .select('*')
+      .eq('project_id', projectId)
+      .eq('is_active', true);
+    if (!err) setAssignments((data as TaskAssignee[]) ?? []);
+  }, [projectId]);
+
   const moveItem = useCallback(async (updates: MoveItemUpdate[]) => {
     if (!projectId) return;
 
@@ -202,5 +213,5 @@ export function useProjectItems(projectId: string | undefined, paused?: boolean)
 
   useAutoRefresh(fetchData, 30_000, !!projectId && !paused);
 
-  return { items, dependencies, resources, assignments, commentCounts, loading, error, refetch: fetchData, moveItem };
+  return { items, dependencies, resources, assignments, commentCounts, loading, error, refetch: fetchData, refetchAssignees, moveItem };
 }

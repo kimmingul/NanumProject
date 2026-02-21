@@ -64,13 +64,43 @@
   color: var(--header-text);
 }
 
+.ide-app-branding {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.ide-app-logo {
+  height: 24px;
+  width: auto;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
 .ide-app-title {
+  position: absolute;
+  left: calc(100% + 4px);
   font-weight: 700;
   font-size: 14px;
   color: var(--header-text);
-  cursor: pointer;
-  margin-right: 8px;
   white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.ide-app-branding:hover .ide-app-title {
+  opacity: 1;
+}
+
+/* When no logo, always show title inline */
+.ide-app-branding:not(:has(.ide-app-logo)) .ide-app-title {
+  position: static;
+  opacity: 1;
+  pointer-events: auto;
 }
 
 /* Center: Search trigger */

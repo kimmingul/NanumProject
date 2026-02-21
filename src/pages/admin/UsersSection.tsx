@@ -11,6 +11,7 @@ import {
   Toolbar,
   Item,
 } from 'devextreme-react/data-grid';
+import { TreeList, Column as TreeColumn } from 'devextreme-react/tree-list';
 import { Popup } from 'devextreme-react/popup';
 import { TextBox } from 'devextreme-react/text-box';
 import { SelectBox } from 'devextreme-react/select-box';
@@ -21,8 +22,38 @@ import { useAuthStore } from '@/lib/auth-store';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserManagement } from '@/hooks/useUserManagement';
 import { useEnumOptions } from '@/hooks/useEnumOptions';
-import type { UserRole } from '@/types';
+import type { UserRole, EmploymentStatus } from '@/types';
+import { DEFAULT_GRID_SETTINGS } from '@/lib/view-config-store';
 import './UsersSection.css';
+
+// Tab definition
+type UserTab = 'directory' | 'departments' | 'orgchart' | 'active' | 'onleave' | 'terminated' | 'settings';
+
+interface TabMeta {
+  key: UserTab;
+  label: string;
+  icon: string;
+}
+
+const TABS: TabMeta[] = [
+  { key: 'directory', label: 'Directory', icon: 'dx-icon-group' },
+  { key: 'departments', label: 'Departments', icon: 'dx-icon-hierarchy' },
+  { key: 'orgchart', label: 'Org Chart', icon: 'dx-icon-smalliconslayout' },
+  { key: 'active', label: 'Active', icon: 'dx-icon-user' },
+  { key: 'onleave', label: 'On Leave', icon: 'dx-icon-clock' },
+  { key: 'terminated', label: 'Terminated', icon: 'dx-icon-remove' },
+  { key: 'settings', label: 'Settings', icon: 'dx-icon-preferences' },
+];
+
+const TAB_DESCRIPTIONS: Record<UserTab, string> = {
+  directory: 'View and manage all users in your organization',
+  departments: 'Create and organize departments',
+  orgchart: 'Visualize organizational hierarchy',
+  active: 'Currently employed users',
+  onleave: 'Users on temporary leave',
+  terminated: 'Former employees',
+  settings: 'Configure user management defaults',
+};
 
 interface UserRow {
   id: string;
@@ -32,6 +63,9 @@ interface UserRow {
   avatar_url: string | null;
   role: string;
   is_active: boolean;
+  employment_status: EmploymentStatus;
+  department_id: string | null;
+  manager_id: string | null;
   last_login_at: string | null;
   created_at: string;
   phone: string | null;
@@ -50,9 +84,15 @@ const activeStatusOptions = [
   { value: false, label: 'Inactive' },
 ];
 
+const employmentStatusOptions = [
+  { value: 'active', label: 'Active' },
+  { value: 'on_leave', label: 'On Leave' },
+  { value: 'terminated', label: 'Terminated' },
+];
+
 export default function UsersSection(): ReactNode {
   const { items: roleOptions } = useEnumOptions('user_role');
-  const { options: departmentEnumOptions } = useEnumOptions('department');
+  const { options: departmentEnumOptions, refetch: refetchDepartments } = useEnumOptions('department');
   const departmentOptions = departmentEnumOptions.map((o) => o.label);
   const tenantId = useAuthStore((s) => s.profile?.tenant_id);
   const currentUserId = useAuthStore((s) => s.profile?.user_id);
@@ -68,7 +108,13 @@ export default function UsersSection(): ReactNode {
     reactivateUser,
     sendPasswordReset,
     createUser,
+    updateEmploymentStatus,
+    updateUserManager,
+    updateUserDepartment,
   } = useUserManagement();
+
+  // Tab state
+  const [activeTab, setActiveTab] = useState<UserTab>('directory');
 
   const [users, setUsers] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -78,6 +124,9 @@ export default function UsersSection(): ReactNode {
   const [editFullName, setEditFullName] = useState('');
   const [editRole, setEditRole] = useState<UserRole>('member');
   const [editIsActive, setEditIsActive] = useState(true);
+  const [editEmploymentStatus, setEditEmploymentStatus] = useState<EmploymentStatus>('active');
+  const [editManagerId, setEditManagerId] = useState<string | null>(null);
+  const [editDepartmentId, setEditDepartmentId] = useState<string | null>(null);
   const [editAvatarUrl, setEditAvatarUrl] = useState<string | null>(null);
   const [newPassword, setNewPassword] = useState('');
   const [saving, setSaving] = useState(false);
@@ -104,12 +153,16 @@ export default function UsersSection(): ReactNode {
   const [addSaving, setAddSaving] = useState(false);
   const [addError, setAddError] = useState('');
 
+  // Department management state
+  const [newDeptName, setNewDeptName] = useState('');
+  const [addingDept, setAddingDept] = useState(false);
+
   const fetchUsers = useCallback(async () => {
     if (!tenantId) return;
     setLoading(true);
     const { data, error } = await supabase
       .from('profiles')
-      .select('id, user_id, email, full_name, avatar_url, role, is_active, last_login_at, created_at, phone, department, position, bio, address, city, state, country, zip_code')
+      .select('id, user_id, email, full_name, avatar_url, role, is_active, employment_status, department_id, manager_id, last_login_at, created_at, phone, department, position, bio, address, city, state, country, zip_code')
       .eq('tenant_id', tenantId)
       .order('created_at', { ascending: true });
 
@@ -125,11 +178,23 @@ export default function UsersSection(): ReactNode {
     fetchUsers();
   }, [fetchUsers]);
 
+  // Filter users by employment status for employment tabs
+  const getFilteredUsers = useCallback(
+    (status?: EmploymentStatus) => {
+      if (!status) return users;
+      return users.filter((u) => u.employment_status === status);
+    },
+    [users],
+  );
+
   const openEditPopup = (user: UserRow) => {
     setEditUser(user);
     setEditFullName(user.full_name || '');
     setEditRole(user.role as UserRole);
     setEditIsActive(user.is_active);
+    setEditEmploymentStatus(user.employment_status || 'active');
+    setEditManagerId(user.manager_id);
+    setEditDepartmentId(user.department_id);
     setEditAvatarUrl(user.avatar_url);
     setEditPhone(user.phone || '');
     setEditDepartment(user.department || '');
@@ -221,6 +286,21 @@ export default function UsersSection(): ReactNode {
       }
       if (roleUpdate) {
         await updateProfile(editUser.user_id, { role: roleUpdate });
+      }
+
+      // Employment status update (admin only)
+      if (editEmploymentStatus !== editUser.employment_status && isAdmin) {
+        await updateEmploymentStatus(editUser.user_id, editEmploymentStatus);
+      }
+
+      // Manager update (admin only)
+      if (editManagerId !== editUser.manager_id && isAdmin) {
+        await updateUserManager(editUser.user_id, editManagerId);
+      }
+
+      // Department ID update (admin only)
+      if (editDepartmentId !== editUser.department_id && isAdmin) {
+        await updateUserDepartment(editUser.user_id, editDepartmentId);
       }
 
       if (editIsActive !== editUser.is_active && isAdmin) {
@@ -347,29 +427,95 @@ export default function UsersSection(): ReactNode {
     e.component.endUpdate();
   };
 
-  return (
-    <div className="users-section">
-      <div className="users-section-grid">
-        <DataGrid
-          dataSource={users}
-          noDataText={loading ? 'Loading...' : 'No users found'}
-          keyExpr="id"
-          showBorders={true}
-          showRowLines={true}
-          showColumnLines={false}
-          rowAlternationEnabled={true}
-          hoverStateEnabled={true}
-          columnAutoWidth={true}
-          onExporting={onExporting}
-        >
-          <FilterRow visible={true} />
-          <HeaderFilter visible={true} />
-          <SearchPanel visible={true} width={240} placeholder="Search users..." />
-          <Export enabled={true} allowExportSelectedData={true} />
+  // Department management handlers
+  const handleAddDepartment = async () => {
+    if (!newDeptName.trim() || !tenantId) return;
+    setAddingDept(true);
+    try {
+      const currentConfig = departmentEnumOptions;
+      const newValue = newDeptName.trim().toLowerCase().replace(/\s+/g, '_');
+      const newItem = { value: newValue, label: newDeptName.trim(), color: '#64748b' };
 
-          <Toolbar>
-            <Item name="searchPanel" />
-            {isAdmin && (
+      // Check if already exists
+      if (currentConfig.some((o) => o.value === newValue)) {
+        return;
+      }
+
+      const updatedConfig = [...currentConfig, newItem];
+
+      const { error } = await supabase
+        .from('tenant_enum_config')
+        .upsert({
+          tenant_id: tenantId,
+          enum_type: 'department',
+          config: updatedConfig,
+        });
+
+      if (error) throw error;
+      setNewDeptName('');
+      await refetchDepartments();
+    } catch (err) {
+      console.error('Failed to add department:', err);
+    } finally {
+      setAddingDept(false);
+    }
+  };
+
+  const handleDeleteDepartment = async (value: string) => {
+    if (!tenantId) return;
+    const result = await dxConfirm(
+      'Are you sure you want to delete this department?',
+      'Delete Department',
+    );
+    if (!result) return;
+
+    try {
+      const updatedConfig = departmentEnumOptions.filter((o) => o.value !== value);
+      const { error } = await supabase
+        .from('tenant_enum_config')
+        .upsert({
+          tenant_id: tenantId,
+          enum_type: 'department',
+          config: updatedConfig,
+        });
+
+      if (error) throw error;
+      await refetchDepartments();
+    } catch (err) {
+      console.error('Failed to delete department:', err);
+    }
+  };
+
+  // Potential managers for org chart (exclude self)
+  const managerOptions = users
+    .filter((u) => u.user_id !== editUser?.user_id && u.employment_status === 'active')
+    .map((u) => ({ value: u.user_id, label: u.full_name || u.email }));
+
+  // Render DataGrid for user lists
+  const renderUserGrid = (dataSource: UserRow[], showStatusColumn = true) => (
+    <div className="users-grid-wrapper">
+      <DataGrid
+        dataSource={dataSource}
+        noDataText={loading ? 'Loading...' : 'No users found'}
+        keyExpr="id"
+        height="100%"
+        showBorders={true}
+        showRowLines={DEFAULT_GRID_SETTINGS.showRowLines ?? true}
+        showColumnLines={DEFAULT_GRID_SETTINGS.showColumnLines ?? false}
+        rowAlternationEnabled={DEFAULT_GRID_SETTINGS.rowAlternationEnabled ?? true}
+        wordWrapEnabled={DEFAULT_GRID_SETTINGS.wordWrapEnabled ?? false}
+        hoverStateEnabled={true}
+        columnAutoWidth={true}
+        onExporting={onExporting}
+      >
+        <FilterRow visible={DEFAULT_GRID_SETTINGS.showFilterRow ?? true} />
+        <HeaderFilter visible={DEFAULT_GRID_SETTINGS.showHeaderFilter ?? true} />
+        <SearchPanel visible={true} width={240} placeholder="Search users..." />
+        <Export enabled={true} allowExportSelectedData={true} />
+
+        <Toolbar>
+          <Item name="searchPanel" />
+          {isAdmin && activeTab === 'directory' && (
             <Item
               widget="dxButton"
               options={{
@@ -380,61 +526,73 @@ export default function UsersSection(): ReactNode {
                 onClick: openAddUserPopup,
               }}
             />
-            )}
-            <Item name="exportButton" />
-          </Toolbar>
+          )}
+          <Item name="exportButton" />
+        </Toolbar>
 
+        <Column
+          caption=""
+          width={50}
+          allowFiltering={false}
+          allowSorting={false}
+          cellRender={(data: { data: UserRow }) => (
+            <div className="user-avatar-cell">
+              {data.data.avatar_url ? (
+                <img src={data.data.avatar_url} alt="" className="user-avatar-img" />
+              ) : (
+                <span className="user-avatar-placeholder">
+                  {getInitials(data.data.full_name, data.data.email)}
+                </span>
+              )}
+            </div>
+          )}
+        />
+
+        <Column dataField="email" caption="Email" width={250} />
+        <Column dataField="full_name" caption="Full Name" width={180} />
+        <Column dataField="department" caption="Department" width={140} />
+        <Column dataField="position" caption="Position" width={140} />
+
+        <Column
+          dataField="role"
+          caption="Role"
+          width={100}
+          cellRender={(data: { value: string }) => (
+            <span className={`role-badge role-${data.value}`}>{data.value}</span>
+          )}
+        />
+
+        {showStatusColumn && (
           <Column
-            caption=""
-            width={50}
-            allowFiltering={false}
-            allowSorting={false}
-            cellRender={(data: { data: UserRow }) => (
-              <div className="user-avatar-cell">
-                {data.data.avatar_url ? (
-                  <img src={data.data.avatar_url} alt="" className="user-avatar-img" />
-                ) : (
-                  <span className="user-avatar-placeholder">
-                    {getInitials(data.data.full_name, data.data.email)}
-                  </span>
-                )}
-              </div>
-            )}
-          />
-
-          <Column dataField="email" caption="Email" width={250} />
-          <Column dataField="full_name" caption="Full Name" width={200} />
-
-          <Column
-            dataField="role"
-            caption="Role"
-            width={120}
-            cellRender={(data: { value: string }) => (
-              <span className={`role-badge role-${data.value}`}>{data.value}</span>
-            )}
-          />
-
-          <Column
-            dataField="is_active"
+            dataField="employment_status"
             caption="Status"
             width={100}
-            cellRender={(data: { value: boolean }) => (
-              <span className={`status-badge ${data.value ? 'active' : 'inactive'}`}>
-                {data.value ? 'Active' : 'Inactive'}
-              </span>
-            )}
+            cellRender={(data: { value: EmploymentStatus }) => {
+              const statusLabels: Record<EmploymentStatus, string> = {
+                active: 'Active',
+                on_leave: 'On Leave',
+                terminated: 'Terminated',
+              };
+              const statusClass = data.value || 'active';
+              return (
+                <span className={`status-badge status-${statusClass}`}>
+                  {statusLabels[data.value] || 'Active'}
+                </span>
+              );
+            }}
           />
+        )}
 
-          <Column dataField="last_login_at" caption="Last Login" dataType="datetime" width={180} />
-          <Column dataField="created_at" caption="Created" dataType="datetime" width={180} />
+        <Column dataField="last_login_at" caption="Last Login" dataType="datetime" width={160} />
 
-          <Column
-            type="buttons"
-            width={110}
-            caption="Actions"
-            cellRender={(cell: { data: UserRow }) => (
-              <div className="action-buttons">
-                <Button icon="edit" stylingMode="text" hint="Edit" onClick={() => openEditPopup(cell.data)} />
+        <Column
+          type="buttons"
+          width={80}
+          caption="Actions"
+          cellRender={(cell: { data: UserRow }) => (
+            <div className="action-buttons">
+              <Button icon="edit" stylingMode="text" hint="Edit" onClick={() => openEditPopup(cell.data)} />
+              {activeTab === 'directory' && (
                 <Button
                   icon={cell.data.is_active ? 'remove' : 'revert'}
                   stylingMode="text"
@@ -442,13 +600,239 @@ export default function UsersSection(): ReactNode {
                   onClick={() => handleToggleActive(cell.data)}
                   disabled={cell.data.user_id === currentUserId}
                 />
+              )}
+            </div>
+          )}
+        />
+
+        <Pager visible={true} showPageSizeSelector={true} allowedPageSizes={[10, 25, 50]} showInfo={true} />
+        <Paging defaultPageSize={10} />
+      </DataGrid>
+    </div>
+  );
+
+  // Render org chart using TreeList
+  const renderOrgChart = () => {
+    // Build tree data with parent relationship
+    // Note: manager_id references profiles.id, so we use profiles.id as the key
+    const treeData = users
+      .filter((u) => u.employment_status === 'active')
+      .map((u) => ({
+        id: u.id,  // profiles.id (primary key)
+        parentId: u.manager_id,  // references profiles.id
+        userId: u.user_id,
+        email: u.email,
+        fullName: u.full_name,
+        department: u.department,
+        position: u.position,
+        avatarUrl: u.avatar_url,
+      }));
+
+    return (
+      <div className="org-chart-wrapper">
+        <TreeList
+          dataSource={treeData}
+          keyExpr="id"
+          parentIdExpr="parentId"
+          height="100%"
+          showBorders={true}
+          showRowLines={true}
+          columnAutoWidth={true}
+          expandNodesOnFiltering={true}
+          defaultExpandedRowKeys={treeData.map((d) => d.id)}
+        >
+          <TreeColumn
+            dataField="fullName"
+            caption="Name"
+            width={250}
+            cellRender={(data: { data: { fullName: string | null; email: string; avatarUrl: string | null } }) => (
+              <div className="org-chart-name-cell">
+                {data.data.avatarUrl ? (
+                  <img src={data.data.avatarUrl} alt="" className="org-chart-avatar" />
+                ) : (
+                  <span className="org-chart-avatar-placeholder">
+                    {getInitials(data.data.fullName, data.data.email)}
+                  </span>
+                )}
+                <span>{data.data.fullName || data.data.email}</span>
               </div>
             )}
           />
+          <TreeColumn dataField="position" caption="Position" width={180} />
+          <TreeColumn dataField="department" caption="Department" width={150} />
+          <TreeColumn dataField="email" caption="Email" width={220} />
+        </TreeList>
+      </div>
+    );
+  };
 
-          <Pager visible={true} showPageSizeSelector={true} allowedPageSizes={[10, 25, 50, 100]} showInfo={true} />
-          <Paging defaultPageSize={10} />
-        </DataGrid>
+  // Render departments tab
+  const renderDepartmentsTab = () => (
+    <div className="departments-tab-content">
+      <div className="admin-card-box">
+        <div className="admin-card-box-header">
+          <h4>Department List</h4>
+        </div>
+
+        <div className="dept-add-form">
+          <TextBox
+            value={newDeptName}
+            onValueChanged={(e) => setNewDeptName(e.value)}
+            placeholder="New department name"
+            stylingMode="outlined"
+            width={300}
+          />
+          <Button
+            text={addingDept ? 'Adding...' : 'Add Department'}
+            icon="add"
+            type="default"
+            stylingMode="contained"
+            onClick={handleAddDepartment}
+            disabled={addingDept || !newDeptName.trim()}
+          />
+        </div>
+
+        <div className="admin-list-table">
+          <div className="admin-list-header">
+            <span className="dept-name-col">Department Name</span>
+            <span className="dept-count-col">Members</span>
+            <span className="dept-actions-col">Actions</span>
+          </div>
+          {departmentEnumOptions.length === 0 ? (
+            <div className="admin-list-row">
+              <span className="dept-empty-text">No departments defined</span>
+            </div>
+          ) : (
+            departmentEnumOptions.map((dept) => {
+              const memberCount = users.filter((u) => u.department === dept.label).length;
+              return (
+                <div key={dept.value} className="admin-list-row">
+                  <span className="dept-name-col">{dept.label}</span>
+                  <span className="dept-count-col">{memberCount}</span>
+                  <span className="dept-actions-col">
+                    <Button
+                      icon="trash"
+                      stylingMode="text"
+                      hint="Delete"
+                      onClick={() => handleDeleteDepartment(dept.value)}
+                    />
+                  </span>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
+  // Render settings tab
+  const renderSettingsTab = () => (
+    <div className="settings-tab-content">
+      <div className="admin-card-box">
+        <div className="admin-card-box-header">
+          <h4>User Default Settings</h4>
+        </div>
+        <p className="admin-card-box-hint">
+          Configure default values for new users in your organization.
+        </p>
+
+        <div className="admin-form-field">
+          <label>Default Role for New Users</label>
+          <SelectBox
+            dataSource={roleOptions}
+            displayExpr="label"
+            valueExpr="value"
+            value="member"
+            stylingMode="outlined"
+            width={200}
+            disabled={true}
+          />
+          <div className="admin-form-hint">
+            New users are assigned the "Member" role by default.
+          </div>
+        </div>
+      </div>
+
+      <div className="admin-card-box">
+        <div className="admin-card-box-header">
+          <h4>Employment Status</h4>
+        </div>
+        <p className="admin-card-box-hint">
+          Manage how employment statuses are used in your organization.
+        </p>
+
+        <div className="admin-settings-grid">
+          <div className="admin-settings-item">
+            <span className="status-badge status-active">Active</span>
+            <span>Currently employed</span>
+          </div>
+          <div className="admin-settings-item">
+            <span className="status-badge status-on_leave">On Leave</span>
+            <span>Temporary leave (maternity, medical, etc.)</span>
+          </div>
+          <div className="admin-settings-item">
+            <span className="status-badge status-terminated">Terminated</span>
+            <span>No longer with the organization</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Render tab content
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'directory':
+        return renderUserGrid(users);
+      case 'departments':
+        return renderDepartmentsTab();
+      case 'orgchart':
+        return renderOrgChart();
+      case 'active':
+        return renderUserGrid(getFilteredUsers('active'), false);
+      case 'onleave':
+        return renderUserGrid(getFilteredUsers('on_leave'), false);
+      case 'terminated':
+        return renderUserGrid(getFilteredUsers('terminated'), false);
+      case 'settings':
+        return renderSettingsTab();
+      default:
+        return renderUserGrid(users);
+    }
+  };
+
+  return (
+    <div className="users-section admin-section-layout">
+      {/* Sidebar */}
+      <div className="admin-section-sidebar">
+        {TABS.map((tab) => (
+          <div
+            key={tab.key}
+            className={`admin-section-sidebar-item ${activeTab === tab.key ? 'active' : ''}`}
+            onClick={() => setActiveTab(tab.key)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => e.key === 'Enter' && setActiveTab(tab.key)}
+          >
+            <i className={`${tab.icon} sidebar-tab-icon`} />
+            {tab.label}
+          </div>
+        ))}
+      </div>
+
+      {/* Main Content */}
+      <div className="admin-section-main">
+        {/* Sticky Header */}
+        <div className="admin-section-header">
+          <div className="admin-section-header-info">
+            <h3>{TABS.find((t) => t.key === activeTab)?.label}</h3>
+            <p className="admin-section-header-desc">{TAB_DESCRIPTIONS[activeTab]}</p>
+          </div>
+        </div>
+
+        {/* Tab Content */}
+        <div className="users-tab-content">{renderTabContent()}</div>
       </div>
 
       {/* Add User Popup */}
@@ -485,124 +869,151 @@ export default function UsersSection(): ReactNode {
 
       {/* Edit User Popup */}
       {editUser && (
-      <Popup
-        visible={true}
-        onHiding={closeEditPopup}
-        title={`Edit User — ${editUser.email}`}
-        showCloseButton={true}
-        width={520}
-        height="auto"
-        maxHeight="90vh"
-      >
-        <div className="user-edit-form">
-          <div className="avatar-section">
-            <div className="avatar-preview-wrap">
-              {editAvatarUrl ? (
-                <img src={editAvatarUrl} alt="" className="avatar-preview" />
+        <Popup
+          visible={true}
+          onHiding={closeEditPopup}
+          title={`Edit User — ${editUser.email}`}
+          showCloseButton={true}
+          width={560}
+          height="auto"
+          maxHeight="90vh"
+        >
+          <div className="user-edit-form">
+            <div className="avatar-section">
+              <div className="avatar-preview-wrap">
+                {editAvatarUrl ? (
+                  <img src={editAvatarUrl} alt="" className="avatar-preview" />
+                ) : (
+                  <span className="avatar-placeholder">
+                    {getInitials(editFullName || editUser.full_name, editUser.email)}
+                  </span>
+                )}
+              </div>
+              <div className="avatar-actions">
+                <Button text="Upload Photo" icon="image" stylingMode="outlined" onClick={() => fileInputRef.current?.click()} />
+                {editAvatarUrl && <Button text="Remove" icon="trash" stylingMode="text" onClick={handleAvatarRemove} />}
+                <input ref={fileInputRef} type="file" accept="image/*" className="avatar-file-input" onChange={handleAvatarUpload} aria-label="Upload avatar image" />
+              </div>
+            </div>
+
+            <div className="form-divider" />
+
+            <div className="form-field">
+              <label>Full Name</label>
+              <TextBox value={editFullName} onValueChanged={(e) => setEditFullName(e.value)} placeholder="Enter full name" stylingMode="outlined" />
+            </div>
+
+            <div className="form-row">
+              <div className="form-field">
+                <label>Role</label>
+                <SelectBox dataSource={roleOptions} displayExpr="label" valueExpr="value" value={editRole} onValueChanged={(e) => setEditRole(e.value)} stylingMode="outlined" disabled={!isAdmin} />
+              </div>
+              <div className="form-field">
+                <label>Employment Status</label>
+                <SelectBox
+                  dataSource={employmentStatusOptions}
+                  displayExpr="label"
+                  valueExpr="value"
+                  value={editEmploymentStatus}
+                  onValueChanged={(e) => setEditEmploymentStatus(e.value)}
+                  stylingMode="outlined"
+                  disabled={!isAdmin || isSelf}
+                />
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-field">
+                <label>Manager</label>
+                <SelectBox
+                  dataSource={[{ value: null, label: '(No Manager)' }, ...managerOptions]}
+                  displayExpr="label"
+                  valueExpr="value"
+                  value={editManagerId}
+                  onValueChanged={(e) => setEditManagerId(e.value)}
+                  stylingMode="outlined"
+                  disabled={!isAdmin}
+                  searchEnabled={true}
+                />
+              </div>
+              <div className="form-field">
+                <label>Department</label>
+                <SelectBox
+                  items={departmentOptions}
+                  value={editDepartment}
+                  onValueChanged={(e) => setEditDepartment(e.value)}
+                  stylingMode="outlined"
+                  acceptCustomValue={true}
+                />
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-field">
+                <label>Position</label>
+                <TextBox value={editPosition} onValueChanged={(e) => setEditPosition(e.value)} placeholder="e.g. Project Manager" stylingMode="outlined" />
+              </div>
+              <div className="form-field">
+                <label>Phone</label>
+                <TextBox value={editPhone} onValueChanged={(e) => setEditPhone(e.value)} placeholder="010-1234-5678" stylingMode="outlined" />
+              </div>
+            </div>
+
+            <div className="form-field">
+              <label>Bio</label>
+              <TextBox value={editBio} onValueChanged={(e) => setEditBio(e.value)} placeholder="Short introduction..." stylingMode="outlined" />
+            </div>
+
+            <div className="form-row">
+              <div className="form-field">
+                <label>Country</label>
+                <TextBox value={editCountry} onValueChanged={(e) => setEditCountry(e.value)} stylingMode="outlined" />
+              </div>
+              <div className="form-field">
+                <label>City</label>
+                <TextBox value={editCity} onValueChanged={(e) => setEditCity(e.value)} stylingMode="outlined" />
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-field">
+                <label>State / Province</label>
+                <TextBox value={editState} onValueChanged={(e) => setEditState(e.value)} stylingMode="outlined" />
+              </div>
+              <div className="form-field">
+                <label>Zip Code</label>
+                <TextBox value={editZipCode} onValueChanged={(e) => setEditZipCode(e.value)} stylingMode="outlined" />
+              </div>
+            </div>
+
+            <div className="form-field">
+              <label>Address</label>
+              <TextBox value={editAddress} onValueChanged={(e) => setEditAddress(e.value)} stylingMode="outlined" />
+            </div>
+
+            <div className="form-divider" />
+
+            <div className="password-section">
+              <label className="section-label">Password</label>
+              {isSelf ? (
+                <div className="password-self">
+                  <TextBox value={newPassword} onValueChanged={(e) => setNewPassword(e.value)} placeholder="New password (min 6 chars)" mode="password" stylingMode="outlined" />
+                  <Button text="Change Password" stylingMode="outlined" onClick={handlePasswordChange} disabled={!newPassword} />
+                </div>
               ) : (
-                <span className="avatar-placeholder">
-                  {getInitials(editFullName || editUser.full_name, editUser.email)}
-                </span>
+                <Button text="Send Password Reset Email" icon="email" stylingMode="outlined" onClick={handlePasswordReset} />
               )}
             </div>
-            <div className="avatar-actions">
-              <Button text="Upload Photo" icon="image" stylingMode="outlined" onClick={() => fileInputRef.current?.click()} />
-              {editAvatarUrl && <Button text="Remove" icon="trash" stylingMode="text" onClick={handleAvatarRemove} />}
-              <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleAvatarUpload} />
+
+            {formError && <div className="form-error">{formError}</div>}
+            {formSuccess && <div className="form-success">{formSuccess}</div>}
+
+            <div className="form-actions">
+              <Button text="Cancel" stylingMode="outlined" onClick={closeEditPopup} />
+              <Button text={saving ? 'Saving...' : 'Save Changes'} type="default" stylingMode="contained" onClick={handleSave} disabled={saving} />
             </div>
           </div>
-
-          <div className="form-divider" />
-
-          <div className="form-field">
-            <label>Full Name</label>
-            <TextBox value={editFullName} onValueChanged={(e) => setEditFullName(e.value)} placeholder="Enter full name" stylingMode="outlined" />
-          </div>
-
-          <div className="form-row">
-            <div className="form-field">
-              <label>Role</label>
-              <SelectBox dataSource={roleOptions} displayExpr="label" valueExpr="value" value={editRole} onValueChanged={(e) => setEditRole(e.value)} stylingMode="outlined" disabled={!isAdmin} />
-            </div>
-            <div className="form-field">
-              <label>Status</label>
-              <SelectBox dataSource={activeStatusOptions} displayExpr="label" valueExpr="value" value={editIsActive} onValueChanged={(e) => setEditIsActive(e.value)} stylingMode="outlined" disabled={!isAdmin || isSelf} />
-            </div>
-          </div>
-
-          <div className="form-divider" />
-
-          <div className="form-row">
-            <div className="form-field">
-              <label>Department</label>
-              <SelectBox items={departmentOptions} value={editDepartment} onValueChanged={(e) => setEditDepartment(e.value)} stylingMode="outlined" acceptCustomValue={true} />
-            </div>
-            <div className="form-field">
-              <label>Position</label>
-              <TextBox value={editPosition} onValueChanged={(e) => setEditPosition(e.value)} placeholder="e.g. Project Manager" stylingMode="outlined" />
-            </div>
-          </div>
-
-          <div className="form-field">
-            <label>Phone</label>
-            <TextBox value={editPhone} onValueChanged={(e) => setEditPhone(e.value)} placeholder="010-1234-5678" stylingMode="outlined" />
-          </div>
-
-          <div className="form-field">
-            <label>Bio</label>
-            <TextBox value={editBio} onValueChanged={(e) => setEditBio(e.value)} placeholder="Short introduction..." stylingMode="outlined" />
-          </div>
-
-          <div className="form-row">
-            <div className="form-field">
-              <label>Country</label>
-              <TextBox value={editCountry} onValueChanged={(e) => setEditCountry(e.value)} stylingMode="outlined" />
-            </div>
-            <div className="form-field">
-              <label>City</label>
-              <TextBox value={editCity} onValueChanged={(e) => setEditCity(e.value)} stylingMode="outlined" />
-            </div>
-          </div>
-
-          <div className="form-row">
-            <div className="form-field">
-              <label>State / Province</label>
-              <TextBox value={editState} onValueChanged={(e) => setEditState(e.value)} stylingMode="outlined" />
-            </div>
-            <div className="form-field">
-              <label>Zip Code</label>
-              <TextBox value={editZipCode} onValueChanged={(e) => setEditZipCode(e.value)} stylingMode="outlined" />
-            </div>
-          </div>
-
-          <div className="form-field">
-            <label>Address</label>
-            <TextBox value={editAddress} onValueChanged={(e) => setEditAddress(e.value)} stylingMode="outlined" />
-          </div>
-
-          <div className="form-divider" />
-
-          <div className="password-section">
-            <label className="section-label">Password</label>
-            {isSelf ? (
-              <div className="password-self">
-                <TextBox value={newPassword} onValueChanged={(e) => setNewPassword(e.value)} placeholder="New password (min 6 chars)" mode="password" stylingMode="outlined" />
-                <Button text="Change Password" stylingMode="outlined" onClick={handlePasswordChange} disabled={!newPassword} />
-              </div>
-            ) : (
-              <Button text="Send Password Reset Email" icon="email" stylingMode="outlined" onClick={handlePasswordReset} />
-            )}
-          </div>
-
-          {formError && <div className="form-error">{formError}</div>}
-          {formSuccess && <div className="form-success">{formSuccess}</div>}
-
-          <div className="form-actions">
-            <Button text="Cancel" stylingMode="outlined" onClick={closeEditPopup} />
-            <Button text={saving ? 'Saving...' : 'Save Changes'} type="default" stylingMode="contained" onClick={handleSave} disabled={saving} />
-          </div>
-        </div>
-      </Popup>
+        </Popup>
       )}
     </div>
   );

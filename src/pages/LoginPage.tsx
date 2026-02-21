@@ -3,55 +3,72 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { TextBox, Button, CheckBox, ValidationGroup, Validator } from 'devextreme-react';
 import { RequiredRule, EmailRule } from 'devextreme-react/validator';
 import { useAuth } from '@/hooks';
+import '@/styles/auth-common.css';
 import './LoginPage.css';
 
 export default function LoginPage(): ReactNode {
   const navigate = useNavigate();
   const location = useLocation();
   const { signIn } = useAuth();
-  
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      setError('');
+      setLoading(true);
 
-    try {
-      await signIn({ email, password });
-      
-      // Redirect to original location or dashboard
-      const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/dashboard';
-      navigate(from, { replace: true });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Invalid email or password');
-    } finally {
-      setLoading(false);
-    }
-  }, [email, password, signIn, navigate, location]);
+      try {
+        await signIn({ email, password });
+
+        // Redirect to original location or dashboard
+        const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/dashboard';
+        navigate(from, { replace: true });
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Invalid email or password');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [email, password, signIn, navigate, location],
+  );
 
   return (
-    <div className="login-page">
-      <div className="login-container">
-        <div className="login-card">
-          <div className="login-header">
-            <h1>Nanum Project</h1>
-            <p>Sign in to your account</p>
+    <div className="auth-page login-page">
+      {/* Decorative elements */}
+      <div className="auth-decoration auth-decoration--1" />
+      <div className="auth-decoration auth-decoration--2" />
+
+      <div className="auth-container">
+        <div className="auth-card">
+          <div className="auth-header">
+            <div className="auth-brand">
+              <div className="auth-brand-icon">
+                <i className="dx-icon-chart" />
+              </div>
+              <span className="auth-brand-text">Nanum</span>
+            </div>
+            <h1>Welcome back</h1>
+            <p>Sign in to your account to continue</p>
           </div>
 
           <ValidationGroup>
-            <form onSubmit={handleSubmit} className="login-form">
+            <form onSubmit={handleSubmit} className="auth-form" aria-labelledby="login-heading">
               {error && (
-                <div className="error-message">
-                  {error}
+                <div role="alert" aria-live="polite" className="auth-error">
+                  <span className="auth-error-icon" aria-hidden="true">
+                    <i className="dx-icon-warning" />
+                  </span>
+                  <span>{error}</span>
                 </div>
               )}
 
-              <div className="form-group">
+              <div className="auth-form-group">
                 <label htmlFor="email">Email</label>
                 <TextBox
                   id="email"
@@ -69,7 +86,7 @@ export default function LoginPage(): ReactNode {
                 </TextBox>
               </div>
 
-              <div className="form-group">
+              <div className="auth-form-group">
                 <label htmlFor="password">Password</label>
                 <TextBox
                   id="password"
@@ -86,14 +103,14 @@ export default function LoginPage(): ReactNode {
                 </TextBox>
               </div>
 
-              <div className="form-options">
+              <div className="auth-options">
                 <CheckBox
                   value={rememberMe}
                   onValueChanged={(e) => setRememberMe(e.value)}
                   text="Remember me"
                   disabled={loading}
                 />
-                <a href="/reset-password" className="forgot-password">
+                <a href="/reset-password" className="auth-link">
                   Forgot password?
                 </a>
               </div>
@@ -107,9 +124,11 @@ export default function LoginPage(): ReactNode {
                 disabled={loading}
               />
 
-              <div className="signup-link">
+              <div className="auth-footer">
                 Don't have an account?{' '}
-                <a href="/signup">Sign up</a>
+                <a href="/signup" className="auth-link">
+                  Sign up
+                </a>
               </div>
             </form>
           </ValidationGroup>

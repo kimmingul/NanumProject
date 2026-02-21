@@ -70,7 +70,7 @@ export default function DashboardPage(): ReactNode {
 
       {/* Row 2 — My Tasks (2fr) + Overdue Items (1fr) */}
       <div className="dashboard-row dashboard-row-2">
-        <DashboardMyTasks tasks={data.myTasks} loading={data.loading.lists} />
+        <DashboardMyTasks tasks={data.myTasks} totalCount={data.myTasksCount} loading={data.loading.lists} />
         <DashboardAtRisk items={data.overdueItems} loading={data.loading.lists} />
       </div>
 

@@ -3,12 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { TextBox, Button, ValidationGroup, Validator } from 'devextreme-react';
 import { RequiredRule, EmailRule, StringLengthRule, CompareRule } from 'devextreme-react/validator';
 import { useAuth } from '@/hooks';
+import '@/styles/auth-common.css';
 import './SignUpPage.css';
 
 export default function SignUpPage(): ReactNode {
   const navigate = useNavigate();
   const { signUp } = useAuth();
-  
+
   const [formData, setFormData] = useState({
     email: '',
     fullName: '',
@@ -19,58 +20,77 @@ export default function SignUpPage(): ReactNode {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      setError('');
+      setLoading(true);
 
-    try {
-      await signUp({
-        email: formData.email,
-        password: formData.password,
-        fullName: formData.fullName,
-      });
-      
-      setSuccess(true);
-      setTimeout(() => {
-        navigate('/login');
-      }, 2000);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create account');
-    } finally {
-      setLoading(false);
-    }
-  }, [formData, signUp, navigate]);
+      try {
+        await signUp({
+          email: formData.email,
+          password: formData.password,
+          fullName: formData.fullName,
+        });
+
+        setSuccess(true);
+        setTimeout(() => {
+          navigate('/login');
+        }, 2000);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to create account');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [formData, signUp, navigate],
+  );
 
   const updateField = (field: keyof typeof formData) => (e: { value?: string }) => {
     setFormData((prev) => ({ ...prev, [field]: e.value ?? '' }));
   };
 
   return (
-    <div className="signup-page">
-      <div className="signup-container">
-        <div className="signup-card">
-          <div className="signup-header">
+    <div className="auth-page signup-page">
+      {/* Decorative elements */}
+      <div className="auth-decoration auth-decoration--1" />
+      <div className="auth-decoration auth-decoration--2" />
+
+      <div className="auth-container">
+        <div className="auth-card signup-card">
+          <div className="auth-header">
+            <div className="auth-brand">
+              <div className="auth-brand-icon">
+                <i className="dx-icon-chart" />
+              </div>
+              <span className="auth-brand-text">Nanum</span>
+            </div>
             <h1>Create Account</h1>
             <p>Join Nanum Project today</p>
           </div>
 
           {success ? (
-            <div className="success-message">
+            <div role="status" aria-live="polite" className="auth-success">
+              <div className="auth-success-icon" aria-hidden="true">
+                <i className="dx-icon-check" />
+              </div>
               <h3>Account created successfully!</h3>
               <p>Please check your email to verify your account.</p>
               <p>Redirecting to login...</p>
             </div>
           ) : (
             <ValidationGroup>
-              <form onSubmit={handleSubmit} className="signup-form">
+              <form onSubmit={handleSubmit} className="auth-form" aria-labelledby="signup-heading">
                 {error && (
-                  <div className="error-message">
-                    {error}
+                  <div role="alert" aria-live="polite" className="auth-error">
+                    <span className="auth-error-icon" aria-hidden="true">
+                      <i className="dx-icon-warning" />
+                    </span>
+                    <span>{error}</span>
                   </div>
                 )}
 
-                <div className="form-group">
+                <div className="auth-form-group">
                   <label htmlFor="fullName">Full Name</label>
                   <TextBox
                     id="fullName"
@@ -87,7 +107,7 @@ export default function SignUpPage(): ReactNode {
                   </TextBox>
                 </div>
 
-                <div className="form-group">
+                <div className="auth-form-group">
                   <label htmlFor="email">Email</label>
                   <TextBox
                     id="email"
@@ -105,7 +125,7 @@ export default function SignUpPage(): ReactNode {
                   </TextBox>
                 </div>
 
-                <div className="form-group">
+                <div className="auth-form-group">
                   <label htmlFor="password">Password</label>
                   <TextBox
                     id="password"
@@ -121,12 +141,10 @@ export default function SignUpPage(): ReactNode {
                       <StringLengthRule min={8} message="Password must be at least 8 characters" />
                     </Validator>
                   </TextBox>
-                  <small className="form-hint">
-                    Minimum 8 characters
-                  </small>
+                  <small className="auth-form-hint">Minimum 8 characters</small>
                 </div>
 
-                <div className="form-group">
+                <div className="auth-form-group">
                   <label htmlFor="confirmPassword">Confirm Password</label>
                   <TextBox
                     id="confirmPassword"
@@ -139,10 +157,7 @@ export default function SignUpPage(): ReactNode {
                   >
                     <Validator>
                       <RequiredRule message="Please confirm your password" />
-                      <CompareRule 
-                        comparisonTarget={() => formData.password}
-                        message="Passwords do not match" 
-                      />
+                      <CompareRule comparisonTarget={() => formData.password} message="Passwords do not match" />
                     </Validator>
                   </TextBox>
                 </div>
@@ -156,9 +171,11 @@ export default function SignUpPage(): ReactNode {
                   disabled={loading}
                 />
 
-                <div className="login-link">
+                <div className="auth-footer">
                   Already have an account?{' '}
-                  <a href="/login">Sign in</a>
+                  <a href="/login" className="auth-link">
+                    Sign in
+                  </a>
                 </div>
               </form>
             </ValidationGroup>

@@ -1,10 +1,10 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import 'devextreme/dist/css/dx.fluent.blue.light.compact.css';
 import './styles/theme-variables.css';
 import './styles/density-normal.css';
+import './styles/admin-sections.css';
 import './index.css';
-import '@/lib/theme-store'; // Initialize theme (applies data-theme + DX dark link)
+import '@/lib/preferences-store'; // Initialize preferences (applies theme + density)
 import App from './App.tsx';
 import '@/config/devextreme'; // Initialize DevExtreme configuration
 

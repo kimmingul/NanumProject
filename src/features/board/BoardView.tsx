@@ -4,6 +4,7 @@ import type { DragEndEvent } from 'devextreme/ui/sortable';
 import { ScrollArrowOverlay } from '@/components/ScrollArrowOverlay';
 import { useProjectItems } from '@/hooks/useProjectItems';
 import { useEnumOptions } from '@/hooks/useEnumOptions';
+import { useViewConfig } from '@/hooks/useViewConfig';
 import { useAuthStore } from '@/lib/auth-store';
 import { usePMStore } from '@/lib/pm-store';
 import { supabase } from '@/lib/supabase';
@@ -34,7 +35,16 @@ export default function BoardView({ projectId, actionsRef }: BoardViewProps): Re
     useProjectItems(projectId);
   const profile = useAuthStore((s) => s.profile);
   const setSelectedTaskId = usePMStore((s) => s.setSelectedTaskId);
+  const { tenantConfig } = useViewConfig({ viewKey: 'board', projectId });
   const boardColumnsRef = useRef<HTMLDivElement>(null);
+
+  // Card field visibility from tenant config
+  const cardFields = tenantConfig.cardFields || {
+    name: true,
+    assignees: true,
+    dueDate: true,
+    progress: true,
+  };
 
   // Add task to "To Do" column
   const handleAddTask = useCallback(async () => {
@@ -196,7 +206,7 @@ export default function BoardView({ projectId, actionsRef }: BoardViewProps): Re
                     >
                       <div className="board-card-name">{task.name}</div>
                       <div className="board-card-meta">
-                        {assignees.length > 0 && (
+                        {cardFields.assignees && assignees.length > 0 && (
                           <div className="board-card-avatars">
                             {assignees.map((name, i) => (
                               <span key={i} className="board-card-avatar" title={name}>
@@ -205,12 +215,12 @@ export default function BoardView({ projectId, actionsRef }: BoardViewProps): Re
                             ))}
                           </div>
                         )}
-                        {dueBadge && (
+                        {cardFields.dueDate && dueBadge && (
                           <span className={`board-card-due ${dueBadge.className}`}>
                             {dueBadge.label}
                           </span>
                         )}
-                        {task.percent_complete > 0 && (
+                        {cardFields.progress && task.percent_complete > 0 && (
                           <span className="board-card-progress">
                             <span className="board-card-progress-bar">
                               <span

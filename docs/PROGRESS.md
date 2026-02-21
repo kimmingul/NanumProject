@@ -295,7 +295,7 @@
 
 - "NanumAuth" → "Nanum Project"로 전면 변경 (5개 파일)
   - `config/index.ts`, `LoginPage.tsx`, `SignUpPage.tsx`, `MainLayout.tsx`, `HomePage.tsx`
-- `HomePage.tsx` subtitle/description을 임상시험 PM 맥락으로 변경
+- `HomePage.tsx` subtitle/description을 프로젝트 관리 맥락으로 변경
 - `auth-store.ts`의 localStorage 키 (`nanumauth-auth`)는 기존 세션 호환성 유지를 위해 유지
 
 ### Phase 18: Relations Panel + Item Links
@@ -715,6 +715,119 @@ _initialize() → navigator.locks 획득 → _recoverAndRefresh()
   - TasksWorkspacePage: 동적 statusLabels
   - ProjectSettingsView: 동적 statusOptions/permissionOptions/permissionLabels
   - UsersSection: 동적 roleOptions/departmentOptions
+
+### Phase 42: View Column 설정 (Admin + User StateStoring)
+
+- **목적**: Admin이 조직 기본 뷰 컬럼 설정(표시 여부, 순서, 너비)을 관리하고, 사용자는 개인 오버라이드 가능
+- **대상 뷰**: Tasks View (TreeList), My Tasks (DataGrid), Gantt View, Board View
+- **DB 변경** (`017_tenant_view_config.sql`):
+  - `tenant_view_config` 테이블 생성 (JSONB config, UNIQUE: tenant_id + view_key)
+  - 4개 뷰에 대한 기본 컬럼/필드 설정 시드
+  - RLS: 인증 사용자 SELECT, admin만 INSERT/UPDATE/DELETE
+- **타입**: `ViewKey`, `ColumnConfig`, `ViewConfig`, `DxGridState` 타입 추가
+- **스토어**: `view-config-store.ts` — Zustand (in-memory)
+  - `loadTenantConfigs()` / `loadUserStates()` — 테넌트 설정 + 사용자 상태 로드
+  - `updateTenantConfig()` — Admin 설정 변경
+  - `saveUserState()` — 사용자 상태 저장 (2초 debounce → profiles.preferences.viewStates)
+  - `clearUserState()` — 개인 설정 초기화
+- **소비자 훅**: `useViewConfig(viewKey, projectId?)` — `customLoad`/`customSave` stateStoring 콜백, `resetToDefault`
+- **ProtectedRoute**: `tenant_id` 확보 시 `loadTenantConfigs()` / `loadUserStates()` 자동 호출
+- **Admin UI**: `ViewSettingsSection.tsx` — 4개 뷰 탭 + 컬럼 편집기 (visible 토글, width 입력, 순서 변경, Gantt taskListWidth, Board cardFields)
+- **뷰 통합**:
+  - TasksView: DevExtreme TreeList `<StateStoring>` 적용 (customLoad/customSave)
+  - MyTasksPage: DevExtreme DataGrid `<StateStoring>` 적용
+  - GanttView: `columnVisible` 맵 + `taskListWidth` 동적 적용 (StateStoring 미지원)
+  - BoardView: `cardFields` 조건부 렌더링 (assignees, dueDate, progress)
+- **NavRail**: AdminSidebarList에 "View Columns" 메뉴 추가
+
+### Phase 43: View Config 확장 — Projects Grid + 컬럼 상세 설정 + Grid 레벨 설정
+
+- **목적**: Projects 페이지 그리드 추가 + 컬럼 Caption 편집 + 정렬/필터/그룹핑/고정 옵션 + Grid 레벨 설정 (Row Lines, Group Panel 등)
+- **ViewKey 추가**: `'projects_list'` (5개 뷰: projects_list, tasks_view, my_tasks, gantt, board)
+- **ColumnConfig 확장**:
+  - `caption` 편집 가능 (컬럼명 커스터마이징)
+  - `alignment`: left/center/right
+  - `minWidth`: 최소 너비
+  - `allowSorting`, `sortOrder`, `sortIndex`: 정렬 설정
+  - `allowFiltering`: 필터 허용
+  - `allowGrouping`, `groupIndex`: 그룹핑 설정
+  - `fixed`, `fixedPosition`: 고정 컬럼 (left/right)
+- **GridSettings 추가**:
+  - `showRowLines`, `showColumnLines`: 선 표시
+  - `rowAlternationEnabled`: 줄무늬 배경
+  - `wordWrapEnabled`: 텍스트 줄바꿈
+  - `showFilterRow`, `showHeaderFilter`: 필터 UI
+  - `showGroupPanel`, `showSearchPanel`: 그룹/검색 패널
+  - `rowHeight`: compact/normal/comfortable
+- **Admin UI 강화** (`ViewSettingsSection.tsx`):
+  - 5개 뷰 선택 사이드바
+  - Grid Settings 패널 + Presets (Compact/Standard/Detailed)
+  - 컬럼별 상세 옵션 (클릭 확장: Sorting, Filtering, Grouping, Fixed)
+  - Live Preview (Projects 뷰 전용)
+- **ProjectListPage 통합**:
+  - `useViewConfig('projects_list')` 훅 연동
+  - DevExtreme StateStoring (사용자별 컬럼 드래그/리사이즈 저장)
+  - gridSettings 기반 그리드 속성 적용
+  - effectiveColumns 기반 동적 Column 렌더링
+- **DB 마이그레이션** (`018_view_config_extended.sql`):
+  - `projects_list` 뷰 설정 시드
+  - 기존 4개 뷰 설정 확장 (gridSettings + 컬럼 옵션)
+- **파일 변경**:
+  - 수정: `src/types/pm.ts` (ViewKey, ColumnConfig, GridSettings, DxGridState 확장)
+  - 수정: `src/lib/view-config-store.ts` (DEFAULT_CONFIGS, GRID_PRESETS, mergeWithTenantConfig)
+  - 수정: `src/hooks/useViewConfig.ts` (gridSettings 반환)
+  - 수정: `src/pages/admin/ViewSettingsSection.tsx` (완전 재작성)
+  - 수정: `src/pages/admin/ViewSettingsSection.css` (새 UI 스타일)
+  - 수정: `src/pages/ProjectListPage.tsx` (StateStoring + 동적 컬럼)
+  - 신규: `supabase/migrations/018_view_config_extended.sql`
+
+### Phase 44: Admin UI 통합 + User Management 확장
+
+- **목적**: Admin 페이지 전체 디자인 통일 (View Columns 스타일) + User Management에 HR 기능 추가
+- **Admin UI 통합**:
+  - Organization 섹션: 3개 하위 탭 (Basic Information, Details, Branding)
+  - Appearance 섹션 → Organization > Branding 탭으로 통합 및 파일 삭제
+  - `admin-sections.css` 공통 스타일 파일 생성 (sidebar tabs, sticky header, card boxes, settings grid)
+- **User Management 확장** — 7개 탭:
+  - Directory: 전체 사용자 DataGrid (기존 코드 재활용)
+  - Departments: 부서 관리 (tenant_enum_config 활용, CRUD UI)
+  - Org Chart: 조직도 시각화 (DevExtreme TreeList, manager_id 기반 계층)
+  - Active: 현재 근무자 필터 (employment_status = 'active')
+  - On Leave: 휴직자 필터 (employment_status = 'on_leave')
+  - Terminated: 퇴사자 필터 (employment_status = 'terminated')
+  - Settings: 역할 권한 기본값 설정
+- **DB 마이그레이션** (`019_employment_status.sql`):
+  - `employment_status` ENUM 생성 (active, on_leave, terminated)
+  - `profiles` 테이블에 `employment_status`, `department_id`, `manager_id` 컬럼 추가
+  - 기존 `is_active` 데이터를 `employment_status`로 마이그레이션
+  - `update_employment_status`, `update_user_manager`, `update_user_department` RPC 함수 (admin only)
+- **타입 추가**: `EmploymentStatus` 타입, Profile 인터페이스 확장
+- **훅 확장** (`useUserManagement.ts`): `updateEmploymentStatus`, `updateUserManager`, `updateUserDepartment` 함수 추가
+- **파일 변경**:
+  - 신규: `supabase/migrations/019_employment_status.sql`, `src/styles/admin-sections.css`
+  - 수정: `src/types/database.ts`, `src/hooks/useUserManagement.ts`
+  - 대폭 재작성: `src/pages/admin/UsersSection.tsx`, `src/pages/admin/UsersSection.css`
+  - 삭제: `src/pages/admin/AppearanceSection.tsx`, `src/pages/admin/AppearanceSection.css`
+
+### Phase 45: My Tasks 페이지 UI 통일 + 필터 연동 갯수 표시
+
+- **목적**: My Tasks 페이지의 UI/UX를 Projects 페이지와 동일하게 통일
+- **MyTasksPage UI 개선**:
+  - 헤더 스타일 통일 (40px 컴팩트 헤더, uppercase 타이틀 "MY TASKS", sidebar 스타일 버튼)
+  - DataGrid 스타일 통일 (`showBorders={false}`, sidebar 배경색 `var(--sidebar-bg)`)
+  - Pager 컴포넌트 추가 (페이지 크기 선택, 정보 표시)
+  - 로딩/에러/빈 상태를 `noDataText`로 통합
+  - CSS 전면 개편 — `project-grid-container` 패턴 적용
+- **필터 연동 갯수 표시**:
+  - ProjectListPage/MyTasksPage 헤더에 항목 갯수 배지 추가
+  - DataGrid 필터 변경 시 갯수 자동 업데이트 (`onOptionChanged` 이벤트)
+  - `visibleCount` state + `lastCountRef` 조합으로 무한 루프 방지
+  - `setTimeout` debounce로 안정적인 상태 업데이트
+- **파일 변경**:
+  - 수정: `src/pages/MyTasksPage.tsx` (Pager import, 헤더 구조, DataGrid props, onOptionChanged)
+  - 수정: `src/pages/MyTasksPage.css` (전면 재작성 — ProjectListPage.css 패턴 적용)
+  - 수정: `src/pages/ProjectListPage.tsx` (visibleCount state, onOptionChanged)
+  - 수정: `src/pages/ProjectListPage.css` (header-count 스타일 추가)
 
 ---
 

@@ -7,9 +7,16 @@ import {
 } from './user-settings';
 import './UserSettingsPage.css';
 
+const SECTION_LABELS: Record<string, string> = {
+  appearance: 'Appearance',
+  regional: 'Regional',
+  workspace: 'Workspace',
+};
+
 export default function UserSettingsPage(): ReactNode {
   const { section } = useParams<{ section?: string }>();
   const activeSection = section || 'appearance';
+  const sectionLabel = SECTION_LABELS[activeSection] || 'Appearance';
 
   const renderSection = (): ReactNode => {
     switch (activeSection) {
@@ -26,9 +33,10 @@ export default function UserSettingsPage(): ReactNode {
 
   return (
     <div className="user-settings-page">
-      <div className="page-header">
-        <h1>Settings</h1>
-        <p>Personal preferences and workspace configuration</p>
+      <div className="settings-breadcrumb">
+        <span className="breadcrumb-root">Settings</span>
+        <i className="dx-icon-chevronright breadcrumb-sep" />
+        <span className="breadcrumb-current">{sectionLabel}</span>
       </div>
 
       <div className="settings-content">

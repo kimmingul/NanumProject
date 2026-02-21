@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/lib/auth-store';
 import { useThemeStore } from '@/lib/theme-store';
 import { supabase } from '@/lib/supabase';
+import type { TenantSettings } from '@/types';
 import { GlobalSearch } from './GlobalSearch';
 import { NotificationBell } from './NotificationBell';
 
@@ -15,6 +16,24 @@ export function IDEHeader(): ReactNode {
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
+
+  // Branding from tenant settings
+  const [branding, setBranding] = useState<TenantSettings['branding']>(undefined);
+
+  useEffect(() => {
+    if (!profile?.tenant_id) return;
+    supabase
+      .from('tenants')
+      .select('settings')
+      .eq('id', profile.tenant_id)
+      .single()
+      .then(({ data }) => {
+        const settings = data?.settings as TenantSettings | null;
+        if (settings?.branding) {
+          setBranding(settings.branding);
+        }
+      });
+  }, [profile?.tenant_id]);
 
   const toggleTheme = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
@@ -54,15 +73,20 @@ export function IDEHeader(): ReactNode {
   return (
     <header className="ide-header">
       <div className="ide-header-left">
-        <span
-          className="ide-app-title"
+        <div
+          className="ide-app-branding"
           onClick={() => navigate('/dashboard')}
           role="button"
           tabIndex={0}
           onKeyDown={(e) => e.key === 'Enter' && navigate('/dashboard')}
         >
-          NanumProject
-        </span>
+          {branding?.logo_url && (
+            <img src={branding.logo_url} alt="" className="ide-app-logo" />
+          )}
+          <span className="ide-app-title">
+            {branding?.app_name || 'Nanum Project'}
+          </span>
+        </div>
       </div>
 
       <div className="ide-header-center">

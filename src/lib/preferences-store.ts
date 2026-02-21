@@ -2,16 +2,16 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { supabase } from './supabase';
 import { useAuthStore } from './auth-store';
-import { useThemeStore } from './theme-store';
+import { useThemeStore, applyFullTheme } from './theme-store';
+import type { ThemeMode, ColorScheme, Density } from './theme-store';
 
-type ThemeMode = 'light' | 'dark' | 'system';
-type Density = 'compact' | 'normal';
 type DateFormat = 'YYYY-MM-DD' | 'MM/DD/YYYY' | 'DD.MM.YYYY' | 'DD/MM/YYYY' | 'YYMMDD';
 type DefaultView = 'gantt' | 'board' | 'grid' | 'calendar';
 type SidebarDefault = 'expanded' | 'collapsed';
 
 export interface UserPreferences {
   theme: ThemeMode;
+  colorScheme: ColorScheme;
   density: Density;
   dateFormat: DateFormat;
   timezone: string; // 'auto' | IANA timezone
@@ -22,6 +22,7 @@ export interface UserPreferences {
 
 const DEFAULT_PREFERENCES: UserPreferences = {
   theme: 'light',
+  colorScheme: 'saas',
   density: 'compact',
   dateFormat: 'YYYY-MM-DD',
   timezone: 'auto',
@@ -36,12 +37,13 @@ interface PreferencesStore {
   setPreference: <K extends keyof UserPreferences>(key: K, value: UserPreferences[K]) => void;
   loadFromDb: () => void;
   _saveToDb: () => void;
+  _applyTheme: () => void;
 }
 
 // Debounce timer for DB saves
 let saveTimer: ReturnType<typeof setTimeout> | null = null;
 
-function applyDensity(density: Density): void {
+function applyDensityClass(density: Density): void {
   document.documentElement.classList.toggle('density-normal', density === 'normal');
 }
 
@@ -51,13 +53,25 @@ export const usePreferencesStore = create<PreferencesStore>()(
       preferences: { ...DEFAULT_PREFERENCES },
       loaded: false,
 
+      _applyTheme: () => {
+        const { theme, colorScheme, density } = get().preferences;
+        useThemeStore.getState().setTheme(theme);
+        applyFullTheme(theme, colorScheme, density);
+      },
+
       setPreference: (key, value) => {
         const next = { ...get().preferences, [key]: value };
         set({ preferences: next });
 
         // Apply side effects
-        if (key === 'density') applyDensity(value as Density);
-        if (key === 'theme') useThemeStore.getState().setTheme(value as ThemeMode);
+        if (key === 'density') {
+          applyDensityClass(value as Density);
+        }
+
+        // Re-apply full theme for theme-related changes
+        if (key === 'theme' || key === 'colorScheme' || key === 'density') {
+          get()._applyTheme();
+        }
 
         // Debounced DB save
         if (saveTimer) clearTimeout(saveTimer);
@@ -83,10 +97,8 @@ export const usePreferencesStore = create<PreferencesStore>()(
             set({ preferences: merged, loaded: true });
 
             // Apply DB values
-            applyDensity(merged.density);
-            if (dbPrefs.theme) {
-              useThemeStore.getState().setTheme(merged.theme);
-            }
+            applyDensityClass(merged.density);
+            get()._applyTheme();
           });
       },
 
@@ -116,9 +128,19 @@ export const usePreferencesStore = create<PreferencesStore>()(
       },
       onRehydrateStorage: () => (state) => {
         if (state) {
-          applyDensity(state.preferences.density);
+          applyDensityClass(state.preferences.density);
+          // Apply full theme on rehydrate
+          const { theme, colorScheme, density } = state.preferences;
+          applyFullTheme(theme, colorScheme, density);
         }
       },
     }
   )
 );
+
+// Listen for system theme changes
+if (typeof window !== 'undefined') {
+  window.addEventListener('system-theme-change', () => {
+    usePreferencesStore.getState()._applyTheme();
+  });
+}

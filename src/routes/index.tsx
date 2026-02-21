@@ -11,6 +11,7 @@ import UsersPage from '@/pages/UsersPage';
 import AuditLogPage from '@/pages/AuditLogPage';
 import ProjectListPage from '@/pages/ProjectListPage';
 import TasksWorkspacePage from '@/pages/TasksWorkspacePage';
+import MyTasksPage from '@/pages/MyTasksPage';
 import MyProfilePage from '@/pages/MyProfilePage';
 import UserSettingsPage from '@/pages/UserSettingsPage';
 
@@ -48,6 +49,7 @@ const router = createBrowserRouter([
     children: [
       { path: '/dashboard', element: <DashboardPage /> },
       { path: '/projects', element: <ProjectListPage /> },
+      { path: '/my-tasks', element: <MyTasksPage /> },
       { path: '/tasks', element: <TasksWorkspacePage /> },
       { path: '/tasks/:projectId', element: <TasksWorkspacePage /> },
       { path: '/tasks/:projectId/:tab', element: <TasksWorkspacePage /> },

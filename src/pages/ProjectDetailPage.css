@@ -10,8 +10,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 44px;
-  min-height: 44px;
+  height: 40px;
+  min-height: 40px;
   padding: 0 12px;
   background: var(--toolbar-bg);
   border-bottom: 1px solid var(--toolbar-border);
@@ -26,7 +26,7 @@
 }
 
 .workspace-project-name {
-  font-size: 14px;
+  font-size: 11px;
   font-weight: 600;
   color: var(--toolbar-text);
   white-space: nowrap;
@@ -325,6 +325,22 @@
 /* Gantt splitter bar (vertical drag handle between treelist & timeline) */
 .workspace-content .dx-gantt .dx-splitter-bar {
   background-color: var(--sidebar-border) !important;
+}
+
+/* Gantt/TreeList selected row */
+.workspace-content .dx-gantt .dx-treelist-rowsview .dx-selection > td,
+.workspace-content .dx-gantt .dx-treelist-rowsview .dx-selection.dx-row:hover > td,
+.workspace-content .dx-treelist-rowsview .dx-selection > td,
+.workspace-content .dx-treelist-rowsview .dx-selection.dx-row:hover > td {
+  background-color: var(--selection-bg) !important;
+  color: var(--selection-text) !important;
+}
+
+/* Focused row */
+.workspace-content .dx-gantt .dx-treelist-rowsview .dx-row-focused > td,
+.workspace-content .dx-treelist-rowsview .dx-row-focused > td {
+  background-color: var(--selection-bg) !important;
+  color: var(--selection-text) !important;
 }
 
 /* --- Standalone TreeList (Grid view) --- */

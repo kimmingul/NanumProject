@@ -54,6 +54,7 @@ export interface ActivityItem {
 export interface DashboardData {
   kpi: DashboardKPI;
   myTasks: DashboardTaskItem[];
+  myTasksCount: number;
   overdueItems: DashboardTaskItem[];
   upcomingItems: DashboardTaskItem[];
   projectStatusCounts: ProjectStatusCount[];
@@ -140,6 +141,7 @@ export function useDashboardData(options: DashboardFilterOptions = {}): Dashboar
     myDueThisWeek: 0,
   });
   const [myTasks, setMyTasks] = useState<DashboardTaskItem[]>([]);
+  const [myTasksCount, setMyTasksCount] = useState(0);
   const [overdueItems, setOverdueItems] = useState<DashboardTaskItem[]>([]);
   const [upcomingItems, setUpcomingItems] = useState<DashboardTaskItem[]>([]);
   const [projectStatusCounts, setProjectStatusCounts] = useState<ProjectStatusCount[]>([]);
@@ -272,7 +274,7 @@ export function useDashboardData(options: DashboardFilterOptions = {}): Dashboar
 
     /* --- List queries (parallel) --- */
     const listsPromise = Promise.all([
-      // My tasks (assigned to me, not done, limit 8)
+      // My tasks (assigned to me, not done, limit 8 for display)
       userId
         ? (() => {
             let q = supabase
@@ -290,6 +292,19 @@ export function useDashboardData(options: DashboardFilterOptions = {}): Dashboar
             return q.order('item_id').limit(20);
           })()
         : Promise.resolve({ data: [], error: null }),
+      // My tasks count (total count for badge)
+      userId
+        ? (() => {
+            let q = supabase
+              .from('task_assignees')
+              .select('item_id, project_items!inner(task_status, project_id)', { count: 'exact', head: true })
+              .eq('is_active', true)
+              .eq('user_id', userId)
+              .neq('project_items.task_status' as string, 'done');
+            if (pid) q = q.eq('project_items.project_id' as string, pid);
+            return q;
+          })()
+        : Promise.resolve({ count: 0, error: null }),
       // Overdue items (top 6)
       (() => {
         let q = supabase
@@ -317,9 +332,12 @@ export function useDashboardData(options: DashboardFilterOptions = {}): Dashboar
         if (pid) q = q.eq('project_id', pid);
         return q.order('end_date', { ascending: true }).limit(10);
       })(),
-    ]).then(async ([myTasksRes, overdueRes, upcomingRes]) => {
+    ]).then(async ([myTasksRes, myTasksCountRes, overdueRes, upcomingRes]) => {
       // Collect project IDs for name lookup
       const projectIds = new Set<string>();
+
+      // Set my tasks total count
+      setMyTasksCount(myTasksCountRes.count ?? 0);
 
       // Process my tasks
       const myTaskItems: DashboardTaskItem[] = [];
@@ -491,6 +509,7 @@ export function useDashboardData(options: DashboardFilterOptions = {}): Dashboar
   return {
     kpi,
     myTasks,
+    myTasksCount,
     overdueItems,
     upcomingItems,
     projectStatusCounts,

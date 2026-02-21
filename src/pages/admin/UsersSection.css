@@ -1,13 +1,28 @@
-/* Settings > Users Section */
-.users-section {
-  width: 100%;
+/* Users Section
+   Uses admin-sections.css common styles with sidebar tabs */
+
+/* Note: Height is controlled by flex layout in admin-sections.css */
+
+/* Tab content area */
+.users-tab-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0; /* Critical: Allow flex child to shrink below content size */
+  overflow: hidden;
 }
 
-.users-section-grid {
-  background: var(--card-bg);
+/* Grid wrapper for DataGrid tabs */
+.users-grid-wrapper {
+  flex: 1;
+  min-height: 0; /* Critical: Allow flex child to shrink */
+  background: var(--card-bg, #ffffff);
   border-radius: 8px;
-  padding: 1.5rem;
-  box-shadow: var(--card-shadow);
+  padding: 1rem;
+  border: 1px solid var(--border-color, #e2e8f0);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Role badges */
@@ -25,7 +40,7 @@
 .users-section .role-member { background: var(--badge-info-bg); color: var(--badge-info-text); }
 .users-section .role-viewer { background: var(--badge-purple-bg); color: var(--badge-purple-text); }
 
-/* Status badges */
+/* Status badges - employment status */
 .users-section .status-badge {
   display: inline-block;
   padding: 0.25rem 0.75rem;
@@ -34,6 +49,11 @@
   font-weight: 600;
 }
 
+.users-section .status-badge.status-active { background: var(--badge-success-bg); color: var(--badge-success-text); }
+.users-section .status-badge.status-on_leave { background: var(--badge-warning-bg); color: var(--badge-warning-text); }
+.users-section .status-badge.status-terminated { background: var(--badge-danger-bg); color: var(--badge-danger-text); }
+
+/* Legacy status badges */
 .users-section .status-badge.active { background: var(--badge-success-bg); color: var(--badge-success-text); }
 .users-section .status-badge.inactive { background: var(--badge-danger-bg); color: var(--badge-danger-text); }
 
@@ -71,22 +91,30 @@
   font-size: 13px;
 }
 
-/* DevExtreme overrides */
-.users-section-grid .dx-datagrid {
-  border: 1px solid var(--grid-border);
+/* DevExtreme DataGrid overrides */
+.users-grid-wrapper .dx-datagrid {
+  flex: 1;
+  border: 1px solid var(--border-color, #e2e8f0);
   border-radius: 8px;
 }
 
-.users-section-grid .dx-datagrid-headers {
-  background: var(--grid-header-bg);
+.users-grid-wrapper .dx-datagrid-headers {
+  background: var(--bg-secondary, #f8fafc);
   font-weight: 600;
 }
 
-.users-section-grid .dx-datagrid-rowsview .dx-row-alt {
-  background: var(--grid-alt-row-bg);
+.users-grid-wrapper .dx-datagrid-rowsview .dx-row-alt {
+  background: var(--bg-secondary, #f8fafc);
 }
 
-/* Edit User Form */
+/* Toolbar styling to match admin-section-header */
+.users-grid-wrapper .dx-toolbar {
+  padding: 8px 0;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--border-color, #e2e8f0);
+}
+
+/* Edit User Form (Popup) */
 .users-section .user-edit-form {
   padding: 0.5rem 0;
 }
@@ -106,13 +134,13 @@
 
 .users-section .user-edit-form .form-field label {
   display: block;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--form-label);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-secondary, #475569);
   margin-bottom: 0.375rem;
 }
 
-/* Avatar section */
+/* Avatar section in popup */
 .users-section .avatar-section {
   display: flex;
   align-items: center;
@@ -127,7 +155,7 @@
   height: 64px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid var(--border-color);
+  border: 2px solid var(--border-color, #e2e8f0);
 }
 
 .users-section .avatar-placeholder {
@@ -149,10 +177,23 @@
   align-items: center;
 }
 
+/* Hidden file input - accessible via button */
+.users-section .avatar-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* Divider */
 .users-section .form-divider {
   border: none;
-  border-top: 1px solid var(--border-color);
+  border-top: 1px solid var(--border-color, #e2e8f0);
   margin: 1rem 0;
 }
 
@@ -161,9 +202,9 @@
 
 .users-section .password-section .section-label {
   display: block;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--form-label);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-secondary, #475569);
   margin-bottom: 0.5rem;
 }
 
@@ -178,30 +219,30 @@
 /* Add User note */
 .users-section .add-user-note {
   padding: 0.625rem 0.75rem;
-  background: var(--alert-info-bg);
-  color: var(--alert-info-text);
+  background: var(--primary-bg, #eff6ff);
+  color: var(--primary-color, #1d4ed8);
   border-radius: 6px;
   font-size: 0.85rem;
   margin-bottom: 1rem;
-  border: 1px solid var(--alert-info-border);
+  border: 1px solid var(--border-color, #e2e8f0);
 }
 
-/* Error / Success */
+/* Error / Success - use common styles */
 .users-section .form-error {
-  padding: 0.5rem 0.75rem;
-  background: var(--alert-error-bg);
-  color: var(--alert-error-text);
+  padding: 0.75rem;
+  background: var(--badge-danger-bg, #fee2e2);
+  color: var(--badge-danger-text, #dc2626);
   border-radius: 6px;
-  font-size: 0.85rem;
+  font-size: 0.875rem;
   margin-bottom: 1rem;
 }
 
 .users-section .form-success {
-  padding: 0.5rem 0.75rem;
-  background: var(--alert-success-bg);
-  color: var(--alert-success-text);
+  padding: 0.75rem;
+  background: var(--badge-success-bg, #dcfce7);
+  color: var(--badge-success-text, #16a34a);
   border-radius: 6px;
-  font-size: 0.85rem;
+  font-size: 0.875rem;
   margin-bottom: 1rem;
 }
 
@@ -212,5 +253,104 @@
   gap: 0.75rem;
   margin-top: 1.5rem;
   padding-top: 1rem;
-  border-top: 1px solid var(--border-color);
+  border-top: 1px solid var(--border-color, #e2e8f0);
+}
+
+/* -------------------------
+   Departments Tab
+   ------------------------- */
+.departments-tab-content {
+  flex: 1;
+  min-height: 0; /* Critical: Allow flex child to shrink */
+  overflow-y: auto;
+}
+
+.dept-add-form {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  align-items: center;
+}
+
+/* Department list table columns */
+.users-section .dept-name-col {
+  flex: 1;
+}
+
+.users-section .dept-count-col {
+  width: 100px;
+}
+
+.users-section .dept-actions-col {
+  width: 80px;
+}
+
+.users-section .dept-empty-text {
+  color: var(--text-muted, #94a3b8);
+}
+
+/* Sidebar tab icon */
+.users-section .sidebar-tab-icon {
+  margin-right: 8px;
+}
+
+/* -------------------------
+   Org Chart Tab
+   ------------------------- */
+.org-chart-wrapper {
+  flex: 1;
+  min-height: 0; /* Critical: Allow flex child to shrink */
+  background: var(--card-bg, #ffffff);
+  border-radius: 8px;
+  padding: 1rem;
+  border: 1px solid var(--border-color, #e2e8f0);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.org-chart-wrapper .dx-treelist {
+  flex: 1;
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 8px;
+}
+
+.org-chart-wrapper .dx-treelist-headers {
+  background: var(--bg-secondary, #f8fafc);
+  font-weight: 600;
+}
+
+.org-chart-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.org-chart-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.org-chart-avatar-placeholder {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--avatar-gradient);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+/* -------------------------
+   Settings Tab
+   ------------------------- */
+.settings-tab-content {
+  flex: 1;
+  min-height: 0; /* Critical: Allow flex child to shrink */
+  overflow-y: auto;
 }

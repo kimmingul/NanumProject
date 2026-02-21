@@ -3,6 +3,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks';
 import { useAuthStore } from '@/lib/auth-store';
 import { useEnumConfigStore } from '@/lib/enum-config-store';
+import { useViewConfigStore } from '@/lib/view-config-store';
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -13,14 +14,25 @@ export function ProtectedRoute({ children }: ProtectedRouteProps): ReactNode {
   const location = useLocation();
   const tenantId = useAuthStore((s) => s.profile?.tenant_id);
   const enumLoaded = useEnumConfigStore((s) => s.loaded);
-  const loadConfigs = useEnumConfigStore((s) => s.loadConfigs);
+  const loadEnumConfigs = useEnumConfigStore((s) => s.loadConfigs);
+  const viewConfigsLoaded = useViewConfigStore((s) => s.tenantConfigsLoaded);
+  const loadViewConfigs = useViewConfigStore((s) => s.loadTenantConfigs);
+  const loadUserStates = useViewConfigStore((s) => s.loadUserStates);
 
   // Load enum configs once tenant_id is available
   useEffect(() => {
     if (tenantId && !enumLoaded) {
-      loadConfigs(tenantId);
+      loadEnumConfigs(tenantId);
     }
-  }, [tenantId, enumLoaded, loadConfigs]);
+  }, [tenantId, enumLoaded, loadEnumConfigs]);
+
+  // Load view configs once tenant_id is available
+  useEffect(() => {
+    if (tenantId && !viewConfigsLoaded) {
+      loadViewConfigs(tenantId);
+      loadUserStates();
+    }
+  }, [tenantId, viewConfigsLoaded, loadViewConfigs, loadUserStates]);
 
   if (isLoading) {
     return (

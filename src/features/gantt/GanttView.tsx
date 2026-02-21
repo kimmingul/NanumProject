@@ -18,6 +18,7 @@ import { usePMStore } from '@/lib/pm-store';
 import { usePreferencesStore } from '@/lib/preferences-store';
 import { getDxDateFormat } from '@/utils/formatDate';
 import { useProjectItems } from '@/hooks/useProjectItems';
+import { useViewConfig } from '@/hooks/useViewConfig';
 import TaskDetailPopup from '@/features/tasks/TaskDetailPopup';
 import type { DependencyType } from '@/types';
 import './GanttView.css';
@@ -65,7 +66,20 @@ export default function GanttView({ projectId, actionsRef }: GanttViewProps): Re
   const selectedTaskId = usePMStore((s) => s.selectedTaskId);
   const dateFormat = usePreferencesStore((s) => s.preferences.dateFormat);
   const dxDateFmt = useMemo(() => getDxDateFormat(), [dateFormat]);
+  const { tenantConfig, effectiveColumns } = useViewConfig({ viewKey: 'gantt', projectId });
   const ganttRef = useRef<GanttRef>(null);
+
+  // Build column visibility map
+  const columnVisible = useMemo(() => {
+    const map: Record<string, boolean> = {};
+    for (const col of effectiveColumns) {
+      map[col.dataField] = col.visible;
+    }
+    return map;
+  }, [effectiveColumns]);
+
+  // Get taskListWidth from tenant config
+  const taskListWidth = tenantConfig.taskListWidth || 600;
 
   // Expose add/delete actions to parent via ref
   useEffect(() => {
@@ -409,7 +423,7 @@ export default function GanttView({ projectId, actionsRef }: GanttViewProps): Re
     <div className="gantt-view">
       <Gantt
         ref={ganttRef}
-        taskListWidth={600}
+        taskListWidth={taskListWidth}
         scaleType="weeks"
         height="calc(100vh - 90px)"
         rootValue=""
@@ -452,11 +466,11 @@ export default function GanttView({ projectId, actionsRef }: GanttViewProps): Re
           resourceIdExpr="resourceId"
         />
 
-        <Column dataField="title" caption="Task Name" width={280} cellRender={taskNameCellRender} />
-        <Column dataField="start" caption="Start" width={90} format={dxDateFmt} />
-        <Column dataField="end" caption="End" width={90} format={dxDateFmt} />
-        <Column dataField="progress" caption="%" width={50} />
-        <Column dataField="assignees" caption="Assigned" width={90} cellRender={assigneesCellRender} />
+        <Column dataField="title" caption="Task Name" width={280} visible={columnVisible.title !== false} cellRender={taskNameCellRender} />
+        <Column dataField="start" caption="Start" width={90} format={dxDateFmt} visible={columnVisible.start !== false} />
+        <Column dataField="end" caption="End" width={90} format={dxDateFmt} visible={columnVisible.end !== false} />
+        <Column dataField="progress" caption="%" width={50} visible={columnVisible.progress !== false} />
+        <Column dataField="assignees" caption="Assigned" width={90} visible={columnVisible.assignees !== false} cellRender={assigneesCellRender} />
 
         <Validation autoUpdateParentTasks={true} />
 

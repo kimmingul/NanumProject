@@ -215,6 +215,44 @@
   --board-card-overdue: #ef4444;
   --board-card-due-soon: #f59e0b;
   --board-card-critical-border: #ef4444;
+
+  /* ---- Selection ---- */
+  --selection-bg: #dbeafe;
+  --selection-text: #1e293b;
+
+  /* ---- Popup/Modal ---- */
+  --popup-bg: #ffffff;
+  --popup-header-bg: #f8fafc;
+  --popup-header-text: #1e293b;
+  --popup-border: #e2e8f0;
+
+  /* ---- Auth Pages ---- */
+  --auth-gradient-start: #667eea;
+  --auth-gradient-end: #764ba2;
+  --auth-gradient: linear-gradient(135deg, var(--auth-gradient-start) 0%, var(--auth-gradient-end) 100%);
+  --auth-bg-overlay: rgba(255, 255, 255, 0.03);
+
+  /* Auth Card (Glassmorphism) */
+  --auth-card-bg: rgba(255, 255, 255, 0.95);
+  --auth-card-border: rgba(255, 255, 255, 0.2);
+  --auth-card-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+
+  /* Text on gradient background */
+  --auth-hero-text: #ffffff;
+  --auth-hero-text-secondary: rgba(255, 255, 255, 0.9);
+  --auth-hero-text-muted: rgba(255, 255, 255, 0.7);
+
+  /* Form elements */
+  --auth-input-focus-ring: rgba(102, 126, 234, 0.3);
+
+  /* Feature pills on gradient */
+  --auth-feature-bg: rgba(255, 255, 255, 0.15);
+  --auth-feature-border: rgba(255, 255, 255, 0.25);
+
+  /* Decorative elements */
+  --auth-blob-1: rgba(255, 255, 255, 0.1);
+  --auth-blob-2: rgba(255, 255, 255, 0.05);
+  --auth-grid-color: rgba(255, 255, 255, 0.03);
 }
 
 
@@ -432,6 +470,44 @@
   --board-card-overdue: #f87171;
   --board-card-due-soon: #fbbf24;
   --board-card-critical-border: #f87171;
+
+  /* ---- Selection ---- */
+  --selection-bg: rgba(99, 102, 241, 0.25);
+  --selection-text: #f1f5f9;
+
+  /* ---- Popup/Modal ---- */
+  --popup-bg: #1e293b;
+  --popup-header-bg: #0f172a;
+  --popup-header-text: #f1f5f9;
+  --popup-border: #334155;
+
+  /* ---- Auth Pages ---- */
+  --auth-gradient-start: #1e1b4b;
+  --auth-gradient-end: #312e81;
+  --auth-gradient: linear-gradient(135deg, var(--auth-gradient-start) 0%, var(--auth-gradient-end) 100%);
+  --auth-bg-overlay: rgba(0, 0, 0, 0.2);
+
+  /* Auth Card (True glassmorphism for dark mode) */
+  --auth-card-bg: rgba(30, 41, 59, 0.85);
+  --auth-card-border: rgba(255, 255, 255, 0.1);
+  --auth-card-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+
+  /* Text on gradient background */
+  --auth-hero-text: #f1f5f9;
+  --auth-hero-text-secondary: rgba(241, 245, 249, 0.9);
+  --auth-hero-text-muted: rgba(241, 245, 249, 0.7);
+
+  /* Form elements */
+  --auth-input-focus-ring: rgba(129, 140, 248, 0.4);
+
+  /* Feature pills */
+  --auth-feature-bg: rgba(255, 255, 255, 0.08);
+  --auth-feature-border: rgba(255, 255, 255, 0.12);
+
+  /* Decorative elements */
+  --auth-blob-1: rgba(129, 140, 248, 0.15);
+  --auth-blob-2: rgba(167, 139, 250, 0.1);
+  --auth-grid-color: rgba(255, 255, 255, 0.02);
 }
 
 /* ================================================= */

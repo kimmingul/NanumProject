@@ -1,0 +1,339 @@
+.my-tasks-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Compact header — matches project-list-header style */
+.my-tasks-header {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  min-height: 40px;
+  padding: 0 8px 0 14px;
+  gap: 8px;
+  border-bottom: 1px solid var(--sidebar-border);
+}
+
+.my-tasks-header-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--sidebar-title);
+  white-space: nowrap;
+}
+
+.my-tasks-header-count {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  padding: 2px 6px;
+  background: var(--badge-neutral-bg);
+  border-radius: 10px;
+}
+
+.my-tasks-header-spacer {
+  flex: 1;
+}
+
+.dx-button.my-tasks-header-btn {
+  min-width: auto;
+  height: 28px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--sidebar-icon);
+  transition: background 0.15s, color 0.15s;
+}
+
+.dx-button.my-tasks-header-btn .dx-button-content {
+  padding: 0 8px;
+}
+
+.dx-button.my-tasks-header-btn .dx-icon {
+  font-size: 14px;
+}
+
+.dx-button.my-tasks-header-btn:hover,
+.dx-button.my-tasks-header-btn.dx-state-hover {
+  background: var(--sidebar-hover-bg);
+  color: var(--sidebar-icon-hover);
+}
+
+/* Header SelectBox styling */
+.my-tasks-header .dx-selectbox.my-tasks-header-select {
+  height: 28px;
+}
+
+.my-tasks-header .dx-selectbox.my-tasks-header-select .dx-texteditor-input {
+  font-size: 12px;
+  padding: 4px 8px;
+  height: 26px;
+  min-height: 26px;
+}
+
+.my-tasks-header .dx-selectbox.my-tasks-header-select .dx-texteditor-container {
+  height: 26px;
+}
+
+/* Error banner */
+.error-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--alert-error-bg);
+  border: 1px solid var(--alert-error-border);
+  border-radius: 8px;
+  color: var(--alert-error-text);
+  margin: 0.5rem;
+  font-size: 0.9rem;
+}
+
+/* Grid container */
+.my-tasks-grid-container {
+  flex: 1;
+  overflow: hidden;
+  padding: 0;
+}
+
+/* ============================================= */
+/* DataGrid — blend with sidebar-style header    */
+/* Higher specificity to override DevExtreme     */
+/* ============================================= */
+
+.my-tasks-grid-container .dx-datagrid {
+  background: var(--sidebar-bg);
+  color: var(--sidebar-text);
+  border: none;
+}
+
+/* --- Header --- */
+.my-tasks-grid-container .dx-datagrid-headers,
+.my-tasks-grid-container .dx-datagrid .dx-datagrid-headers {
+  background-color: var(--sidebar-bg) !important;
+  border-bottom: 1px solid var(--sidebar-border);
+  color: var(--sidebar-title);
+}
+
+.my-tasks-grid-container .dx-datagrid-headers td {
+  background-color: var(--sidebar-bg) !important;
+  border: none;
+}
+
+.my-tasks-grid-container .dx-header-row > td {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--sidebar-title);
+}
+
+.my-tasks-grid-container.uppercase-headers .dx-header-row > td {
+  text-transform: uppercase;
+}
+
+/* Header alignment classes */
+.my-tasks-grid-container .dx-datagrid-headers td.header-align-left {
+  text-align: left;
+}
+
+.my-tasks-grid-container .dx-datagrid-headers td.header-align-center {
+  text-align: center;
+}
+
+.my-tasks-grid-container .dx-datagrid-headers td.header-align-right {
+  text-align: right;
+}
+
+/* --- Rows view (content area) --- */
+.my-tasks-grid-container .dx-datagrid-rowsview,
+.my-tasks-grid-container .dx-datagrid .dx-datagrid-rowsview {
+  background-color: var(--sidebar-bg) !important;
+}
+
+.my-tasks-grid-container .dx-datagrid-rowsview .dx-row > td,
+.my-tasks-grid-container .dx-data-row > td {
+  background-color: var(--sidebar-bg);
+  border-color: var(--sidebar-border);
+  color: var(--sidebar-text);
+}
+
+.my-tasks-grid-container .dx-data-row.dx-row-alt > td {
+  background-color: var(--grid-alt-row-bg);
+}
+
+.my-tasks-grid-container .dx-data-row:hover > td,
+.my-tasks-grid-container .dx-data-row.dx-state-hover > td {
+  background-color: var(--sidebar-hover-bg) !important;
+}
+
+/* --- Filter row --- */
+.my-tasks-grid-container .dx-datagrid-filter-row > td,
+.my-tasks-grid-container .dx-datagrid-filter-row .dx-editor-cell {
+  background-color: var(--sidebar-bg) !important;
+  border-color: var(--sidebar-border) !important;
+}
+
+.my-tasks-grid-container .dx-datagrid-filter-row .dx-texteditor,
+.my-tasks-grid-container .dx-datagrid-filter-row .dx-texteditor-input {
+  background-color: transparent;
+  color: var(--sidebar-text);
+}
+
+/* --- Pager --- */
+.my-tasks-grid-container .dx-datagrid-pager,
+.my-tasks-grid-container .dx-pager {
+  background-color: var(--sidebar-bg) !important;
+  border-top: 1px solid var(--sidebar-border);
+  color: var(--sidebar-text);
+}
+
+.my-tasks-grid-container .dx-pager .dx-page-size,
+.my-tasks-grid-container .dx-pager .dx-page {
+  color: var(--sidebar-text);
+}
+
+.my-tasks-grid-container .dx-pager .dx-page-size:hover,
+.my-tasks-grid-container .dx-pager .dx-page:hover {
+  background-color: var(--sidebar-hover-bg);
+}
+
+/* --- Borders cleanup --- */
+.my-tasks-grid-container .dx-datagrid-borders > .dx-datagrid-rowsview {
+  border: none;
+}
+
+.my-tasks-grid-container .dx-datagrid-rowsview .dx-row-lines > td {
+  border-bottom-color: var(--sidebar-border);
+}
+
+/* Hide header panel (search/toolbar area) */
+.my-tasks-grid-container .dx-datagrid-header-panel {
+  display: none;
+}
+
+/* DataGrid row click cursor */
+.my-tasks-grid-container .dx-data-row {
+  cursor: pointer;
+}
+
+/* ============================================= */
+/* Cell Styles                                   */
+/* ============================================= */
+
+/* Task name cell */
+.task-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.task-name-cell .task-name {
+  font-weight: 500;
+}
+
+/* Project link */
+.project-link {
+  color: var(--accent-color);
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.project-link:hover {
+  text-decoration: underline;
+}
+
+/* Progress bar */
+.progress-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 6px;
+  background: var(--border-color);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--accent-color);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  font-size: 12px;
+  color: var(--text-secondary);
+  min-width: 28px;
+  text-align: right;
+}
+
+/* Task status badge */
+.task-status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.status-todo {
+  background: var(--badge-neutral-bg);
+  color: var(--badge-neutral-text);
+}
+
+.status-in_progress {
+  background: var(--badge-info-bg);
+  color: var(--badge-info-text);
+}
+
+.status-review {
+  background: var(--badge-warning-bg);
+  color: var(--badge-warning-text);
+}
+
+.status-done {
+  background: var(--badge-success-bg);
+  color: var(--badge-success-text);
+}
+
+/* Due date badge */
+.due-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.due-overdue {
+  background: var(--badge-danger-bg);
+  color: var(--badge-danger-text);
+}
+
+.due-today {
+  background: var(--badge-warning-bg);
+  color: var(--badge-warning-text);
+}
+
+.due-soon {
+  background: var(--badge-info-bg);
+  color: var(--badge-info-text);
+}
+
+.due-normal {
+  background: var(--badge-neutral-bg);
+  color: var(--badge-neutral-text);
+}
+
+.due-none {
+  color: var(--text-tertiary);
+}

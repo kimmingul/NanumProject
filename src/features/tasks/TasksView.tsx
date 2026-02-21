@@ -6,20 +6,25 @@ import TreeList, {
   HeaderFilter,
   Lookup,
   RowDragging,
+  SearchPanel,
   Selection,
+  StateStoring,
 } from 'devextreme-react/tree-list';
 import type { TreeListRef } from 'devextreme-react/tree-list';
 import { SelectBox } from 'devextreme-react/select-box';
 import { Button } from 'devextreme-react/button';
 import { Popup } from 'devextreme-react/popup';
+import { TagBox } from 'devextreme-react/tag-box';
 import { DataGrid, Column as DGColumn } from 'devextreme-react/data-grid';
 import { useProjectItems } from '@/hooks/useProjectItems';
 import { useEnumOptions } from '@/hooks/useEnumOptions';
+import { useViewConfig } from '@/hooks/useViewConfig';
 import { useAuthStore } from '@/lib/auth-store';
 import { usePMStore } from '@/lib/pm-store';
 import { usePreferencesStore } from '@/lib/preferences-store';
 import { getDxDateFormat } from '@/utils/formatDate';
 import { supabase } from '@/lib/supabase';
+import type { ColumnConfig } from '@/types';
 import './TasksView.css';
 
 interface TasksViewProps {
@@ -33,15 +38,42 @@ const itemTypeIcons: Record<string, string> = {
   milestone: 'event',
 };
 
+// Helper to build column props from ColumnConfig
+function getColumnProps(col: ColumnConfig) {
+  const props: Record<string, unknown> = {
+    dataField: col.dataField,
+    caption: col.caption,
+    visible: col.visible,
+    visibleIndex: col.visibleIndex,
+  };
+  if (!col.autoWidth && col.width !== undefined) props.width = col.width;
+  if (col.minWidth !== undefined) props.minWidth = col.minWidth;
+  if (col.cellAlignment !== undefined) props.alignment = col.cellAlignment;
+  if (col.headerAlignment !== undefined) {
+    props.headerCssClass = `header-align-${col.headerAlignment}`;
+  }
+  if (col.allowSorting !== undefined) props.allowSorting = col.allowSorting;
+  if (col.allowFiltering !== undefined) props.allowFiltering = col.allowFiltering;
+  if (col.allowGrouping !== undefined) props.allowGrouping = col.allowGrouping;
+  if (col.fixed !== undefined) props.fixed = col.fixed;
+  if (col.fixedPosition !== undefined) props.fixedPosition = col.fixedPosition;
+  if (col.sortOrder !== undefined) props.sortOrder = col.sortOrder;
+  if (col.sortIndex !== undefined) props.sortIndex = col.sortIndex;
+  if (col.groupIndex !== undefined) props.groupIndex = col.groupIndex;
+  return props;
+}
+
 export default function TasksView({ projectId, addRowRef }: TasksViewProps): ReactNode {
   const { labels: statusLabels, items: statusItems } = useEnumOptions('task_status');
   const { items: itemTypeItems } = useEnumOptions('item_type');
-  const { items, resources, assignments, loading, error, refetch, moveItem } = useProjectItems(projectId);
+  const { items, resources, assignments, loading, error, refetch, refetchAssignees, moveItem } = useProjectItems(projectId);
   const setSelectedTaskId = usePMStore((s) => s.setSelectedTaskId);
   const profile = useAuthStore((s) => s.profile);
   const dateFormat = usePreferencesStore((s) => s.preferences.dateFormat);
   const dxDateFmt = useMemo(() => getDxDateFormat(), [dateFormat]);
+  const { effectiveColumns, gridSettings, customLoad, customSave, resetToDefault } = useViewConfig({ viewKey: 'tasks_view', projectId });
   const treeListRef = useRef<TreeListRef>(null);
+  const [treeListKey, setTreeListKey] = useState(0);
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
   const [showImportPopup, setShowImportPopup] = useState(false);
   const [importData, setImportData] = useState<Array<{ name: string; item_type: string; start_date: string; end_date: string }>>([]);
@@ -68,16 +100,15 @@ export default function TasksView({ projectId, addRowRef }: TasksViewProps): Rea
     return map;
   }, [resources]);
 
-  // Enrich items with assignee names
+  // Enrich items with assignee names and ids
   const enrichedItems = useMemo(
     () =>
       items.map((item) => {
-        const itemAssignees = assignments
-          .filter((a) => a.item_id === item.id)
-          .map((a) => resourceMap.get(a.user_id) || 'Unknown');
+        const itemAssignments = assignments.filter((a) => a.item_id === item.id);
         return {
           ...item,
-          assignee_names: itemAssignees.join(', '),
+          assignee_names: itemAssignments.map((a) => resourceMap.get(a.user_id) || 'Unknown').join(', '),
+          assignee_ids: itemAssignments.map((a) => a.user_id),
         };
       }),
     [items, assignments, resourceMap],
@@ -198,11 +229,25 @@ export default function TasksView({ projectId, addRowRef }: TasksViewProps): Rea
   // Cell editing: persist update to DB
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleRowUpdating = useCallback((e: any) => {
-    const updates = { ...e.newData };
+    const { assignee_names: _a, assignee_ids: _b, ...updates } = e.newData;
     // Sync is_milestone flag when item_type changes (DB check constraint)
     if ('item_type' in updates) {
       updates.is_milestone = updates.item_type === 'milestone';
     }
+    // Milestone date sync: start_date must always equal end_date
+    const isMilestone = ('item_type' in updates)
+      ? updates.item_type === 'milestone'
+      : e.oldData.item_type === 'milestone';
+    if (isMilestone) {
+      if ('start_date' in updates) {
+        updates.end_date = updates.start_date;
+      } else if ('end_date' in updates) {
+        updates.start_date = updates.end_date;
+      } else if ('item_type' in updates && e.oldData.start_date) {
+        updates.end_date = e.oldData.start_date;
+      }
+    }
+    if (Object.keys(updates).length === 0) return;
     e.cancel = (async () => {
       const { error } = await supabase
         .from('project_items')
@@ -216,7 +261,7 @@ export default function TasksView({ projectId, addRowRef }: TasksViewProps): Rea
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleRowInserting = useCallback((e: any) => {
     if (!profile?.tenant_id) { e.cancel = true; return; }
-    const { assignee_names: _a, id: _id, ...rowData } = e.data;
+    const { assignee_names: _a, assignee_ids: _b, id: _id, ...rowData } = e.data;
     const itemType = rowData.item_type || 'task';
     e.cancel = (async () => {
       const { error } = await supabase
@@ -246,6 +291,42 @@ export default function TasksView({ projectId, addRowRef }: TasksViewProps): Rea
       await refetch();
     })();
   }, [refetch]);
+
+  // Assignee TagBox: sync task_assignees on change
+  const handleAssigneeChange = useCallback(async (itemId: string, newUserIds: string[]) => {
+    if (!profile?.tenant_id) return;
+    const currentIds = assignments.filter((a) => a.item_id === itemId).map((a) => a.user_id);
+    const toAdd = newUserIds.filter((uid) => !currentIds.includes(uid));
+    const toRemove = currentIds.filter((uid) => !newUserIds.includes(uid));
+
+    const ops: PromiseLike<unknown>[] = [];
+    if (toRemove.length > 0) {
+      ops.push(
+        supabase
+          .from('task_assignees')
+          .delete()
+          .eq('item_id', itemId)
+          .in('user_id', toRemove)
+          .then(),
+      );
+    }
+    if (toAdd.length > 0) {
+      ops.push(
+        supabase.from('task_assignees').insert(
+          toAdd.map((uid) => ({
+            tenant_id: profile.tenant_id!,
+            project_id: projectId,
+            item_id: itemId,
+            user_id: uid,
+          })),
+        ).then(),
+      );
+    }
+    if (ops.length > 0) {
+      await Promise.all(ops);
+      await refetchAssignees();
+    }
+  }, [profile, projectId, assignments, refetchAssignees]);
 
   // RowDragging: prevent dropping onto own descendants (circular ref)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -367,6 +448,15 @@ export default function TasksView({ projectId, addRowRef }: TasksViewProps): Rea
           stylingMode="text"
           onClick={() => setShowImportPopup(true)}
         />
+        <Button
+          icon="columnchooser"
+          hint="Reset columns to default"
+          stylingMode="text"
+          onClick={() => {
+            resetToDefault();
+            setTreeListKey((k) => k + 1);
+          }}
+        />
       </div>
 
       {selectedKeys.length > 0 && (
@@ -396,112 +486,203 @@ export default function TasksView({ projectId, addRowRef }: TasksViewProps): Rea
         </div>
       )}
 
-      <TreeList
-        ref={treeListRef}
-        dataSource={enrichedItems}
-        keyExpr="id"
-        parentIdExpr="parent_id"
-        rootValue=""
-        showBorders={true}
-        showRowLines={true}
-        showColumnLines={false}
-        rowAlternationEnabled={true}
-        hoverStateEnabled={true}
-        columnAutoWidth={true}
-        autoExpandAll={true}
-        height="calc(100vh - 90px)"
-        onRowClick={handleRowClick}
-        onRowUpdating={handleRowUpdating}
-        onRowInserting={handleRowInserting}
-        onRowRemoving={handleRowRemoving}
-        onSelectionChanged={(e) => {
-          setSelectedKeys((e.selectedRowKeys || []) as string[]);
-        }}
-        repaintChangesOnly={true}
-      >
-        <RowDragging
-          allowReordering={true}
-          allowDropInsideItem={true}
-          onDragChange={handleDragChange}
-          onReorder={handleReorder}
-        />
-        <FilterRow visible={true} />
-        <HeaderFilter visible={true} />
-        <Selection mode="multiple" />
-
-        <Column
-          dataField="name"
-          caption="Task Name"
-          minWidth={300}
-          cellRender={(data: { value: string; data: { item_type: string } }) => (
-            <div className="task-name-cell">
-              <i className={`dx-icon-${itemTypeIcons[data.data.item_type] || 'doc'}`} />
-              <span>{data.value}</span>
-            </div>
-          )}
-        />
-
-        <Column
-          dataField="item_type"
-          caption="Type"
-          width={100}
-          cellRender={(data: { value: string }) => (
-            <span className={`item-type-badge type-${data.value}`}>
-              {data.value}
-            </span>
-          )}
-        >
-          <Lookup dataSource={itemTypeItems} displayExpr="label" valueExpr="value" />
-        </Column>
-
-        <Column dataField="start_date" caption="Start" dataType="date" format={dxDateFmt} width={110} />
-        <Column dataField="end_date" caption="End" dataType="date" format={dxDateFmt} width={110} />
-
-        <Column
-          dataField="percent_complete"
-          caption="Progress"
-          width={100}
-          dataType="number"
-          editorOptions={{ min: 0, max: 100 }}
-          cellRender={(data: { value: number }) => (
-            <div className="progress-cell">
-              <div className="progress-bar">
-                <div
-                  className="progress-fill"
-                  style={{ width: `${data.value}%` }}
-                />
-              </div>
-              <span className="progress-text">{data.value}%</span>
-            </div>
-          )}
-        />
-
-        <Column
-          dataField="task_status"
-          caption="Status"
-          width={120}
-          cellRender={(data: { value: string; data: { item_type: string } }) => {
-            if (data.data.item_type !== 'task') return null;
-            return (
-              <span className={`task-status-badge status-${data.value}`}>
-                {statusLabels[data.value] || data.value}
-              </span>
-            );
+      <div className={`tasks-grid-container${gridSettings.uppercaseHeaders ? ' uppercase-headers' : ''}`}>
+        <TreeList
+          key={treeListKey}
+          ref={treeListRef}
+          dataSource={enrichedItems}
+          keyExpr="id"
+          parentIdExpr="parent_id"
+          rootValue=""
+          showBorders={true}
+          showRowLines={gridSettings.showRowLines ?? true}
+          showColumnLines={gridSettings.showColumnLines ?? false}
+          rowAlternationEnabled={gridSettings.rowAlternationEnabled ?? true}
+          wordWrapEnabled={gridSettings.wordWrapEnabled ?? false}
+          hoverStateEnabled={true}
+          columnAutoWidth={gridSettings.columnAutoWidth ?? false}
+          autoExpandAll={true}
+          height="calc(100vh - 90px)"
+          onRowClick={handleRowClick}
+          onEditorPreparing={(e) => {
+            if (e.dataField === 'task_status' || e.dataField === 'item_type') {
+              const defaultHandler = e.editorOptions.onValueChanged;
+              e.editorOptions.onValueChanged = (args: unknown) => {
+                defaultHandler?.(args);
+                setTimeout(() => treeListRef.current?.instance().closeEditCell());
+              };
+            }
           }}
+          onRowUpdating={handleRowUpdating}
+          onRowInserting={handleRowInserting}
+          onRowRemoving={handleRowRemoving}
+          onSelectionChanged={(e) => {
+            setSelectedKeys((e.selectedRowKeys || []) as string[]);
+          }}
+          repaintChangesOnly={true}
         >
-          <Lookup dataSource={statusItems} displayExpr="label" valueExpr="value" />
-        </Column>
+          <StateStoring
+            enabled={true}
+            type="custom"
+            customLoad={customLoad}
+            customSave={customSave}
+            savingTimeout={2000}
+          />
+          <RowDragging
+            allowReordering={true}
+            allowDropInsideItem={true}
+            onDragChange={handleDragChange}
+            onReorder={handleReorder}
+          />
+          <FilterRow visible={gridSettings.showFilterRow ?? true} />
+          <HeaderFilter visible={gridSettings.showHeaderFilter ?? true} />
+          <SearchPanel visible={gridSettings.showSearchPanel ?? false} />
+          <Selection mode="multiple" />
 
-        <Column dataField="assignee_names" caption="Assignees" width={180} allowEditing={false} />
-        <Column dataField="wbs" caption="WBS" width={70} allowEditing={false} />
+          {effectiveColumns.map((col) => {
+            const colProps = getColumnProps(col);
 
-        <Editing
-          mode="cell"
-          allowUpdating={true}
-          allowDeleting={true}
-          allowAdding={true}
-        />
-      </TreeList>
+            if (col.dataField === 'name') {
+              return (
+                <Column
+                  key={col.dataField}
+                  {...colProps}
+                  minWidth={col.minWidth || 200}
+                  cellRender={(data: { value: string; data: { item_type: string } }) => (
+                    <div className="task-name-cell">
+                      <i className={`dx-icon-${itemTypeIcons[data.data.item_type] || 'doc'}`} />
+                      <span>{data.value}</span>
+                    </div>
+                  )}
+                />
+              );
+            }
+
+            if (col.dataField === 'item_type') {
+              return (
+                <Column
+                  key={col.dataField}
+                  {...colProps}
+                  cellRender={(data: { value: string }) => (
+                    <span className={`item-type-badge type-${data.value}`}>
+                      {data.value}
+                    </span>
+                  )}
+                >
+                  <Lookup dataSource={itemTypeItems} displayExpr="label" valueExpr="value" />
+                </Column>
+              );
+            }
+
+            if (col.dataField === 'start_date') {
+              return (
+                <Column
+                  key={col.dataField}
+                  {...colProps}
+                  dataType="date"
+                  format={dxDateFmt}
+                />
+              );
+            }
+
+            if (col.dataField === 'end_date') {
+              return (
+                <Column
+                  key={col.dataField}
+                  {...colProps}
+                  dataType="date"
+                  format={dxDateFmt}
+                />
+              );
+            }
+
+            if (col.dataField === 'percent_complete') {
+              return (
+                <Column
+                  key={col.dataField}
+                  {...colProps}
+                  dataType="number"
+                  editorOptions={{ min: 0, max: 100 }}
+                  cellRender={(data: { value: number }) => (
+                    <div className="progress-cell">
+                      <div className="progress-bar">
+                        <div className="progress-fill" style={{ width: `${data.value}%` }} />
+                      </div>
+                      <span className="progress-text">{data.value}%</span>
+                    </div>
+                  )}
+                />
+              );
+            }
+
+            if (col.dataField === 'task_status') {
+              return (
+                <Column
+                  key={col.dataField}
+                  {...colProps}
+                  cellRender={(data: { value: string; data: { item_type: string } }) => {
+                    if (data.data.item_type !== 'task') return null;
+                    return (
+                      <span className={`task-status-badge status-${data.value}`}>
+                        {statusLabels[data.value] || data.value}
+                      </span>
+                    );
+                  }}
+                >
+                  <Lookup dataSource={statusItems} displayExpr="label" valueExpr="value" />
+                </Column>
+              );
+            }
+
+            if (col.dataField === 'assignee_ids') {
+              return (
+                <Column
+                  key={col.dataField}
+                  {...colProps}
+                  calculateDisplayValue={(rowData: { assignee_names: string }) => rowData.assignee_names}
+                  editCellRender={(cell: { value: string[]; data: { id: string } }) => (
+                    <TagBox
+                      items={resources}
+                      displayExpr="text"
+                      valueExpr="id"
+                      value={cell.value || []}
+                      onValueChanged={(e) => {
+                        handleAssigneeChange(cell.data.id, e.value).then(() => {
+                          treeListRef.current?.instance().closeEditCell();
+                        });
+                      }}
+                      showSelectionControls={true}
+                      applyValueMode="useButtons"
+                      searchEnabled={true}
+                      placeholder="Select..."
+                    />
+                  )}
+                />
+              );
+            }
+
+            if (col.dataField === 'wbs') {
+              return (
+                <Column
+                  key={col.dataField}
+                  {...colProps}
+                  allowEditing={false}
+                />
+              );
+            }
+
+            // Generic column for any other fields
+            return <Column key={col.dataField} {...colProps} />;
+          })}
+
+          <Editing
+            mode="cell"
+            allowUpdating={true}
+            allowDeleting={true}
+            allowAdding={true}
+          />
+        </TreeList>
+      </div>
 
       <Popup
         visible={showImportPopup}

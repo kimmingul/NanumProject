@@ -169,11 +169,21 @@ export default function TaskDetailPopup({
 
   const popupTitle = task?.name || 'Task Details';
 
+  // Custom title render to prevent DevExtreme's inline max-width truncation
+  const renderTitle = useCallback(
+    () => (
+      <div className="task-detail-popup-title">
+        <span className="task-detail-popup-title-text">{popupTitle}</span>
+      </div>
+    ),
+    [popupTitle],
+  );
+
   return (
     <Popup
       visible={visible}
       onHiding={onClose}
-      title={popupTitle}
+      titleRender={renderTitle}
       width={720}
       maxHeight="85vh"
       showCloseButton={true}

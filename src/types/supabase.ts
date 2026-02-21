@@ -545,6 +545,25 @@ export interface Database {
         Update: Record<string, never>;
         Relationships: [];
       };
+      tenant_view_config: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          view_key: string;
+          config: unknown;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          tenant_id: string;
+          view_key: string;
+          config: unknown;
+        };
+        Update: {
+          config?: unknown;
+        };
+        Relationships: [];
+      };
       activity_log: {
         Row: {
           id: string;

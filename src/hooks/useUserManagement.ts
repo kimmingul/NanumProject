@@ -1,6 +1,8 @@
 import { useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/lib/auth-store';
+import { resizeAvatar } from '@/utils/imageResize';
+import type { EmploymentStatus } from '@/types';
 
 /** Call an RPC function (void return). Supabase generated types have Functions: Record<string, never> so we cast. */
 async function rpc(fn: string, params: Record<string, unknown>): Promise<void> {
@@ -49,13 +51,19 @@ export function useUserManagement() {
     async (userId: string, file: File): Promise<string> => {
       if (!profile?.tenant_id) throw new Error('No tenant');
 
-      const ext = file.name.split('.').pop() || 'png';
-      const filePath = `${profile.tenant_id}/${userId}.${ext}`;
+      // Resize image to 128x128 WebP for optimal storage and loading
+      const resizedFile = await resizeAvatar(file);
+
+      // Always use .webp extension for resized avatars
+      const filePath = `${profile.tenant_id}/${userId}.webp`;
 
       // Upload (upsert)
       const { error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(filePath, file, { upsert: true });
+        .upload(filePath, resizedFile, {
+          upsert: true,
+          contentType: 'image/webp',
+        });
       if (uploadError) throw uploadError;
 
       // Get public URL
@@ -87,7 +95,11 @@ export function useUserManagement() {
         .eq('user_id', userId);
       if (updateError) throw updateError;
 
-      // Try to delete storage files (best-effort, ignore errors)
+      // Try to delete the .webp avatar file (best-effort, ignore errors)
+      const filePath = `${profile.tenant_id}/${userId}.webp`;
+      await supabase.storage.from('avatars').remove([filePath]);
+
+      // Also clean up any legacy files with other extensions
       const { data: files } = await supabase.storage
         .from('avatars')
         .list(profile.tenant_id, { search: userId });
@@ -133,6 +145,36 @@ export function useUserManagement() {
     [],
   );
 
+  const updateEmploymentStatus = useCallback(
+    async (userId: string, status: EmploymentStatus) => {
+      await rpc('update_employment_status', {
+        p_user_id: userId,
+        p_status: status,
+      });
+    },
+    [],
+  );
+
+  const updateUserManager = useCallback(
+    async (userId: string, managerId: string | null) => {
+      await rpc('update_user_manager', {
+        p_user_id: userId,
+        p_manager_id: managerId,
+      });
+    },
+    [],
+  );
+
+  const updateUserDepartment = useCallback(
+    async (userId: string, departmentId: string | null) => {
+      await rpc('update_user_department', {
+        p_user_id: userId,
+        p_department_id: departmentId,
+      });
+    },
+    [],
+  );
+
   return {
     updateProfile,
     uploadAvatar,
@@ -141,5 +183,8 @@ export function useUserManagement() {
     reactivateUser,
     sendPasswordReset,
     createUser,
+    updateEmploymentStatus,
+    updateUserManager,
+    updateUserDepartment,
   };
 }

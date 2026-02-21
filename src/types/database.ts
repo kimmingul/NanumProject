@@ -14,8 +14,17 @@ export interface Tenant {
 export interface TenantSettings {
   branding?: {
     logo_url?: string;
+    app_name?: string;        // Custom app name (default: "Nanum Project")
     primary_color?: string;
     secondary_color?: string;
+  };
+  domains?: string[];         // Multiple domains for email verification
+  organization?: {
+    address?: string;
+    phone?: string;
+    email?: string;
+    business_number?: string; // 사업자등록번호
+    representative?: string;  // 대표자
   };
   features?: {
     mfa_enabled: boolean;
@@ -43,11 +52,16 @@ export interface Profile {
   tenant_name?: string | null;
   metadata: Record<string, unknown> | null;
   preferences: Record<string, unknown> | null;
+  employment_status: EmploymentStatus;
+  department_id: string | null;
+  manager_id: string | null;
   created_at: string;
   updated_at: string;
 }
 
 export type UserRole = 'admin' | 'manager' | 'member' | 'viewer';
+
+export type EmploymentStatus = 'active' | 'on_leave' | 'terminated';
 
 export interface Application {
   id: string;

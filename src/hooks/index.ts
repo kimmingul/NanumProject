@@ -14,3 +14,4 @@ export { useUserManagement } from './useUserManagement';
 export { useItemLinks } from './useItemLinks';
 export { useItemRelations } from './useItemRelations';
 export { useEnumOptions } from './useEnumOptions';
+export { useViewConfig } from './useViewConfig';

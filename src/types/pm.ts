@@ -286,3 +286,91 @@ export interface ProjectMemberWithProfile extends ProjectMember {
     avatar_url: string | null;
   } | undefined;
 }
+
+// ========================================
+// View configuration types (tenant-level + user-level)
+// ========================================
+
+export type ViewKey = 'tasks_view' | 'my_tasks' | 'gantt' | 'board' | 'projects_list';
+
+export type ColumnAlignment = 'left' | 'center' | 'right';
+export type SortOrder = 'asc' | 'desc' | undefined;
+export type FixedPosition = 'left' | 'right';
+
+export type ColumnDisplayMode = 'text' | 'avatar';
+
+export interface ColumnConfig {
+  dataField: string;
+  caption: string;
+  visible: boolean;
+  visibleIndex: number;
+  width?: number;
+  minWidth?: number;
+  autoWidth?: boolean;  // true = fill remaining space (no fixed width)
+  headerAlignment?: ColumnAlignment;  // column header text alignment
+  cellAlignment?: ColumnAlignment;    // cell value alignment
+  displayMode?: ColumnDisplayMode;    // 'text' or 'avatar' for person columns
+
+  // Sorting
+  allowSorting?: boolean;
+  sortOrder?: SortOrder;
+  sortIndex?: number;
+
+  // Filtering
+  allowFiltering?: boolean;
+  filterValue?: unknown;
+
+  // Grouping
+  allowGrouping?: boolean;
+  groupIndex?: number;
+
+  // Fixed column
+  fixed?: boolean;
+  fixedPosition?: FixedPosition;
+}
+
+export interface GridSettings {
+  showColumnHeaders?: boolean;
+  showRowLines?: boolean;
+  showColumnLines?: boolean;
+  rowAlternationEnabled?: boolean;
+  columnAutoWidth?: boolean;
+  wordWrapEnabled?: boolean;
+  showGroupPanel?: boolean;
+  showFilterRow?: boolean;
+  showHeaderFilter?: boolean;
+  showSearchPanel?: boolean;
+  rowHeight?: 'compact' | 'normal' | 'comfortable';
+  uppercaseHeaders?: boolean;
+}
+
+export interface ViewConfig {
+  columns: ColumnConfig[];
+  gridSettings?: GridSettings;
+  taskListWidth?: number;  // Gantt only
+  cardFields?: Record<string, boolean>;  // Board only
+}
+
+/** DevExtreme grid state object (simplified) */
+export interface DxGridState {
+  columns?: Array<{
+    dataField?: string;
+    visible?: boolean;
+    visibleIndex?: number;
+    width?: number;
+    sortOrder?: 'asc' | 'desc';
+    sortIndex?: number;
+    filterValue?: unknown;
+    filterValues?: unknown[];
+    filterType?: string;
+    groupIndex?: number;
+    fixed?: boolean;
+    fixedPosition?: 'left' | 'right';
+  }>;
+  filterValue?: unknown;
+  searchText?: string;
+  pageIndex?: number;
+  pageSize?: number;
+  expandedRowKeys?: string[];
+  selectedRowKeys?: string[];
+}

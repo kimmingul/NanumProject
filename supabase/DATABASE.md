@@ -22,8 +22,11 @@ Supabase (PostgreSQL) 기반 멀티테넌트 프로젝트 관리 서비스.
 | `014_project_manager.sql` | projects.manager_id 컬럼 추가 + 기존 데이터 backfill |
 | `015_user_project_stars.sql` | user_project_stars 테이블 (사용자별 프로젝트 별표) + projects.is_starred 컬럼 제거 |
 | `016_tenant_enum_config.sql` | tenant_enum_config 테이블 (Tenant별 Enum 설정) + task_status/project_status ENUM→TEXT 변환 + 시드 |
+| `017_tenant_view_config.sql` | tenant_view_config 테이블 (Tenant별 뷰 컬럼 설정) + RLS + 기본 설정 시드 |
+| `018_view_config_extended.sql` | projects_list 뷰 추가 + 모든 뷰에 gridSettings/확장 컬럼 옵션 추가 |
+| `019_employment_status.sql` | profiles 확장: employment_status ENUM (active/on_leave/terminated), department_id, manager_id + HR 관련 RPC 함수 |
 
-> 실행 순서: 001 → 002 → 003 → 004 → 005 → 006 → 007 → 008 → 009 → 010 → 011 → 012 → 013 → 014 → 015 → 016
+> 실행 순서: 001 → 002 → ... → 018 → 019
 
 ---
 
@@ -39,7 +42,7 @@ audit_logs         감사 로그 (immutable)
 sessions           활성 세션 관리
 ```
 
-### PM 모듈 (13개)
+### PM 모듈 (14개)
 
 ```
 projects              프로젝트 메타데이터 (manager_id: 프로젝트 매니저)
@@ -57,6 +60,7 @@ checklist_items       체크리스트
 activity_log          활동 로그 (immutable)
 notifications         알림 (할당/멘션/상태변경/기한)
 tenant_enum_config    Tenant별 Enum 설정 (JSONB options, UNIQUE: tenant_id + category)
+tenant_view_config    Tenant별 뷰 컬럼 설정 (JSONB config, UNIQUE: tenant_id + view_key)
 ```
 
 ---
@@ -233,6 +237,9 @@ tenants, applications, projects, project_members, project_items
 | `rotate_application_secret(UUID)` | 앱 시크릿 갱신 | admin/developer |
 | `create_tenant_user(TEXT, TEXT, TEXT)` | 테넌트 내 사용자 생성 (auth.users + identities + profiles) | admin |
 | `get_item_comment_counts(UUID)` | 프로젝트 전체 item별 댓글 수 배치 조회 | authenticated |
+| `update_employment_status(UUID, employment_status)` | 사용자 고용 상태 변경 | admin |
+| `update_user_manager(UUID, UUID)` | 사용자 직속 상관 설정 (조직도용) | admin |
+| `update_user_department(UUID, TEXT)` | 사용자 부서 ID 설정 | admin |
 
 ---
 

@@ -1,16 +1,110 @@
 /* Task Detail Popup */
 
+/* ---- Popup theme styles ---- */
+.task-detail-popup .dx-overlay-content {
+  background-color: var(--popup-bg);
+  border: 1px solid var(--popup-border);
+}
+
+.task-detail-popup .dx-popup-title {
+  background-color: var(--popup-header-bg);
+  border-bottom: 1px solid var(--popup-border);
+  min-height: 44px;
+}
+
+/* Custom title (bypasses DevExtreme inline max-width) */
+.task-detail-popup-title {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding-right: 8px;
+}
+
+.task-detail-popup-title-text {
+  white-space: normal;
+  word-wrap: break-word;
+  line-height: 1.4;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--popup-header-text);
+}
+
+.task-detail-popup .dx-closebutton {
+  color: var(--text-secondary);
+}
+
+.task-detail-popup .dx-closebutton:hover {
+  color: var(--text-primary);
+}
+
 .task-detail-popup .dx-popup-content {
   padding: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  background-color: var(--popup-bg);
 }
 
 .task-detail-popup-body {
   flex: 1;
   overflow-y: auto;
   padding: 16px;
+  background-color: var(--popup-bg);
+  color: var(--text-primary);
+}
+
+/* ---- TabPanel theme ---- */
+.task-detail-popup .dx-tabpanel {
+  background-color: transparent;
+}
+
+.task-detail-popup .dx-tabs {
+  background-color: var(--popup-header-bg);
+  border-bottom: 1px solid var(--popup-border);
+}
+
+.task-detail-popup .dx-tab {
+  background-color: transparent;
+  color: var(--text-secondary);
+}
+
+.task-detail-popup .dx-tab.dx-tab-selected {
+  background-color: var(--popup-bg);
+  color: var(--text-primary);
+}
+
+.task-detail-popup .dx-tab:hover:not(.dx-tab-selected) {
+  background-color: var(--hover-bg);
+}
+
+.task-detail-popup .dx-multiview-wrapper {
+  background-color: var(--popup-bg);
+}
+
+/* ---- Form inputs theme ---- */
+.task-detail-popup .dx-texteditor {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-color);
+}
+
+.task-detail-popup .dx-texteditor.dx-state-focused {
+  border-color: var(--accent-color);
+}
+
+.task-detail-popup .dx-texteditor-input {
+  color: var(--text-primary);
+}
+
+.task-detail-popup .dx-placeholder {
+  color: var(--text-tertiary);
+}
+
+.task-detail-popup .dx-dropdowneditor-button {
+  background-color: transparent;
+}
+
+.task-detail-popup .dx-dropdowneditor-icon {
+  color: var(--text-secondary);
 }
 
 /* Edit form within popup */

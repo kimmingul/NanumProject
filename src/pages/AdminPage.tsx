@@ -4,11 +4,19 @@ import { useAuthStore } from '@/lib/auth-store';
 import {
   OrganizationSection,
   SecuritySection,
-  AppearanceSection,
   UsersSection,
   EnumConfigSection,
+  ViewSettingsSection,
 } from './admin';
 import './AdminPage.css';
+
+const SECTION_LABELS: Record<string, string> = {
+  organization: 'Organization',
+  users: 'Users',
+  security: 'Security',
+  enums: 'Enum Config',
+  views: 'View Settings',
+};
 
 export default function AdminPage(): ReactNode {
   const { section } = useParams<{ section?: string }>();
@@ -16,6 +24,7 @@ export default function AdminPage(): ReactNode {
   const isAdmin = role === 'admin';
 
   const activeSection = section || 'organization';
+  const sectionLabel = SECTION_LABELS[activeSection] || 'Organization';
 
   const renderSection = (): ReactNode => {
     if (!isAdmin) return null;
@@ -26,10 +35,10 @@ export default function AdminPage(): ReactNode {
         return <UsersSection />;
       case 'security':
         return <SecuritySection />;
-      case 'appearance':
-        return <AppearanceSection />;
       case 'enums':
         return <EnumConfigSection />;
+      case 'views':
+        return <ViewSettingsSection />;
       default:
         return <OrganizationSection />;
     }
@@ -37,9 +46,10 @@ export default function AdminPage(): ReactNode {
 
   return (
     <div className="admin-page">
-      <div className="page-header">
-        <h1>Admin</h1>
-        <p>Organization and system administration</p>
+      <div className="admin-breadcrumb">
+        <span className="breadcrumb-root">Admin</span>
+        <i className="dx-icon-chevronright breadcrumb-sep" />
+        <span className="breadcrumb-current">{sectionLabel}</span>
       </div>
 
       <div className="admin-content">

@@ -25,6 +25,16 @@
   white-space: nowrap;
 }
 
+.project-list-header-count {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  padding: 2px 6px;
+  background: var(--badge-neutral-bg);
+  border-radius: 10px;
+  margin-right: auto;
+}
+
 .dx-button.project-list-header-btn {
   min-width: auto;
   height: 28px;
@@ -189,9 +199,25 @@
 .project-grid-container .dx-header-row > td {
   font-size: 11px;
   font-weight: 600;
-  text-transform: uppercase;
   letter-spacing: 0.03em;
   color: var(--sidebar-title);
+}
+
+.project-grid-container.uppercase-headers .dx-header-row > td {
+  text-transform: uppercase;
+}
+
+/* Header alignment classes */
+.project-grid-container .dx-datagrid-headers td.header-align-left {
+  text-align: left;
+}
+
+.project-grid-container .dx-datagrid-headers td.header-align-center {
+  text-align: center;
+}
+
+.project-grid-container .dx-datagrid-headers td.header-align-right {
+  text-align: right;
 }
 
 /* --- Rows view (content area) --- */
@@ -299,4 +325,197 @@
   margin-top: 1.5rem;
   padding-top: 1rem;
   border-top: 1px solid var(--border-color);
+}
+
+/* ============================================= */
+/* New Column Styles                             */
+/* ============================================= */
+
+/* Members cell - avatar initials like Gantt */
+.project-members-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.project-member-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--avatar-gradient, linear-gradient(135deg, #667eea 0%, #764ba2 100%));
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.member-more {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-left: 4px;
+}
+
+/* Member count badge */
+.member-count-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: var(--badge-info-bg);
+  color: var(--badge-info-text);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Template badge */
+.template-badge {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--badge-warning-bg);
+  color: var(--badge-warning-text);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+/* Description cell */
+.description-cell {
+  color: var(--text-secondary);
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Overdue badge */
+.overdue-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: var(--badge-neutral-bg);
+  color: var(--badge-neutral-text);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.overdue-badge.has-overdue {
+  background: var(--badge-danger-bg);
+  color: var(--badge-danger-text);
+}
+
+/* Days remaining */
+.days-remaining {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.days-remaining.overdue {
+  color: var(--badge-danger-text);
+}
+
+.days-remaining.soon {
+  color: var(--badge-warning-text);
+}
+
+.days-remaining.none {
+  color: var(--text-tertiary);
+}
+
+/* ============================================= */
+/* Avatar Display Mode                           */
+/* ============================================= */
+
+/* Single avatar (for manager_name) */
+.avatar-single {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--avatar-gradient, linear-gradient(135deg, #667eea 0%, #764ba2 100%));
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+/* Avatar image (when profile photo exists) */
+.avatar-img {
+  object-fit: cover;
+  background: none;
+}
+
+/* Stacked avatars (for members) - overlapping effect */
+.avatar-stack {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-stack-item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--avatar-gradient, linear-gradient(135deg, #667eea 0%, #764ba2 100%));
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-left: -8px;
+  border: 2px solid var(--sidebar-bg);
+  box-sizing: content-box;
+}
+
+.avatar-stack-item:first-child {
+  margin-left: 0;
+}
+
+/* Avatar image in stack */
+.avatar-stack-item.avatar-img {
+  object-fit: cover;
+  background: none;
+}
+
+/* z-index by position (first = highest) */
+.avatar-stack-item.stack-pos-0 { z-index: 5; }
+.avatar-stack-item.stack-pos-1 { z-index: 4; }
+.avatar-stack-item.stack-pos-2 { z-index: 3; }
+.avatar-stack-item.stack-pos-3 { z-index: 2; }
+.avatar-stack-item.stack-pos-4 { z-index: 1; }
+
+.avatar-stack-more {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--badge-neutral-bg);
+  color: var(--badge-neutral-text);
+  font-size: 9px;
+  font-weight: 600;
+  margin-left: -8px;
+  border: 2px solid var(--sidebar-bg);
+  box-sizing: content-box;
+  z-index: 0;
+}
+
+/* Text mode for members */
+.project-members-text {
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

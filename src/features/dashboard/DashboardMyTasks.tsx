@@ -4,6 +4,7 @@ import type { DashboardTaskItem } from '@/hooks/useDashboardData';
 
 interface Props {
   tasks: DashboardTaskItem[];
+  totalCount: number;
   loading: boolean;
 }
 
@@ -41,7 +42,7 @@ function statusColor(endDate: string | null, taskStatus: string): string {
   return 'strip-todo';
 }
 
-export default function DashboardMyTasks({ tasks, loading }: Props): ReactNode {
+export default function DashboardMyTasks({ tasks, totalCount, loading }: Props): ReactNode {
   const navigate = useNavigate();
 
   const handleClick = (task: DashboardTaskItem) => {
@@ -52,7 +53,7 @@ export default function DashboardMyTasks({ tasks, loading }: Props): ReactNode {
     <div className="dashboard-card">
       <div className="dashboard-card-header">
         <h3 className="dashboard-card-title">My Tasks</h3>
-        <span className="dashboard-card-badge">{loading ? '...' : tasks.length}</span>
+        <span className="dashboard-card-badge">{loading ? '...' : totalCount}</span>
       </div>
       <div className="dashboard-card-body dashboard-card-body-flush">
         {loading ? (
@@ -89,14 +90,14 @@ export default function DashboardMyTasks({ tasks, loading }: Props): ReactNode {
           </div>
         )}
       </div>
-      {!loading && tasks.length > 0 && (
+      {!loading && totalCount > 0 && (
         <div className="dashboard-card-footer">
           <span
             className="dashboard-card-footer-link"
-            onClick={() => navigate('/tasks')}
+            onClick={() => navigate('/my-tasks')}
             role="button"
             tabIndex={0}
-            onKeyDown={(e) => e.key === 'Enter' && navigate('/tasks')}
+            onKeyDown={(e) => e.key === 'Enter' && navigate('/my-tasks')}
           >
             View All My Tasks &rarr;
           </span>

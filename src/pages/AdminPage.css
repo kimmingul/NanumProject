@@ -1,26 +1,42 @@
 .admin-page {
-  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
-.admin-page .page-header {
-  margin-bottom: 2rem;
+/* Breadcrumb — matches context-sidebar-header style */
+.admin-breadcrumb {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  min-height: 40px;
+  padding: 0 14px;
+  background: var(--sidebar-bg);
+  border-bottom: 1px solid var(--sidebar-border);
+  gap: 6px;
 }
 
-.admin-page .page-header h1 {
-  margin: 0 0 0.5rem 0;
-  font-size: 1.75rem;
-  color: var(--text-primary);
-  font-weight: 700;
+.breadcrumb-root,
+.breadcrumb-current {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--sidebar-title);
 }
 
-.admin-page .page-header p {
-  margin: 0;
-  color: var(--text-secondary);
-  font-size: 0.95rem;
+.breadcrumb-sep {
+  font-size: 10px;
+  color: var(--text-tertiary);
 }
 
 .admin-content {
-  max-width: 100%;
+  flex: 1;
+  min-height: 0; /* Critical: Allow flex child to shrink */
+  padding: 1.5rem;
+  overflow: hidden; /* Prevent admin-content from scrolling; let sections handle it */
+  display: flex;
+  flex-direction: column;
 }
 
 /* Section card */

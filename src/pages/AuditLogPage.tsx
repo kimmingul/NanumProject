@@ -12,6 +12,7 @@ import {
   Item,
 } from 'devextreme-react/data-grid';
 import { useAuditLog } from '@/hooks/useAuditLog';
+import { DEFAULT_GRID_SETTINGS } from '@/lib/view-config-store';
 import './AuditLogPage.css';
 
 function getActionClass(action: string): string {
@@ -58,16 +59,17 @@ export default function AuditLogPage(): ReactNode {
           dataSource={logs}
           keyExpr="id"
           showBorders={true}
-          showRowLines={true}
-          showColumnLines={false}
-          rowAlternationEnabled={true}
+          showRowLines={DEFAULT_GRID_SETTINGS.showRowLines ?? true}
+          showColumnLines={DEFAULT_GRID_SETTINGS.showColumnLines ?? false}
+          rowAlternationEnabled={DEFAULT_GRID_SETTINGS.rowAlternationEnabled ?? true}
+          wordWrapEnabled={DEFAULT_GRID_SETTINGS.wordWrapEnabled ?? false}
           hoverStateEnabled={true}
           columnAutoWidth={true}
           loadPanel={{ enabled: loading }}
           noDataText={loading ? 'Loading...' : 'No audit logs found'}
         >
-          <FilterRow visible={true} />
-          <HeaderFilter visible={true} />
+          <FilterRow visible={DEFAULT_GRID_SETTINGS.showFilterRow ?? true} />
+          <HeaderFilter visible={DEFAULT_GRID_SETTINGS.showHeaderFilter ?? true} />
           <SearchPanel visible={true} width={240} placeholder="Search audit logs..." />
           <Export enabled={true} allowExportSelectedData={true} />
 
