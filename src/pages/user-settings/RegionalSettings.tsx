@@ -43,7 +43,7 @@ export default function RegionalSettings(): ReactNode {
 
   return (
     <>
-      <div className="settings-section" style={{ marginBottom: '1.5rem' }}>
+      <div className="settings-section" style={{ marginBottom: '0.5rem' }}>
         <h2 className="section-title">Date Format</h2>
         <p className="section-desc">How dates are displayed throughout the app</p>
 
@@ -65,7 +65,7 @@ export default function RegionalSettings(): ReactNode {
         </div>
       </div>
 
-      <div className="settings-section" style={{ marginBottom: '1.5rem' }}>
+      <div className="settings-section" style={{ marginBottom: '0.5rem' }}>
         <h2 className="section-title">Timezone</h2>
         <p className="section-desc">Used for scheduling and date display</p>
 

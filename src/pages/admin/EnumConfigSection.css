@@ -11,7 +11,7 @@
 
 /* Sidebar */
 .enum-config-sidebar {
-  width: 180px;
+  width: 140px;
   flex-shrink: 0;
   border-right: 1px solid var(--border-color, #e2e8f0);
   padding-right: 16px;
@@ -139,11 +139,11 @@
 .enum-value-readonly {
   display: inline-block;
   padding: 4px 8px;
-  background: var(--bg-hover, #f1f5f9);
   border-radius: 4px;
   font-size: 12px;
   font-family: monospace;
-  color: var(--text-secondary, #475569);
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 /* Footer */

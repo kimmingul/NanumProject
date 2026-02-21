@@ -32,7 +32,7 @@ export default function AppearanceSettings(): ReactNode {
   return (
     <>
       {/* Theme (Light / Dark / System) */}
-      <div className="settings-section" style={{ marginBottom: '1.5rem' }}>
+      <div className="settings-section" style={{ marginBottom: '0.5rem' }}>
         <h2 className="section-title">Theme</h2>
         <p className="section-desc">Choose your preferred color scheme</p>
 
@@ -57,7 +57,7 @@ export default function AppearanceSettings(): ReactNode {
       </div>
 
       {/* Color Scheme (SaaS / Blue) */}
-      <div className="settings-section" style={{ marginBottom: '1.5rem' }}>
+      <div className="settings-section" style={{ marginBottom: '0.5rem' }}>
         <h2 className="section-title">Color Scheme</h2>
         <p className="section-desc">Select the DevExtreme Fluent color palette</p>
 

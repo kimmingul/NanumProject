@@ -1,16 +1,24 @@
 import { type ReactNode, useCallback, useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { DataGrid, Column, Paging, Pager, FilterRow, HeaderFilter, SearchPanel, Selection } from 'devextreme-react/data-grid';
+import { Button } from 'devextreme-react/button';
+import { SelectBox } from 'devextreme-react/select-box';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/lib/auth-store';
+import { DEFAULT_GRID_SETTINGS } from '@/lib/view-config-store';
+import type { EmploymentStatus } from '@/types';
 import './UsersPage.css';
 
-interface UserProfile {
+interface UserRow {
+  id: string;
   user_id: string;
   email: string;
   full_name: string | null;
   avatar_url: string | null;
   role: string;
   is_active: boolean;
+  employment_status: EmploymentStatus;
+  department_id: string | null;
+  manager_id: string | null;
   last_login_at: string | null;
   created_at: string;
   phone: string | null;
@@ -24,42 +32,53 @@ interface UserProfile {
   zip_code: string | null;
 }
 
-const roleBadgeClass: Record<string, string> = {
-  admin: 'role-admin',
-  manager: 'role-manager',
-  member: 'role-member',
-  viewer: 'role-viewer',
-};
+const statusFilterOptions = [
+  { value: 'all', label: 'All Users' },
+  { value: 'active', label: 'Active' },
+  { value: 'on_leave', label: 'On Leave' },
+  { value: 'terminated', label: 'Terminated' },
+];
 
 export default function UsersPage(): ReactNode {
-  const { userId } = useParams<{ userId?: string }>();
   const tenantId = useAuthStore((s) => s.profile?.tenant_id);
 
-  const [user, setUser] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [users, setUsers] = useState<UserRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedUser, setSelectedUser] = useState<UserRow | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string>('active');
+  const [detailPanelOpen, setDetailPanelOpen] = useState(true);
 
-  const fetchUser = useCallback(async () => {
-    if (!tenantId || !userId) return;
+  const fetchUsers = useCallback(async () => {
+    if (!tenantId) return;
     setLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('user_id, email, full_name, avatar_url, role, is_active, last_login_at, created_at, phone, department, position, bio, address, city, state, country, zip_code')
-        .eq('tenant_id', tenantId)
-        .eq('user_id', userId)
-        .single();
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id, user_id, email, full_name, avatar_url, role, is_active, employment_status, department_id, manager_id, last_login_at, created_at, phone, department, position, bio, address, city, state, country, zip_code')
+      .eq('tenant_id', tenantId)
+      .order('full_name', { ascending: true });
 
-      if (error) throw error;
-      setUser(data as unknown as UserProfile);
-    } catch (err) {
-      console.error('Failed to load user:', err);
-      setUser(null);
-    } finally {
-      setLoading(false);
+    if (error) {
+      console.error('Failed to load users:', error);
+    } else {
+      setUsers(data as unknown as UserRow[]);
     }
-  }, [tenantId, userId]);
+    setLoading(false);
+  }, [tenantId]);
 
-  useEffect(() => { fetchUser(); }, [fetchUser]);
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+
+  // Filter users by employment status
+  const filteredUsers = statusFilter === 'all'
+    ? users
+    : users.filter((u) => u.employment_status === statusFilter);
+
+  const handleSelectionChanged = useCallback((e: { selectedRowsData: UserRow[] }) => {
+    if (e.selectedRowsData.length > 0) {
+      setSelectedUser(e.selectedRowsData[0]);
+    }
+  }, []);
 
   const getInitials = (name: string | null, email: string) => {
     if (name) {
@@ -71,176 +90,258 @@ export default function UsersPage(): ReactNode {
     return email.charAt(0).toUpperCase();
   };
 
-  if (!userId) {
-    return (
-      <div className="users-page">
-        <div className="users-empty-state">
-          <i className="dx-icon-group" />
-          <h3>Select a user</h3>
-          <p>Choose a team member from the sidebar to view their profile</p>
-        </div>
-      </div>
-    );
-  }
+  const getManagerName = useCallback((managerId: string | null) => {
+    if (!managerId) return null;
+    const manager = users.find((u) => u.id === managerId);
+    return manager?.full_name || manager?.email || null;
+  }, [users]);
 
-  if (loading) {
-    return (
-      <div className="users-page">
-        <div className="users-loading">
-          <div className="loading-spinner" />
-          <p>Loading profile...</p>
-        </div>
-      </div>
-    );
-  }
+  const statusLabels: Record<EmploymentStatus, string> = {
+    active: 'Active',
+    on_leave: 'On Leave',
+    terminated: 'Terminated',
+  };
 
-  if (!user) {
+  const renderDetailPanel = () => {
+    if (!selectedUser) {
+      return (
+        <div className="users-detail-empty">
+          <i className="dx-icon-user" />
+          <h4>Select a user</h4>
+          <p>Click on a row to view details</p>
+        </div>
+      );
+    }
+
     return (
-      <div className="users-page">
-        <div className="users-empty-state">
-          <i className="dx-icon-warning" />
-          <h3>User not found</h3>
-          <p>The selected user could not be found</p>
+      <div className="users-detail-content">
+        {/* Header */}
+        <div className="users-detail-header">
+          <div className="users-detail-avatar">
+            {selectedUser.avatar_url ? (
+              <img src={selectedUser.avatar_url} alt="" />
+            ) : (
+              <span className="users-detail-initials">
+                {getInitials(selectedUser.full_name, selectedUser.email)}
+              </span>
+            )}
+          </div>
+          <div className="users-detail-info">
+            <h3 className="users-detail-name">{selectedUser.full_name || selectedUser.email}</h3>
+            <p className="users-detail-position">{selectedUser.position || 'No position'}</p>
+            <div className="users-detail-badges">
+              <span className={`role-badge role-${selectedUser.role}`}>{selectedUser.role}</span>
+              <span className={`status-badge status-${selectedUser.employment_status || 'active'}`}>
+                {statusLabels[selectedUser.employment_status] || 'Active'}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Contact */}
+        <div className="users-detail-section">
+          <h4 className="users-detail-section-title">
+            <i className="dx-icon-tel" /> Contact
+          </h4>
+          <div className="users-detail-grid">
+            <div className="users-detail-item">
+              <span className="users-detail-label">Email</span>
+              <span className="users-detail-value">{selectedUser.email}</span>
+            </div>
+            <div className="users-detail-item">
+              <span className="users-detail-label">Phone</span>
+              <span className="users-detail-value">{selectedUser.phone || '-'}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Organization */}
+        <div className="users-detail-section">
+          <h4 className="users-detail-section-title">
+            <i className="dx-icon-hierarchy" /> Organization
+          </h4>
+          <div className="users-detail-grid">
+            <div className="users-detail-item">
+              <span className="users-detail-label">Department</span>
+              <span className="users-detail-value">{selectedUser.department || '-'}</span>
+            </div>
+            <div className="users-detail-item">
+              <span className="users-detail-label">Manager</span>
+              <span className="users-detail-value">{getManagerName(selectedUser.manager_id) || '-'}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Address */}
+        <div className="users-detail-section">
+          <h4 className="users-detail-section-title">
+            <i className="dx-icon-map" /> Address
+          </h4>
+          <div className="users-detail-grid">
+            <div className="users-detail-item full-width">
+              <span className="users-detail-label">Address</span>
+              <span className="users-detail-value">{selectedUser.address || '-'}</span>
+            </div>
+            <div className="users-detail-item">
+              <span className="users-detail-label">City</span>
+              <span className="users-detail-value">{selectedUser.city || '-'}</span>
+            </div>
+            <div className="users-detail-item">
+              <span className="users-detail-label">State</span>
+              <span className="users-detail-value">{selectedUser.state || '-'}</span>
+            </div>
+            <div className="users-detail-item">
+              <span className="users-detail-label">Country</span>
+              <span className="users-detail-value">{selectedUser.country || '-'}</span>
+            </div>
+            <div className="users-detail-item">
+              <span className="users-detail-label">Zip Code</span>
+              <span className="users-detail-value">{selectedUser.zip_code || '-'}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Bio */}
+        {selectedUser.bio && (
+          <div className="users-detail-section">
+            <h4 className="users-detail-section-title">
+              <i className="dx-icon-comment" /> Bio
+            </h4>
+            <p className="users-detail-bio">{selectedUser.bio}</p>
+          </div>
+        )}
+
+        {/* Meta */}
+        <div className="users-detail-section users-detail-meta">
+          <div className="users-detail-meta-item">
+            <span className="users-detail-label">Last Login</span>
+            <span className="users-detail-value">
+              {selectedUser.last_login_at
+                ? new Date(selectedUser.last_login_at).toLocaleString()
+                : 'Never'}
+            </span>
+          </div>
+          <div className="users-detail-meta-item">
+            <span className="users-detail-label">Created</span>
+            <span className="users-detail-value">
+              {new Date(selectedUser.created_at).toLocaleDateString()}
+            </span>
+          </div>
         </div>
       </div>
     );
-  }
+  };
 
   return (
     <div className="users-page">
-      {/* Toolbar */}
-      <div className="profile-toolbar">
-        <h1 className="profile-toolbar-title">User Profile</h1>
+      {/* Header — my-tasks style */}
+      <div className="users-page-header">
+        <span className="users-page-header-title">TEAM</span>
+        <span className="users-page-header-count">{loading ? '...' : filteredUsers.length}</span>
+        <div className="users-page-header-spacer" />
+        <SelectBox
+          items={statusFilterOptions}
+          displayExpr="label"
+          valueExpr="value"
+          value={statusFilter}
+          onValueChanged={(e) => setStatusFilter(e.value)}
+          width={130}
+          stylingMode="outlined"
+          className="users-page-header-select"
+        />
+        <Button
+          icon="refresh"
+          stylingMode="text"
+          hint="Refresh"
+          className="users-page-header-btn"
+          onClick={fetchUsers}
+        />
+        <Button
+          icon={detailPanelOpen ? 'chevrondoubleright' : 'chevrondoubleleft'}
+          stylingMode="text"
+          hint={detailPanelOpen ? 'Hide detail panel' : 'Show detail panel'}
+          className="users-page-header-btn"
+          onClick={() => setDetailPanelOpen(!detailPanelOpen)}
+        />
       </div>
 
-      <div className="profile-cards-container">
-        {/* Basic Info Card */}
-        <div className="profile-card basic-info-card">
-          <div className="profile-card-panel">
-            <div className="profile-card-header">Basic Info</div>
-            <div className="profile-card-body">
-              {/* Avatar + Name Header */}
-              <div className="basic-info-top">
-                <div className="profile-avatar-large">
-                  {user.avatar_url ? (
-                    <img src={user.avatar_url} alt="" className="profile-avatar-img" />
+      {/* Split Layout */}
+      <div className={`users-page-body ${detailPanelOpen ? '' : 'detail-collapsed'}`}>
+        <div className="users-page-grid">
+          <DataGrid
+            dataSource={filteredUsers}
+            noDataText={loading ? 'Loading...' : 'No users found'}
+            keyExpr="id"
+            width="100%"
+            height="100%"
+            showBorders={true}
+            showRowLines={DEFAULT_GRID_SETTINGS.showRowLines ?? true}
+            showColumnLines={DEFAULT_GRID_SETTINGS.showColumnLines ?? false}
+            rowAlternationEnabled={DEFAULT_GRID_SETTINGS.rowAlternationEnabled ?? true}
+            hoverStateEnabled={true}
+            onSelectionChanged={handleSelectionChanged}
+            focusedRowEnabled={true}
+            selectedRowKeys={selectedUser ? [selectedUser.id] : []}
+          >
+            <Selection mode="single" />
+            <FilterRow visible={DEFAULT_GRID_SETTINGS.showFilterRow ?? true} />
+            <HeaderFilter visible={DEFAULT_GRID_SETTINGS.showHeaderFilter ?? true} />
+            <SearchPanel visible={true} width={200} placeholder="Search..." />
+
+            <Column
+              caption=""
+              width={50}
+              allowFiltering={false}
+              allowSorting={false}
+              cellRender={(data: { data: UserRow }) => (
+                <div className="users-avatar-cell">
+                  {data.data.avatar_url ? (
+                    <img src={data.data.avatar_url} alt="" className="users-avatar-img" />
                   ) : (
-                    <span className="profile-avatar-initials">
-                      {getInitials(user.full_name, user.email)}
+                    <span className="users-avatar-placeholder">
+                      {getInitials(data.data.full_name, data.data.email)}
                     </span>
                   )}
                 </div>
-                <div className="basic-info-summary">
-                  <div className="profile-name">{user.full_name || user.email}</div>
-                  <div className="profile-id">ID: {user.user_id.slice(0, 8)}</div>
-                  <span className={`profile-role-badge ${roleBadgeClass[user.role] || ''}`}>
-                    {user.role}
-                  </span>
-                </div>
-              </div>
+              )}
+            />
 
-              {/* Read-only Fields */}
-              <div className="profile-form profile-form-4col">
-                <div className="profile-field col-span-2">
-                  <label>Full Name</label>
-                  <div className="field-value">{user.full_name || '-'}</div>
-                </div>
+            <Column dataField="full_name" caption="Name" width={140} />
+            <Column dataField="phone" caption="Phone" width={120} />
+            <Column dataField="email" caption="Email" width={180} />
+            <Column dataField="department" caption="Department" width={100} />
+            <Column dataField="position" caption="Position" width={120} />
 
-                <div className="profile-field">
-                  <label>Department</label>
-                  <div className="field-value">{user.department || '-'}</div>
-                </div>
+            <Column
+              dataField="role"
+              caption="Role"
+              width={85}
+              cellRender={(data: { value: string }) => (
+                <span className={`role-badge role-${data.value}`}>{data.value}</span>
+              )}
+            />
 
-                <div className="profile-field">
-                  <label>Position</label>
-                  <div className="field-value">{user.position || '-'}</div>
-                </div>
+            <Column
+              dataField="employment_status"
+              caption="Status"
+              width={90}
+              cellRender={(data: { value: EmploymentStatus }) => (
+                <span className={`status-badge status-${data.value || 'active'}`}>
+                  {statusLabels[data.value] || 'Active'}
+                </span>
+              )}
+            />
 
-                <div className="profile-field col-span-4">
-                  <label>Bio</label>
-                  <div className="field-value">{user.bio || '-'}</div>
-                </div>
-              </div>
-            </div>
-          </div>
+            <Pager visible={true} showPageSizeSelector={true} allowedPageSizes={[10, 25, 50]} showInfo={true} />
+            <Paging defaultPageSize={25} />
+          </DataGrid>
         </div>
 
-        {/* Contacts Card */}
-        <div className="profile-card contacts-card">
-          <div className="profile-card-panel">
-            <div className="profile-card-header">Contacts</div>
-            <div className="profile-card-body">
-              <div className="card-top-item">
-                <div className="card-icon-circle contacts-icon">
-                  <i className="dx-icon-tel" />
-                </div>
-                <div className="card-top-text">
-                  <span className="card-top-primary">{user.phone || 'No phone'}</span>
-                  <span className="card-top-secondary">{user.email}</span>
-                </div>
-              </div>
-
-              <div className="profile-form profile-form-2col">
-                <div className="profile-field">
-                  <label>Phone</label>
-                  <div className="field-value">{user.phone || '-'}</div>
-                </div>
-
-                <div className="profile-field">
-                  <label>Email</label>
-                  <div className="field-value">{user.email}</div>
-                </div>
-              </div>
-            </div>
+        {detailPanelOpen && (
+          <div className="users-page-detail">
+            {renderDetailPanel()}
           </div>
-        </div>
-
-        {/* Address Card */}
-        <div className="profile-card address-card">
-          <div className="profile-card-panel">
-            <div className="profile-card-header">Address</div>
-            <div className="profile-card-body">
-              <div className="card-top-item">
-                <div className="card-icon-circle address-icon">
-                  <i className="dx-icon-map" />
-                </div>
-                <div className="card-top-text">
-                  <span className="card-top-primary">
-                    {[user.city, user.state, user.country].filter(Boolean).join(', ') || 'No address'}
-                  </span>
-                  <span className="card-top-secondary">{user.address || ''}</span>
-                </div>
-              </div>
-
-              <div className="profile-form profile-form-2col">
-                <div className="profile-field">
-                  <label>Country</label>
-                  <div className="field-value">{user.country || '-'}</div>
-                </div>
-
-                <div className="profile-field">
-                  <label>City</label>
-                  <div className="field-value">{user.city || '-'}</div>
-                </div>
-
-                <div className="profile-field col-span-2">
-                  <label>State / Province</label>
-                  <div className="field-value">{user.state || '-'}</div>
-                </div>
-
-                <div className="profile-field col-span-2">
-                  <label>Address</label>
-                  <div className="field-value">{user.address || '-'}</div>
-                </div>
-
-                <div className="profile-field col-span-2">
-                  <label>Zip Code</label>
-                  <div className="field-value">{user.zip_code || '-'}</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );

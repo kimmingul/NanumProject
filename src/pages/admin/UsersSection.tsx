@@ -10,6 +10,7 @@ import {
   Export,
   Toolbar,
   Item,
+  Selection,
 } from 'devextreme-react/data-grid';
 import { TreeList, Column as TreeColumn } from 'devextreme-react/tree-list';
 import { Popup } from 'devextreme-react/popup';
@@ -115,6 +116,9 @@ export default function UsersSection(): ReactNode {
 
   const [users, setUsers] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Selected user for detail panel
+  const [selectedUser, setSelectedUser] = useState<UserRow | null>(null);
 
   // Edit popup state
   const [editUser, setEditUser] = useState<UserRow | null>(null);
@@ -488,6 +492,182 @@ export default function UsersSection(): ReactNode {
     .filter((u) => u.user_id !== editUser?.user_id && u.employment_status === 'active')
     .map((u) => ({ value: u.user_id, label: u.full_name || u.email }));
 
+  // Handle row selection for detail panel
+  const handleSelectionChanged = useCallback((e: { selectedRowsData: UserRow[] }) => {
+    if (e.selectedRowsData.length > 0) {
+      setSelectedUser(e.selectedRowsData[0]);
+    }
+  }, []);
+
+  // Get manager name for detail panel
+  const getManagerName = useCallback((managerId: string | null) => {
+    if (!managerId) return null;
+    const manager = users.find((u) => u.id === managerId);
+    return manager?.full_name || manager?.email || null;
+  }, [users]);
+
+  // Render Detail Panel for selected user
+  const renderDetailPanel = () => {
+    if (!selectedUser) {
+      return (
+        <div className="detail-panel-empty">
+          <i className="dx-icon-user" />
+          <h4>Select a user</h4>
+          <p>Click on a row to view details</p>
+        </div>
+      );
+    }
+
+    const statusLabels: Record<EmploymentStatus, string> = {
+      active: 'Active',
+      on_leave: 'On Leave',
+      terminated: 'Terminated',
+    };
+
+    return (
+      <div className="detail-panel-content">
+        {/* Header with avatar and basic info */}
+        <div className="detail-panel-header">
+          <div className="detail-avatar-large">
+            {selectedUser.avatar_url ? (
+              <img src={selectedUser.avatar_url} alt="" className="detail-avatar-img" />
+            ) : (
+              <span className="detail-avatar-initials">
+                {getInitials(selectedUser.full_name, selectedUser.email)}
+              </span>
+            )}
+          </div>
+          <div className="detail-header-info">
+            <h3 className="detail-name">{selectedUser.full_name || selectedUser.email}</h3>
+            <p className="detail-position">{selectedUser.position || 'No position'}</p>
+            <div className="detail-badges">
+              <span className={`role-badge role-${selectedUser.role}`}>{selectedUser.role}</span>
+              <span className={`status-badge status-${selectedUser.employment_status || 'active'}`}>
+                {statusLabels[selectedUser.employment_status] || 'Active'}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="detail-actions">
+          <Button
+            text="Edit"
+            icon="edit"
+            stylingMode="contained"
+            type="default"
+            onClick={() => openEditPopup(selectedUser)}
+          />
+          <Button
+            text="Send Email"
+            icon="email"
+            stylingMode="outlined"
+            onClick={() => handlePasswordReset()}
+          />
+          {selectedUser.user_id !== currentUserId && (
+            <Button
+              text={selectedUser.is_active ? 'Deactivate' : 'Reactivate'}
+              icon={selectedUser.is_active ? 'remove' : 'revert'}
+              stylingMode="outlined"
+              onClick={() => handleToggleActive(selectedUser)}
+            />
+          )}
+        </div>
+
+        {/* Contact Info */}
+        <div className="detail-section">
+          <h4 className="detail-section-title">
+            <i className="dx-icon-tel" /> Contact
+          </h4>
+          <div className="detail-info-grid">
+            <div className="detail-info-item">
+              <span className="detail-label">Email</span>
+              <span className="detail-value">{selectedUser.email}</span>
+            </div>
+            <div className="detail-info-item">
+              <span className="detail-label">Phone</span>
+              <span className="detail-value">{selectedUser.phone || '-'}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Organization Info */}
+        <div className="detail-section">
+          <h4 className="detail-section-title">
+            <i className="dx-icon-hierarchy" /> Organization
+          </h4>
+          <div className="detail-info-grid">
+            <div className="detail-info-item">
+              <span className="detail-label">Department</span>
+              <span className="detail-value">{selectedUser.department || '-'}</span>
+            </div>
+            <div className="detail-info-item">
+              <span className="detail-label">Manager</span>
+              <span className="detail-value">{getManagerName(selectedUser.manager_id) || '-'}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Address Info */}
+        <div className="detail-section">
+          <h4 className="detail-section-title">
+            <i className="dx-icon-map" /> Address
+          </h4>
+          <div className="detail-info-grid">
+            <div className="detail-info-item full-width">
+              <span className="detail-label">Address</span>
+              <span className="detail-value">{selectedUser.address || '-'}</span>
+            </div>
+            <div className="detail-info-item">
+              <span className="detail-label">City</span>
+              <span className="detail-value">{selectedUser.city || '-'}</span>
+            </div>
+            <div className="detail-info-item">
+              <span className="detail-label">State</span>
+              <span className="detail-value">{selectedUser.state || '-'}</span>
+            </div>
+            <div className="detail-info-item">
+              <span className="detail-label">Country</span>
+              <span className="detail-value">{selectedUser.country || '-'}</span>
+            </div>
+            <div className="detail-info-item">
+              <span className="detail-label">Zip Code</span>
+              <span className="detail-value">{selectedUser.zip_code || '-'}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Bio */}
+        {selectedUser.bio && (
+          <div className="detail-section">
+            <h4 className="detail-section-title">
+              <i className="dx-icon-comment" /> Bio
+            </h4>
+            <p className="detail-bio">{selectedUser.bio}</p>
+          </div>
+        )}
+
+        {/* Meta Info */}
+        <div className="detail-section detail-meta">
+          <div className="detail-meta-item">
+            <span className="detail-label">Last Login</span>
+            <span className="detail-value">
+              {selectedUser.last_login_at
+                ? new Date(selectedUser.last_login_at).toLocaleString()
+                : 'Never'}
+            </span>
+          </div>
+          <div className="detail-meta-item">
+            <span className="detail-label">Created</span>
+            <span className="detail-value">
+              {new Date(selectedUser.created_at).toLocaleDateString()}
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // Render DataGrid for user lists
   const renderUserGrid = (dataSource: UserRow[], showStatusColumn = true) => (
     <div className="users-grid-wrapper">
@@ -504,7 +684,11 @@ export default function UsersSection(): ReactNode {
         hoverStateEnabled={true}
         columnAutoWidth={true}
         onExporting={onExporting}
+        onSelectionChanged={handleSelectionChanged}
+        focusedRowEnabled={true}
+        selectedRowKeys={selectedUser ? [selectedUser.id] : []}
       >
+        <Selection mode="single" />
         <FilterRow visible={DEFAULT_GRID_SETTINGS.showFilterRow ?? true} />
         <HeaderFilter visible={DEFAULT_GRID_SETTINGS.showHeaderFilter ?? true} />
         <SearchPanel visible={true} width={240} placeholder="Search users..." />
@@ -781,7 +965,16 @@ export default function UsersSection(): ReactNode {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'directory':
-        return renderUserGrid(users);
+        return (
+          <div className="users-split-layout">
+            <div className="users-grid-panel">
+              {renderUserGrid(users)}
+            </div>
+            <div className="users-detail-panel">
+              {renderDetailPanel()}
+            </div>
+          </div>
+        );
       case 'departments':
         return renderDepartmentsTab();
       case 'orgchart':

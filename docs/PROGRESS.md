@@ -809,6 +809,31 @@ _initialize() → navigator.locks 획득 → _recoverAndRefresh()
   - 대폭 재작성: `src/pages/admin/UsersSection.tsx`, `src/pages/admin/UsersSection.css`
   - 삭제: `src/pages/admin/AppearanceSection.tsx`, `src/pages/admin/AppearanceSection.css`
 
+### Phase 46: Users 페이지 CRM 스타일 + Enum Config 개선
+
+- **목적**: Users 페이지를 CRM Contact List 스타일로 전환 + Admin Enum 설정 UI 개선
+- **Users 페이지 CRM 레이아웃** (`/users`):
+  - DataGrid + 우측 상세 패널 (540px) Split Layout
+  - 상세 패널 접기/펼치기 토글 버튼 (chevron 아이콘)
+  - my-tasks 헤더 스타일 적용 (40px, uppercase "TEAM" 타이틀, 갯수 배지)
+  - 사이드바 제거 → 전체 너비 사용
+  - Phone, Status 컬럼 추가 (Avatar, Name, Phone, Email, Department, Position, Role, Status)
+  - Status 컬럼: employment_status 기반 배지 (Active/On Leave/Terminated)
+- **상세 패널 UI**:
+  - 아바타 + 이름/직책/배지 헤더
+  - 4개 섹션: Contact (Email/Phone), Organization (Department/Manager), Address, Bio
+  - Meta 정보: Last Login, Created
+  - 반응형: 1300px 이하 480px, 1000px 이하 전체 너비 스택
+- **Enum Config 개선** (`/admin/enums`):
+  - 사이드바 폭 통일 (180px → 140px, ViewSettings와 동일)
+  - Value 컬럼에 선택된 색상 배경 적용 (`enum-value-readonly` 배지)
+  - 흰색 텍스트 + text-shadow로 가독성 확보
+- **파일 변경**:
+  - 대폭 재작성: `src/pages/UsersPage.tsx`, `src/pages/UsersPage.css`
+  - 수정: `src/components/ContextSidebar.tsx` (Users 경로 사이드바 제거)
+  - 수정: `src/pages/admin/EnumConfigSection.tsx` (색상 배지)
+  - 수정: `src/pages/admin/EnumConfigSection.css` (사이드바 폭, 배지 스타일)
+
 ### Phase 45: My Tasks 페이지 UI 통일 + 필터 연동 갯수 표시
 
 - **목적**: My Tasks 페이지의 UI/UX를 Projects 페이지와 동일하게 통일

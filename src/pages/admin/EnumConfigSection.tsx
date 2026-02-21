@@ -163,7 +163,12 @@ export default function EnumConfigSection(): ReactNode {
               <span className="enum-col-order">{index + 1}</span>
               <div className="enum-col-value">
                 {opt.is_system ? (
-                  <span className="enum-value-readonly">{opt.value}</span>
+                  <span
+                    className="enum-value-readonly"
+                    style={{ backgroundColor: opt.color || '#94a3b8' }}
+                  >
+                    {opt.value}
+                  </span>
                 ) : (
                   <TextBox
                     value={opt.value}

@@ -23,7 +23,7 @@ export default function WorkspaceSettings(): ReactNode {
 
   return (
     <>
-      <div className="settings-section" style={{ marginBottom: '1.5rem' }}>
+      <div className="settings-section" style={{ marginBottom: '0.5rem' }}>
         <h2 className="section-title">Default View</h2>
         <p className="section-desc">The default tab when opening a project</p>
 
