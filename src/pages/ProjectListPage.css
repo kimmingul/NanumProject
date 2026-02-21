@@ -35,6 +35,24 @@
   margin-right: auto;
 }
 
+.project-list-header-breadcrumb {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin: 0 4px;
+}
+
+.project-list-header-left {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.project-list-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .dx-button.project-list-header-btn {
   min-width: auto;
   height: 28px;
@@ -518,4 +536,126 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* Year cell */
+.project-year-cell {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* ============================================= */
+/* Project Detail Popup                          */
+/* ============================================= */
+
+.project-detail-popup {
+  padding: 0.5rem 0;
+}
+
+.project-detail-popup .detail-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.project-detail-popup .detail-section {
+  margin-bottom: 1.25rem;
+}
+
+.project-detail-popup .detail-section label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 0.375rem;
+}
+
+.project-detail-popup .detail-section p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+.project-detail-popup .detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.project-detail-popup .detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.project-detail-popup .detail-item label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.project-detail-popup .detail-item span {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+
+.project-detail-popup .detail-item .text-danger {
+  color: var(--badge-danger-text);
+}
+
+.project-detail-popup .detail-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+}
+
+/* ============================================= */
+/* Editing Mode Styles                           */
+/* ============================================= */
+
+.project-grid-container .dx-datagrid-edit-form {
+  background-color: var(--sidebar-bg);
+}
+
+.project-grid-container .dx-row.dx-edit-row > td {
+  background-color: var(--sidebar-hover-bg) !important;
+}
+
+.project-grid-container .dx-datagrid-rowsview .dx-row.dx-edit-row .dx-texteditor {
+  background-color: var(--input-bg);
+}
+
+.project-grid-container .dx-command-edit {
+  width: 80px;
+}
+
+.project-grid-container .dx-link {
+  color: var(--accent-color);
+}
+
+.project-grid-container .dx-link:hover {
+  color: var(--accent-hover);
+}
+
+/* ============================================= */
+/* Inline Settings View                          */
+/* ============================================= */
+
+.project-settings-inline {
+  flex: 1;
+  overflow: auto;
+  padding: 16px;
+  background: var(--sidebar-bg);
 }

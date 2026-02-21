@@ -44,7 +44,7 @@ const initialState = {
   activeProjectLoading: false,
   leftPanelOpen: true,
   rightPanelOpen: false,
-  leftPanelWidth: 220,
+  leftPanelWidth: 180,
   rightPanelWidth: 320,
   selectedTaskId: null as string | null,
   rightPanelTab: 0,

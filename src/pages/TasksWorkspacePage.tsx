@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useRef } from 'react';
+import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from 'devextreme-react/button';
 import { useProject, useProjectCrud, useEnumOptions } from '@/hooks';
@@ -12,7 +12,7 @@ import CommentsView from '@/features/comments/CommentsView';
 import FilesView, { type FileActions } from '@/features/files/FilesView';
 import ActivityView from '@/features/activity/ActivityView';
 import TimeTrackingView, { type TimeActions } from '@/features/time-tracking/TimeTrackingView';
-import ProjectSettingsView from '@/features/settings/ProjectSettingsView';
+import ProjectSettingsView, { type ProjectSettingsViewHandle } from '@/features/settings/ProjectSettingsView';
 import './ProjectDetailPage.css';
 
 const projectTabs = [
@@ -51,14 +51,18 @@ export default function TasksWorkspacePage(): ReactNode {
   const boardActionsRef = useRef<BoardActions | undefined>(undefined);
   const fileActionsRef = useRef<FileActions | undefined>(undefined);
   const timeActionsRef = useRef<TimeActions | undefined>(undefined);
+  const settingsRef = useRef<ProjectSettingsViewHandle>(null);
   const workspaceContentRef = useRef<HTMLDivElement>(null);
+
+  // Settings save state
+  const [settingsSaving, setSettingsSaving] = useState(false);
+  const [settingsSaved, setSettingsSaved] = useState(false);
 
   const defaultView = usePreferencesStore((s) => s.preferences.defaultView);
   const activeTab = tab || defaultView;
   const handleTabClick = (tabId: string) => {
-    if (projectId) {
-      navigate(`/tasks/${projectId}/${tabId}`);
-    }
+    if (!projectId) return;
+    navigate(`/tasks/${projectId}/${tabId}`);
   };
 
   // No project selected — empty state
@@ -106,83 +110,111 @@ export default function TasksWorkspacePage(): ReactNode {
           </span>
         </div>
         <div className="workspace-tab-buttons">
-          {activeTab === 'gantt' && (
+          {activeTab === 'settings' ? (
             <>
               <Button
-                icon="plus"
-                stylingMode="text"
-                hint="Add Task"
-                className="workspace-tab-btn workspace-action-btn"
-                onClick={() => ganttActionsRef.current?.addTask()}
+                text="Cancel"
+                stylingMode="outlined"
+                onClick={() => navigate(`/tasks/${projectId}/gantt`)}
               />
               <Button
-                icon="trash"
-                stylingMode="text"
-                hint="Delete Task"
-                className="workspace-tab-btn workspace-action-btn"
-                onClick={() => ganttActionsRef.current?.deleteTask()}
+                text={settingsSaving ? 'Saving...' : settingsSaved ? 'Saved!' : 'Save Changes'}
+                type={settingsSaved ? 'success' : 'default'}
+                stylingMode="contained"
+                icon={settingsSaved ? 'check' : ''}
+                disabled={settingsSaving}
+                onClick={async () => {
+                  if (settingsRef.current) {
+                    setSettingsSaving(true);
+                    await settingsRef.current.save();
+                    setSettingsSaving(false);
+                    setSettingsSaved(true);
+                    setTimeout(() => setSettingsSaved(false), 2000);
+                  }
+                }}
               />
-              <span className="workspace-toolbar-divider" />
             </>
-          )}
-          {activeTab === 'grid' && (
+          ) : (
             <>
-              <Button
-                icon="plus"
-                stylingMode="text"
-                hint="Add Task"
-                className="workspace-tab-btn workspace-action-btn"
-                onClick={() => addRowRef.current?.()}
-              />
-              <span className="workspace-toolbar-divider" />
+              {activeTab === 'gantt' && (
+                <>
+                  <Button
+                    icon="plus"
+                    stylingMode="text"
+                    hint="Add Task"
+                    className="workspace-tab-btn workspace-action-btn"
+                    onClick={() => ganttActionsRef.current?.addTask()}
+                  />
+                  <Button
+                    icon="trash"
+                    stylingMode="text"
+                    hint="Delete Task"
+                    className="workspace-tab-btn workspace-action-btn"
+                    onClick={() => ganttActionsRef.current?.deleteTask()}
+                  />
+                  <span className="workspace-toolbar-divider" />
+                </>
+              )}
+              {activeTab === 'grid' && (
+                <>
+                  <Button
+                    icon="plus"
+                    stylingMode="text"
+                    hint="Add Task"
+                    className="workspace-tab-btn workspace-action-btn"
+                    onClick={() => addRowRef.current?.()}
+                  />
+                  <span className="workspace-toolbar-divider" />
+                </>
+              )}
+              {activeTab === 'board' && (
+                <>
+                  <Button
+                    icon="plus"
+                    stylingMode="text"
+                    hint="Add Task"
+                    className="workspace-tab-btn workspace-action-btn"
+                    onClick={() => boardActionsRef.current?.addTask()}
+                  />
+                  <span className="workspace-toolbar-divider" />
+                </>
+              )}
+              {activeTab === 'files' && (
+                <>
+                  <Button
+                    icon="upload"
+                    stylingMode="text"
+                    hint="Upload File"
+                    className="workspace-tab-btn workspace-action-btn"
+                    onClick={() => fileActionsRef.current?.upload()}
+                  />
+                  <span className="workspace-toolbar-divider" />
+                </>
+              )}
+              {activeTab === 'time' && (
+                <>
+                  <Button
+                    icon="clock"
+                    stylingMode="text"
+                    hint="Log Time"
+                    className="workspace-tab-btn workspace-action-btn"
+                    onClick={() => timeActionsRef.current?.logTime()}
+                  />
+                  <span className="workspace-toolbar-divider" />
+                </>
+              )}
+              {projectTabs.map((t) => (
+                <Button
+                  key={t.id}
+                  icon={t.icon}
+                  stylingMode="text"
+                  hint={t.label}
+                  className={`workspace-tab-btn tab-${t.id} ${t.id === activeTab ? 'active' : ''}`}
+                  onClick={() => handleTabClick(t.id)}
+                />
+              ))}
             </>
           )}
-          {activeTab === 'board' && (
-            <>
-              <Button
-                icon="plus"
-                stylingMode="text"
-                hint="Add Task"
-                className="workspace-tab-btn workspace-action-btn"
-                onClick={() => boardActionsRef.current?.addTask()}
-              />
-              <span className="workspace-toolbar-divider" />
-            </>
-          )}
-          {activeTab === 'files' && (
-            <>
-              <Button
-                icon="upload"
-                stylingMode="text"
-                hint="Upload File"
-                className="workspace-tab-btn workspace-action-btn"
-                onClick={() => fileActionsRef.current?.upload()}
-              />
-              <span className="workspace-toolbar-divider" />
-            </>
-          )}
-          {activeTab === 'time' && (
-            <>
-              <Button
-                icon="clock"
-                stylingMode="text"
-                hint="Log Time"
-                className="workspace-tab-btn workspace-action-btn"
-                onClick={() => timeActionsRef.current?.logTime()}
-              />
-              <span className="workspace-toolbar-divider" />
-            </>
-          )}
-          {projectTabs.map((t) => (
-            <Button
-              key={t.id}
-              icon={t.icon}
-              stylingMode="text"
-              hint={t.label}
-              className={`workspace-tab-btn tab-${t.id} ${t.id === activeTab ? 'active' : ''}`}
-              onClick={() => handleTabClick(t.id)}
-            />
-          ))}
         </div>
       </div>
 
@@ -197,8 +229,14 @@ export default function TasksWorkspacePage(): ReactNode {
           {activeTab === 'files' && projectId && <FilesView projectId={projectId} actionsRef={fileActionsRef} />}
           {activeTab === 'time' && projectId && <TimeTrackingView projectId={projectId} actionsRef={timeActionsRef} />}
           {activeTab === 'activity' && projectId && <ActivityView projectId={projectId} />}
-          {activeTab === 'settings' && (
-            <ProjectSettingsView project={project} onProjectUpdated={() => refetch()} />
+          {activeTab === 'settings' && project && (
+            <ProjectSettingsView
+              ref={settingsRef}
+              project={project}
+              onProjectUpdated={() => refetch()}
+              onCancel={() => navigate(`/tasks/${projectId}/gantt`)}
+              showHeaderActions={false}
+            />
           )}
         </div>
       </div>

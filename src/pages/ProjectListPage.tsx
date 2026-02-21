@@ -11,7 +11,10 @@ import {
   Grouping,
   GroupPanel,
   SearchPanel,
+  Editing,
+  Lookup,
 } from 'devextreme-react/data-grid';
+import type { RowUpdatingEvent, RowDblClickEvent } from 'devextreme/ui/data_grid';
 import { Button } from 'devextreme-react/button';
 import { Popup } from 'devextreme-react/popup';
 import { TextBox } from 'devextreme-react/text-box';
@@ -22,6 +25,7 @@ import { supabase } from '@/lib/supabase';
 import { useProjects, useProjectCrud, useEnumOptions, useViewConfig } from '@/hooks';
 import { usePreferencesStore } from '@/lib/preferences-store';
 import { getDxDateFormat, getDxDateTimeFormat } from '@/utils/formatDate';
+import ProjectSettingsView, { type ProjectSettingsViewHandle } from '@/features/settings/ProjectSettingsView';
 import type { Project, ColumnConfig } from '@/types';
 import './ProjectListPage.css';
 
@@ -100,9 +104,9 @@ interface EnrichedProject extends Project {
 
 export default function ProjectListPage(): ReactNode {
   const navigate = useNavigate();
-  const { labels: statusLabels, items: statusOptions } = useEnumOptions('project_status');
+  const { items: statusOptions } = useEnumOptions('project_status');
   const { projects, loading, error, refetch } = useProjects({ status: 'all' });
-  const { createProject, cloneFromTemplate, toggleStar } = useProjectCrud();
+  const { createProject, cloneFromTemplate } = useProjectCrud();
   const dateFormat = usePreferencesStore((s) => s.preferences.dateFormat);
   const dxDateFmt = useMemo(() => getDxDateFormat(), [dateFormat]);
   const dxDateTimeFmt = useMemo(() => getDxDateTimeFormat(), [dateFormat]);
@@ -112,6 +116,12 @@ export default function ProjectListPage(): ReactNode {
   const [showTemplatePopup, setShowTemplatePopup] = useState(false);
   const [templateForm, setTemplateForm] = useState({ templateId: '', name: '', startDate: new Date() });
   const [templateSaving, setTemplateSaving] = useState(false);
+
+  // Inline settings view state
+  const [settingsProject, setSettingsProject] = useState<EnrichedProject | null>(null);
+  const settingsRef = useRef<ProjectSettingsViewHandle>(null);
+  const [settingsSaving, setSettingsSaving] = useState(false);
+  const [settingsSaved, setSettingsSaved] = useState(false);
 
   // View configuration
   const { effectiveColumns, gridSettings, customLoad, customSave, resetToDefault } = useViewConfig({
@@ -301,45 +311,143 @@ export default function ProjectListPage(): ReactNode {
     }
   }, [templateForm, cloneFromTemplate, refetch, navigate]);
 
+  // Handle inline row update
+  const handleRowUpdating = useCallback(async (e: RowUpdatingEvent<EnrichedProject, string>) => {
+    e.cancel = (async () => {
+      try {
+        const updateData: Record<string, unknown> = {};
+        if (e.newData.name !== undefined) updateData.name = e.newData.name;
+        if (e.newData.status !== undefined) updateData.status = e.newData.status;
+        if (e.newData.start_date !== undefined) {
+          updateData.start_date = e.newData.start_date
+            ? new Date(e.newData.start_date).toISOString().split('T')[0]
+            : null;
+        }
+        if (e.newData.end_date !== undefined) {
+          updateData.end_date = e.newData.end_date
+            ? new Date(e.newData.end_date).toISOString().split('T')[0]
+            : null;
+        }
+        if (e.newData.description !== undefined) updateData.description = e.newData.description;
+
+        const { error } = await supabase
+          .from('projects')
+          .update(updateData)
+          .eq('id', e.key);
+
+        if (error) throw error;
+        await refetch();
+      } catch (err) {
+        console.error('Failed to update project:', err);
+        throw err;
+      }
+    })();
+  }, [refetch]);
+
+  // Handle double-click to show inline settings
+  const handleRowDblClick = useCallback((e: RowDblClickEvent<EnrichedProject, string>) => {
+    e.component.cancelEditData();
+    const project = e.data as EnrichedProject;
+    setSettingsProject(project);
+  }, []);
+
+  // Handle back from settings to grid
+  const handleBackFromSettings = useCallback(() => {
+    setSettingsProject(null);
+  }, []);
+
+  // Handle project updated in settings
+  const handleProjectUpdated = useCallback(() => {
+    refetch();
+    setSettingsProject(null);
+  }, [refetch]);
+
   return (
       <div className="project-list-page">
         <div className="project-list-header">
-          <span className="project-list-header-title">PROJECTS</span>
-          <span className="project-list-header-count">{loading ? '...' : (visibleCount ?? enrichedProjects.length)}</span>
-          <Button
-            icon="plus"
-            text="New"
-            stylingMode="text"
-            className="project-list-header-btn"
-            onClick={() => setShowPopup(true)}
-          />
-          <Button
-            icon="copy"
-            text="Template"
-            stylingMode="text"
-            className="project-list-header-btn"
-            onClick={() => setShowTemplatePopup(true)}
-          />
-          <Button
-            icon="columnchooser"
-            hint="Reset columns to default"
-            stylingMode="text"
-            className="project-list-header-btn reset-view-btn"
-            onClick={() => {
-              resetToDefault();
-              setGridKey((k) => k + 1);
-            }}
-          />
+          {settingsProject ? (
+            <>
+              <div className="project-list-header-left">
+                <span className="project-list-header-title">PROJECTS</span>
+                <span className="project-list-header-breadcrumb">&gt;</span>
+                <span className="project-list-header-title">SETTINGS</span>
+              </div>
+              <div className="project-list-header-actions">
+                <Button
+                  text="Cancel"
+                  stylingMode="outlined"
+                  onClick={handleBackFromSettings}
+                />
+                <Button
+                  text={settingsSaving ? 'Saving...' : settingsSaved ? 'Saved!' : 'Save Changes'}
+                  type={settingsSaved ? 'success' : 'default'}
+                  stylingMode="contained"
+                  icon={settingsSaved ? 'check' : ''}
+                  disabled={settingsSaving}
+                  onClick={async () => {
+                    if (settingsRef.current) {
+                      setSettingsSaving(true);
+                      await settingsRef.current.save();
+                      setSettingsSaving(false);
+                      setSettingsSaved(true);
+                      setTimeout(() => setSettingsSaved(false), 2000);
+                    }
+                  }}
+                />
+              </div>
+            </>
+          ) : (
+            <>
+              <span className="project-list-header-title">PROJECTS</span>
+              <span className="project-list-header-count">{loading ? '...' : (visibleCount ?? enrichedProjects.length)}</span>
+              <Button
+                icon="plus"
+                text="New"
+                stylingMode="text"
+                className="project-list-header-btn"
+                onClick={() => setShowPopup(true)}
+              />
+              <Button
+                icon="copy"
+                text="Template"
+                stylingMode="text"
+                className="project-list-header-btn"
+                onClick={() => setShowTemplatePopup(true)}
+              />
+              <Button
+                icon="columnchooser"
+                hint="Reset columns to default"
+                stylingMode="text"
+                className="project-list-header-btn reset-view-btn"
+                onClick={() => {
+                  resetToDefault();
+                  setGridKey((k) => k + 1);
+                }}
+              />
+            </>
+          )}
         </div>
 
-        {error && (
-          <div className="error-banner">
-            <i className="dx-icon-warning"></i>
-            <span>{error}</span>
+        {settingsProject ? (
+          <div className="project-settings-inline">
+            <ProjectSettingsView
+              ref={settingsRef}
+              project={settingsProject}
+              onProjectUpdated={handleProjectUpdated}
+              onCancel={handleBackFromSettings}
+              showHeaderActions={false}
+            />
           </div>
-        )}
+        ) : (
+          <>
+            {error && (
+              <div className="error-banner">
+                <i className="dx-icon-warning"></i>
+                <span>{error}</span>
+              </div>
+            )}
 
-        <div className={`project-grid-container${gridSettings.uppercaseHeaders ? ' uppercase-headers' : ''}`}>
+            <div className={`project-grid-container${gridSettings.uppercaseHeaders ? ' uppercase-headers' : ''}`}>
           <DataGrid
             key={gridKey}
             dataSource={enrichedProjects}
@@ -353,11 +461,8 @@ export default function ProjectListPage(): ReactNode {
             wordWrapEnabled={gridSettings.wordWrapEnabled ?? false}
             columnAutoWidth={gridSettings.columnAutoWidth ?? false}
             hoverStateEnabled={true}
-            onRowClick={(e) => {
-              if (e.data?.id) {
-                navigate(`/tasks/${e.data.id}`);
-              }
-            }}
+            onRowUpdating={handleRowUpdating}
+            onRowDblClick={handleRowDblClick}
             onOptionChanged={(e) => {
               if (e.name === 'filterValue' || e.fullName?.includes('filterValue') || e.name === 'dataSource') {
                 setTimeout(() => {
@@ -379,6 +484,13 @@ export default function ProjectListPage(): ReactNode {
               customSave={customSave}
               savingTimeout={2000}
             />
+            <Editing
+              mode="row"
+              allowUpdating={true}
+              startEditAction="click"
+              selectTextOnEditStart={true}
+              useIcons={true}
+            />
             <FilterRow visible={gridSettings.showFilterRow ?? true} />
             <HeaderFilter visible={gridSettings.showHeaderFilter ?? true} />
             <SearchPanel visible={gridSettings.showSearchPanel ?? false} />
@@ -397,18 +509,7 @@ export default function ProjectListPage(): ReactNode {
                     key={col.dataField}
                     {...nameColProps}
                     minWidth={col.minWidth || 200}
-                    cellRender={(data: { value: string; data: { id: string; is_starred: boolean } }) => (
-                      <div className="project-name-cell">
-                        <i
-                          className={`dx-icon-favorites project-star${data.data.is_starred ? ' starred' : ''}`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleStar(data.data.id).then(() => refetch());
-                          }}
-                        />
-                        <span>{data.value}</span>
-                      </div>
-                    )}
+                    allowEditing={true}
                   />
                 );
               }
@@ -419,6 +520,7 @@ export default function ProjectListPage(): ReactNode {
                     key={col.dataField}
                     {...colProps}
                     dataType="number"
+                    allowEditing={false}
                     cellRender={(data: { value: number | null }) => (
                       <span className="project-year-cell">{data.value ?? '—'}</span>
                     )}
@@ -431,6 +533,7 @@ export default function ProjectListPage(): ReactNode {
                   <Column
                     key={col.dataField}
                     {...colProps}
+                    allowEditing={false}
                     cellRender={(data: { value: string | null; data: EnrichedProject }) => {
                       if (!data.value) return <span className="project-owner-cell">—</span>;
                       if (col.displayMode === 'avatar') {
@@ -460,12 +563,14 @@ export default function ProjectListPage(): ReactNode {
                     key={col.dataField}
                     {...colProps}
                     defaultFilterValue="active"
-                    cellRender={(data: { value: string }) => (
-                      <span className={`project-status-badge status-${data.value}`}>
-                        {statusLabels[data.value] || data.value}
-                      </span>
-                    )}
-                  />
+                    allowEditing={true}
+                  >
+                    <Lookup
+                      dataSource={statusOptions}
+                      displayExpr="label"
+                      valueExpr="value"
+                    />
+                  </Column>
                 );
               }
 
@@ -475,6 +580,7 @@ export default function ProjectListPage(): ReactNode {
                     key={col.dataField}
                     {...colProps}
                     dataType="number"
+                    allowEditing={false}
                     cellRender={(data: { value: number }) => (
                       <div className="project-progress-cell">
                         <div className="progress-bar-track">
@@ -496,6 +602,7 @@ export default function ProjectListPage(): ReactNode {
                     key={col.dataField}
                     {...colProps}
                     dataType="number"
+                    allowEditing={false}
                   />
                 );
               }
@@ -507,6 +614,7 @@ export default function ProjectListPage(): ReactNode {
                     {...colProps}
                     dataType="date"
                     format={dxDateFmt}
+                    allowEditing={true}
                   />
                 );
               }
@@ -518,6 +626,7 @@ export default function ProjectListPage(): ReactNode {
                     {...colProps}
                     dataType="date"
                     format={dxDateFmt}
+                    allowEditing={true}
                   />
                 );
               }
@@ -529,6 +638,7 @@ export default function ProjectListPage(): ReactNode {
                     {...colProps}
                     dataType="datetime"
                     format={dxDateTimeFmt}
+                    allowEditing={false}
                   />
                 );
               }
@@ -539,6 +649,7 @@ export default function ProjectListPage(): ReactNode {
                     key={col.dataField}
                     {...colProps}
                     dataType="number"
+                    allowEditing={false}
                     cellRender={(data: { value: number }) => (
                       <span className="member-count-badge">{data.value}</span>
                     )}
@@ -551,6 +662,7 @@ export default function ProjectListPage(): ReactNode {
                   <Column
                     key={col.dataField}
                     {...colProps}
+                    allowEditing={false}
                     cellRender={(data: { data: EnrichedProject }) => {
                       const members = data.data.members;
                       if (!members || members.length === 0) return null;
@@ -599,6 +711,7 @@ export default function ProjectListPage(): ReactNode {
                   <Column
                     key={col.dataField}
                     {...colProps}
+                    allowEditing={false}
                     cellRender={(data: { value: string | null }) => (
                       <span className="project-owner-cell">{data.value || '—'}</span>
                     )}
@@ -613,6 +726,7 @@ export default function ProjectListPage(): ReactNode {
                     {...colProps}
                     dataType="datetime"
                     format={dxDateTimeFmt}
+                    allowEditing={false}
                   />
                 );
               }
@@ -622,6 +736,7 @@ export default function ProjectListPage(): ReactNode {
                   <Column
                     key={col.dataField}
                     {...colProps}
+                    allowEditing={false}
                     cellRender={(data: { value: boolean }) =>
                       data.value ? <span className="template-badge">Template</span> : null
                     }
@@ -634,11 +749,7 @@ export default function ProjectListPage(): ReactNode {
                   <Column
                     key={col.dataField}
                     {...colProps}
-                    cellRender={(data: { value: string | null }) => (
-                      <span className="description-cell" title={data.value || ''}>
-                        {data.value && data.value.length > 80 ? data.value.substring(0, 80) + '...' : data.value}
-                      </span>
-                    )}
+                    allowEditing={true}
                   />
                 );
               }
@@ -649,6 +760,7 @@ export default function ProjectListPage(): ReactNode {
                     key={col.dataField}
                     {...colProps}
                     dataType="number"
+                    allowEditing={false}
                     cellRender={(data: { value: number }) => (
                       <span className={`overdue-badge${data.value > 0 ? ' has-overdue' : ''}`}>
                         {data.value}
@@ -664,6 +776,7 @@ export default function ProjectListPage(): ReactNode {
                     key={col.dataField}
                     {...colProps}
                     dataType="number"
+                    allowEditing={false}
                     cellRender={(data: { value: number | null }) => {
                       if (data.value === null) return <span className="days-remaining none">—</span>;
                       const className = data.value < 0 ? 'overdue' : data.value <= 7 ? 'soon' : '';
@@ -682,6 +795,7 @@ export default function ProjectListPage(): ReactNode {
                 <Column
                   key={col.dataField}
                   {...colProps}
+                  allowEditing={false}
                 />
               );
             })}
@@ -695,6 +809,8 @@ export default function ProjectListPage(): ReactNode {
             <Paging defaultPageSize={25} />
           </DataGrid>
         </div>
+          </>
+        )}
 
         <Popup
           visible={showPopup}

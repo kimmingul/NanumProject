@@ -834,6 +834,31 @@ _initialize() → navigator.locks 획득 → _recoverAndRefresh()
   - 수정: `src/pages/admin/EnumConfigSection.tsx` (색상 배지)
   - 수정: `src/pages/admin/EnumConfigSection.css` (사이드바 폭, 배지 스타일)
 
+### Phase 47: Project Settings UI 개선 — Header 버튼 통합 + 전체 폭
+
+- **목적**: Project Settings UI를 Admin 페이지와 일관되게 개선 + Save/Cancel 버튼을 상단 헤더로 이동
+- **ProjectSettingsView 변경** (`src/features/settings/ProjectSettingsView.tsx`):
+  - `width: 100%` — 전체 폭 사용 (기존 800px 제한 제거)
+  - `forwardRef` + `useImperativeHandle` 패턴 — 부모에서 save 함수 호출 가능
+  - `showHeaderActions` prop — false일 때 내부 Cancel/Save 버튼 숨김
+  - `ProjectSettingsViewHandle` 인터페이스: `save()`, `saving`, `saved`, `canSave`
+- **ProjectListPage 헤더 통합** (`src/pages/ProjectListPage.tsx`):
+  - 더블클릭 설정 화면 진입 시 헤더에 Cancel/Save Changes 버튼 표시
+  - breadcrumb 스타일: "PROJECTS > SETTINGS"
+  - ref 기반 save 트리거 + saving/saved 상태 피드백
+- **TasksWorkspacePage 헤더 통합** (`src/pages/TasksWorkspacePage.tsx`):
+  - Settings 탭 활성화 시 기존 action 버튼들(Gantt/Grid/Board 등) 대신 Cancel/Save Changes 표시
+  - Cancel → Gantt 뷰로 이동
+  - ref 기반 save 트리거 + saving/saved 상태 피드백
+- **UsersSection 부서 편집** (`src/pages/admin/UsersSection.tsx`):
+  - Department 탭에 편집 팝업 추가 (기존 추가만 가능 → 이름 수정 가능)
+- **파일 변경**:
+  - 수정: `src/features/settings/ProjectSettingsView.tsx`, `ProjectSettingsView.css`
+  - 수정: `src/pages/ProjectListPage.tsx`, `ProjectListPage.css`
+  - 수정: `src/pages/TasksWorkspacePage.tsx`
+  - 수정: `src/pages/admin/UsersSection.tsx`
+  - 수정: `src/lib/pm-store.ts` (leftPanelWidth 220→180)
+
 ### Phase 45: My Tasks 페이지 UI 통일 + 필터 연동 갯수 표시
 
 - **목적**: My Tasks 페이지의 UI/UX를 Projects 페이지와 동일하게 통일

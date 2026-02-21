@@ -157,6 +157,10 @@ export default function UsersSection(): ReactNode {
   // Department management state
   const [newDeptName, setNewDeptName] = useState('');
   const [addingDept, setAddingDept] = useState(false);
+  const [editDeptOpen, setEditDeptOpen] = useState(false);
+  const [editDeptValue, setEditDeptValue] = useState('');
+  const [editDeptLabel, setEditDeptLabel] = useState('');
+  const [savingDept, setSavingDept] = useState(false);
 
   const fetchUsers = useCallback(async () => {
     if (!tenantId) return;
@@ -487,6 +491,43 @@ export default function UsersSection(): ReactNode {
     }
   };
 
+  const openEditDepartment = (value: string, label: string) => {
+    setEditDeptValue(value);
+    setEditDeptLabel(label);
+    setEditDeptOpen(true);
+  };
+
+  const closeEditDepartment = () => {
+    setEditDeptOpen(false);
+    setEditDeptValue('');
+    setEditDeptLabel('');
+  };
+
+  const handleSaveEditDepartment = async () => {
+    if (!tenantId || !editDeptLabel.trim()) return;
+    setSavingDept(true);
+    try {
+      const updatedConfig = departmentEnumOptions.map((o) =>
+        o.value === editDeptValue ? { ...o, label: editDeptLabel.trim() } : o
+      );
+      const { error } = await supabase
+        .from('tenant_enum_config')
+        .upsert({
+          tenant_id: tenantId,
+          category: 'department',
+          options: updatedConfig,
+        }, { onConflict: 'tenant_id,category' });
+
+      if (error) throw error;
+      await loadEnumConfigs(tenantId);
+      closeEditDepartment();
+    } catch (err) {
+      console.error('Failed to update department:', err);
+    } finally {
+      setSavingDept(false);
+    }
+  };
+
   // Potential managers for org chart (exclude self)
   const managerOptions = users
     .filter((u) => u.user_id !== editUser?.user_id && u.employment_status === 'active')
@@ -669,7 +710,7 @@ export default function UsersSection(): ReactNode {
   };
 
   // Render DataGrid for user lists
-  const renderUserGrid = (dataSource: UserRow[], showStatusColumn = true) => (
+  const renderUserGrid = (dataSource: UserRow[], _showStatusColumn = true) => (
     <div className="users-grid-wrapper">
       <DataGrid
         dataSource={dataSource}
@@ -869,6 +910,12 @@ export default function UsersSection(): ReactNode {
                   <span className="dept-name-col">{dept.label}</span>
                   <span className="dept-count-col">{memberCount}</span>
                   <span className="dept-actions-col">
+                    <Button
+                      icon="edit"
+                      stylingMode="text"
+                      hint="Edit"
+                      onClick={() => openEditDepartment(dept.value, dept.label)}
+                    />
                     <Button
                       icon="trash"
                       stylingMode="text"
@@ -1182,6 +1229,38 @@ export default function UsersSection(): ReactNode {
           </div>
         </Popup>
       )}
+
+      {/* Edit Department Popup */}
+      <Popup
+        visible={editDeptOpen}
+        onHiding={closeEditDepartment}
+        title="Edit Department"
+        showCloseButton={true}
+        width={360}
+        height="auto"
+      >
+        <div className="user-edit-form">
+          <div className="form-field">
+            <label>Department Name</label>
+            <TextBox
+              value={editDeptLabel}
+              onValueChanged={(e) => setEditDeptLabel(e.value)}
+              placeholder="Enter department name"
+              stylingMode="outlined"
+            />
+          </div>
+          <div className="form-actions">
+            <Button text="Cancel" stylingMode="outlined" onClick={closeEditDepartment} />
+            <Button
+              text={savingDept ? 'Saving...' : 'Save'}
+              type="default"
+              stylingMode="contained"
+              onClick={handleSaveEditDepartment}
+              disabled={savingDept || !editDeptLabel.trim()}
+            />
+          </div>
+        </div>
+      </Popup>
     </div>
   );
 }
