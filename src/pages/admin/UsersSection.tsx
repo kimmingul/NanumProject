@@ -22,6 +22,7 @@ import { useAuthStore } from '@/lib/auth-store';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserManagement } from '@/hooks/useUserManagement';
 import { useEnumOptions } from '@/hooks/useEnumOptions';
+import { useEnumConfigStore } from '@/lib/enum-config-store';
 import type { UserRole, EmploymentStatus } from '@/types';
 import { DEFAULT_GRID_SETTINGS } from '@/lib/view-config-store';
 import './UsersSection.css';
@@ -79,11 +80,6 @@ interface UserRow {
   zip_code: string | null;
 }
 
-const activeStatusOptions = [
-  { value: true, label: 'Active' },
-  { value: false, label: 'Inactive' },
-];
-
 const employmentStatusOptions = [
   { value: 'active', label: 'Active' },
   { value: 'on_leave', label: 'On Leave' },
@@ -92,7 +88,8 @@ const employmentStatusOptions = [
 
 export default function UsersSection(): ReactNode {
   const { items: roleOptions } = useEnumOptions('user_role');
-  const { options: departmentEnumOptions, refetch: refetchDepartments } = useEnumOptions('department');
+  const { options: departmentEnumOptions } = useEnumOptions('department');
+  const loadEnumConfigs = useEnumConfigStore((s) => s.loadConfigs);
   const departmentOptions = departmentEnumOptions.map((o) => o.label);
   const tenantId = useAuthStore((s) => s.profile?.tenant_id);
   const currentUserId = useAuthStore((s) => s.profile?.user_id);
@@ -447,13 +444,13 @@ export default function UsersSection(): ReactNode {
         .from('tenant_enum_config')
         .upsert({
           tenant_id: tenantId,
-          enum_type: 'department',
-          config: updatedConfig,
-        });
+          category: 'department',
+          options: updatedConfig,
+        }, { onConflict: 'tenant_id,category' });
 
       if (error) throw error;
       setNewDeptName('');
-      await refetchDepartments();
+      await loadEnumConfigs(tenantId);
     } catch (err) {
       console.error('Failed to add department:', err);
     } finally {
@@ -475,12 +472,12 @@ export default function UsersSection(): ReactNode {
         .from('tenant_enum_config')
         .upsert({
           tenant_id: tenantId,
-          enum_type: 'department',
-          config: updatedConfig,
-        });
+          category: 'department',
+          options: updatedConfig,
+        }, { onConflict: 'tenant_id,category' });
 
       if (error) throw error;
-      await refetchDepartments();
+      await loadEnumConfigs(tenantId);
     } catch (err) {
       console.error('Failed to delete department:', err);
     }
